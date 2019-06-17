@@ -8,6 +8,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.location.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.squareup.sqldelight.android.AndroidSqliteDriver
+import com.squareup.sqldelight.db.SqlDriver
 
 class MainActivity : AppCompatActivity() {
 
@@ -28,7 +30,10 @@ class MainActivity : AppCompatActivity() {
 
     val request = ActivityTransitionRequest(transitions)
 
+    val driver: SqlDriver = AndroidSqliteDriver(Database.Schema, this, "test.db")
+
     private lateinit var textMessage: TextView
+
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.navigation_home -> {
@@ -51,6 +56,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
+
+        // In reality the database and driver above should be created a single time
+        // and passed around using your favourite dependency injection/service locator/singleton pattern.
+        val database = Database(driver)
+
+        val playerQueries: PlayerQueries = database.playerQueries
+
+        println(playerQueries.selectAll().executeAsList())
 
         textMessage = findViewById(R.id.message)
         navView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)

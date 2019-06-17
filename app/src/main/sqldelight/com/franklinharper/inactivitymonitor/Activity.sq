@@ -1,0 +1,20 @@
+-- comment in sql
+
+CREATE TABLE userActivity (
+  activity_type INTEGER NOT NULL,
+  transition_type INTEGER NOT NULL,
+   TEXT NOT NULL
+);
+
+CREATE INDEX hockeyPlayer_full_name ON hockeyPlayer(full_name);
+
+INSERT INTO hockeyPlayer (player_number, full_name)
+VALUES (15, 'Ryan Getzlaf');
+
+selectAll:
+SELECT *
+FROM hockeyPlayer;
+
+insert:
+INSERT INTO hockeyPlayer(player_number, full_name)
+VALUES (?, ?);

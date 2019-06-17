@@ -4,12 +4,16 @@ buildscript {
     ext.kotlin_version = '1.3.31'
     repositories {
         google()
-        jcenter()
-        
+        mavenCentral()
+        // JCenter and Bintray are not trustworthy artifact hosts.
+        // Ideally we fetch nothing from them!
+        // jcenter()
+        // For more details see: https://blog.autsoft.hu/a-confusing-dependency/
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.4.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.squareup.sqldelight:gradle-plugin:1.1.3'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -18,8 +22,11 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
-        
+        mavenCentral()
+        // JCenter and Bintray are not trustworthy artifact hosts.
+        // Ideally we fetch nothing from them!
+        // jcenter()
+        // For more details see: https://blog.autsoft.hu/a-confusing-dependency/
     }
 }
 
