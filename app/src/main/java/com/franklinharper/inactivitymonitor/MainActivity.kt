@@ -30,8 +30,6 @@ class MainActivity : AppCompatActivity() {
 
     val request = ActivityTransitionRequest(transitions)
 
-    val driver: SqlDriver = AndroidSqliteDriver(Database.Schema, this, "test.db")
-
     private lateinit var textMessage: TextView
 
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
@@ -57,11 +55,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
 
-        // In reality the database and driver above should be created a single time
-        // and passed around using your favourite dependency injection/service locator/singleton pattern.
-        val database = Database(driver)
-
-        val userActivityQueries = database.userActivityQueries
+        val userActivityQueries = InactivityDb.from(this).queries
 
         println(userActivityQueries.selectAll().executeAsList())
 
