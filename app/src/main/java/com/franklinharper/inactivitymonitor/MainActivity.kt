@@ -61,9 +61,9 @@ class MainActivity : AppCompatActivity() {
         // and passed around using your favourite dependency injection/service locator/singleton pattern.
         val database = Database(driver)
 
-        val playerQueries: PlayerQueries = database.playerQueries
+        val userActivityQueries = database.userActivityQueries
 
-        println(playerQueries.selectAll().executeAsList())
+        println(userActivityQueries.selectAll().executeAsList())
 
         textMessage = findViewById(R.id.message)
         navView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)

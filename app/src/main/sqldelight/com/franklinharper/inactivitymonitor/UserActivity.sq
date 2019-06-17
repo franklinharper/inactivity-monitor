@@ -1,6 +1,7 @@
 -- comment in sql
 
 CREATE TABLE userActivity (
+  id INTEGER PRIMARY KEY,
   activity_type INTEGER NOT NULL,
   transition_type INTEGER NOT NULL,
   elapsed_real_time_nanos INTEGER NOT NULL
@@ -8,13 +9,16 @@ CREATE TABLE userActivity (
 
 -- CREATE INDEX hockeyPlayer_full_name ON hockeyPlayer(full_name);
 
--- INSERT INTO hockeyPlayer (player_number, full_name)
--- VALUES (15, 'Ryan Getzlaf');
+INSERT INTO userActivity (activity_type, transition_type, elapsed_real_time_nanos)
+VALUES (1, 2, 3);
 
 selectAll:
 SELECT *
 FROM userActivity;
 
 insert:
+-- The primary key value is not set, so when you insert a new row,
+-- SQLite assigns an integer that is one larger than the largest rowid in the table.
+-- In case you have never inserted any row, the rowid value is 1.
 INSERT INTO userActivity(activity_type, transition_type, elapsed_real_time_nanos)
 VALUES (?, ?, ?);
