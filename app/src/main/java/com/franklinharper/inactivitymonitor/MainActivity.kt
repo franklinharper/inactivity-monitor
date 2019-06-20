@@ -8,8 +8,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.location.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.squareup.sqldelight.android.AndroidSqliteDriver
-import com.squareup.sqldelight.db.SqlDriver
 
 class MainActivity : AppCompatActivity() {
 
@@ -57,7 +55,15 @@ class MainActivity : AppCompatActivity() {
 
         val userActivityQueries = InactivityDb.from(this).queries
 
-        println(userActivityQueries.selectAll().executeAsList())
+        val u = userActivityQueries.selectAll().executeAsList()
+        u.forEach {
+            with(it) {
+                val activityType = typeToString(activity_type)
+                val transitionType = transitionToString(transition_type)
+                val elapsedSeconds = elapsed_real_time_millis / 1000
+                Log.i("InactivityMonitor", "$id, $date_time, $activityType, $transitionType, $elapsedSeconds ")
+            }
+        }
 
         textMessage = findViewById(R.id.message)
         navView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
@@ -68,7 +74,7 @@ class MainActivity : AppCompatActivity() {
 
         val client = ActivityRecognition.getClient(this)
 
-        val task = client.requestActivityTransitionUpdates(request,  pendingIntent)
+        val task = client.requestActivityTransitionUpdates(request, pendingIntent)
 
         task.addOnSuccessListener {
             Log.d("MAIN", "Success")
@@ -84,5 +90,32 @@ class MainActivity : AppCompatActivity() {
             .setActivityType(type)
             .setActivityTransition(transition)
             .build()
+    }
+
+    private fun transitionToString(type: Int): String {
+        return when(type) {
+            0 -> "ENTER"
+            1 -> "EXIT"
+            else -> type.toString()
+        }
+    }
+
+    private fun typeToString(type: Int): String {
+        return when (type) {
+            0 -> "IN_VEHICLE"
+            1 -> "ON_BICYCLE"
+            2 -> "ON_FOOT"
+            3 -> "STILL"
+            4 -> "UNKNOWN"
+            5 -> "TILTING"
+            6, 9, 10, 11, 12, 13, 14, 15 -> type.toString()
+            7 -> "WALKING"
+            8 -> "RUNNING"
+            16 -> "IN_ROAD_VEHICLE"
+            17 -> "IN_RAIL_VEHICLE"
+            18 -> "IN_TWO_WHEELER_VEHICLE"
+            19 -> "IN_FOUR_WHEELER_VEHICLE"
+            else -> type.toString()
+        }
     }
 }

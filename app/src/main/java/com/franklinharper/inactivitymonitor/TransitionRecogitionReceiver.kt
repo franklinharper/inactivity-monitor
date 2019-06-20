@@ -11,10 +11,13 @@ import java.lang.IllegalStateException
 
 class ActivityTransitionReceiver : BroadcastReceiver() {
 
-    lateinit var context: Context
+//    lateinit var context: Context
 
-    override fun onReceive(context: Context?, intent: Intent?) {
-        this.context = context!!
+    private lateinit var dbQueries: UserActivityQueries
+
+    override fun onReceive(context: Context, intent: Intent?) {
+//        this.context = context!!
+        dbQueries = InactivityDb.from(context).queries
 
 //        Log.i("RECEIVER", intent.toString())
         if (ActivityTransitionResult.hasResult(intent)) {
@@ -32,9 +35,12 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
 
     private fun onDetectedTransitionEvent(activity: ActivityTransitionEvent) {
         val detectedActivity = DetectedActivity(activity.activityType, 100)
-//        val transition = activity.transitionType.toEnum()
-//        val elapsedTime = activity.elapsedRealTimeNanos / 1e+9
         Log.i("InactivityMonitor", "$detectedActivity")
+//        val transition = activity.transitionType.toEnum()
+        with(activity) {
+            val elapsedMillis = (elapsedRealTimeNanos / 1e+6).toLong()
+            dbQueries.insert(activityType, transitionType, elapsedMillis)
+        }
 //        when (activity.activityType) {
 //            DetectedActivity.ON_BICYCLE,
 //            DetectedActivity.RUNNING,
