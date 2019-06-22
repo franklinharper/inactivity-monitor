@@ -8,6 +8,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.location.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import java.time.LocalDate
+import java.time.ZoneId
 
 class MainActivity : AppCompatActivity() {
 
@@ -55,15 +57,7 @@ class MainActivity : AppCompatActivity() {
 
         val userActivityQueries = InactivityDb.from(this).queries
 
-        val u = userActivityQueries.selectAll().executeAsList()
-        u.forEach {
-            with(it) {
-                val activityType = typeToString(activity_type)
-                val transitionType = transitionToString(transition_type)
-                val elapsedSeconds = elapsed_real_time_millis / 1000
-                Log.i("InactivityMonitor", "$id, $date_time, $activityType, $transitionType, $elapsedSeconds ")
-            }
-        }
+        showActivitiesForToday(userActivityQueries)
 
         textMessage = findViewById(R.id.message)
         navView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
@@ -85,6 +79,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun showActivitiesForToday(userActivityQueries: UserActivityQueries) {
+        val todayMidnight = LocalDate.now().atStartOfDay(ZoneId.systemDefault())
+        val tomorrowMidnight = todayMidnight.plusDays(1)
+        userActivityQueries.select(
+            transition = ActivityTransition.ACTIVITY_TRANSITION_ENTER,
+            start = todayMidnight.toEpochSecond(),
+            end = tomorrowMidnight.toEpochSecond()
+        )
+            .executeAsList()
+            .forEach {
+                with(it) {
+                    val activityType = typeToString(activity_type)
+                    val transitionType = transitionToString(transition_type)
+                    val elapsedSeconds = elapsed_real_time_millis / 1000.0
+                    Log.i("InactivityMonitor", "$id, $timestamp, $activityType, $transitionType, $elapsedSeconds elapsed secs")
+                }
+            }
+    }
+
     private fun createActivityTransition(type: Int, transition: Int): ActivityTransition {
         return ActivityTransition.Builder()
             .setActivityType(type)
@@ -93,7 +106,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun transitionToString(type: Int): String {
-        return when(type) {
+        return when (type) {
             0 -> "ENTER"
             1 -> "EXIT"
             else -> type.toString()
