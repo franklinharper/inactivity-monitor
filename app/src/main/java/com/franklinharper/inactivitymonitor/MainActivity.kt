@@ -8,8 +8,12 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.location.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.IllegalStateException
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class MainActivity : AppCompatActivity() {
 
@@ -31,11 +35,15 @@ class MainActivity : AppCompatActivity() {
     val request = ActivityTransitionRequest(transitions)
 
     private lateinit var textMessage: TextView
+    private lateinit var userActivityQueries: UserActivityQueries
+
+    private val zoneId = ZoneId.systemDefault()
+    private val timeFormatter = DateTimeFormatter.ofPattern("kk:HH:mm:ss").withZone(zoneId)
 
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.navigation_home -> {
-                textMessage.setText(R.string.title_home)
+                showActivitiesForToday()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_dashboard -> {
@@ -54,12 +62,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
-
-        val userActivityQueries = InactivityDb.from(this).queries
-
-        showActivitiesForToday(userActivityQueries)
-
         textMessage = findViewById(R.id.message)
+        userActivityQueries = InactivityDb.from(this).queries
+
+        showActivitiesForToday()
+
         navView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
 
         val intent = Intent(this, ActivityTransitionReceiver::class.java)
@@ -79,9 +86,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showActivitiesForToday(userActivityQueries: UserActivityQueries) {
-        val todayMidnight = LocalDate.now().atStartOfDay(ZoneId.systemDefault())
+    override fun onResume() {
+        super.onResume()
+        showActivitiesForToday()
+    }
+
+    private fun showActivitiesForToday() {
+        val todayMidnight = LocalDate.now().atStartOfDay(zoneId)
         val tomorrowMidnight = todayMidnight.plusDays(1)
+        val todaysActivities = StringBuilder()
+
+        todaysActivities.append("Activities\n")
+        var previousTimestamp = System.currentTimeMillis() / 1000
+        var previousActivityType = ""
+        var first = true
+        var delta = 0L
         userActivityQueries.select(
             transition = ActivityTransition.ACTIVITY_TRANSITION_ENTER,
             start = todayMidnight.toEpochSecond(),
@@ -90,12 +109,22 @@ class MainActivity : AppCompatActivity() {
             .executeAsList()
             .forEach {
                 with(it) {
+                    val formattedTimestamp = timeFormatter.format(Instant.ofEpochSecond(timestamp))
                     val activityType = typeToString(activity_type)
-                    val transitionType = transitionToString(transition_type)
-                    val elapsedSeconds = elapsed_real_time_millis / 1000.0
-                    Log.i("InactivityMonitor", "$id, $timestamp, $activityType, $transitionType, $elapsedSeconds elapsed secs")
+                    delta = when {
+//                        previousTimestamp == -1L -> 0L
+                        first || activityType == previousActivityType -> {
+                            first = false
+                            delta + previousTimestamp - timestamp
+                        }
+                        else -> previousTimestamp - timestamp
+                    }
+                    todaysActivities.append("$formattedTimestamp => $activityType $delta secs\n")
+                    previousTimestamp = timestamp
+                    previousActivityType = activityType
                 }
             }
+        message.text = todaysActivities.toString()
     }
 
     private fun createActivityTransition(type: Int, transition: Int): ActivityTransition {

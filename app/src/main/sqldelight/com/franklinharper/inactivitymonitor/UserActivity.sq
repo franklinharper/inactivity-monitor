@@ -24,7 +24,8 @@ SELECT *
 FROM userActivity
 WHERE :transition = transition_type
       AND timestamp >= :start
-      AND timestamp < :end;
+      AND timestamp < :end
+ORDER BY timestamp DESC;
 
 insert:
 -- The primary key value is not set, so when you insert a new row,
