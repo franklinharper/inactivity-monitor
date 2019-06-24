@@ -2,11 +2,13 @@
 
 CREATE TABLE userActivity (
   id INTEGER PRIMARY KEY,
-  -- The Unix timestamp is used. It is the number of seconds that have elapsed since
-  -- 00:00:00 Thursday, 1 January 1970,[2] Coordinated Universal Time (UTC), minus leap seconds.
+  -- The Unix timestamp is used by default. It is the number of *seconds* that have elapsed since
+  -- 00:00:00 Thursday, 1 January 1970, Coordinated Universal Time (UTC), minus leap seconds.
   timestamp INTEGER NOT NULL DEFAULT (strftime('%s','now')),
   activity_type INTEGER AS Int NOT NULL,
   transition_type INTEGER AS Int NOT NULL,
+  -- Calculating using elapsed real_time_milli values would be more complicated than using seconds,
+  -- albeit more accurate. In this case it would be overkill.
   elapsed_real_time_millis INTEGER NOT NULL
 );
 
@@ -23,8 +25,8 @@ select:
 SELECT *
 FROM userActivity
 WHERE :transition = transition_type
-      AND timestamp >= :start
-      AND timestamp < :end
+      AND timestamp >= :startInclusive
+      AND timestamp < :endExclusive
 ORDER BY timestamp DESC;
 
 insert:
