@@ -1,6 +1,6 @@
 -- comment in sql
 
-CREATE TABLE userActivity (
+CREATE TABLE userActivityTransition (
   id INTEGER PRIMARY KEY,
   -- The Unix timestamp is used by default. It is the number of *seconds* that have elapsed since
   -- 00:00:00 Thursday, 1 January 1970, Coordinated Universal Time (UTC), minus leap seconds.
@@ -12,26 +12,49 @@ CREATE TABLE userActivity (
   elapsed_real_time_millis INTEGER NOT NULL
 );
 
-CREATE INDEX user_activity_timestamp ON userActivity(timestamp);
+CREATE INDEX user_activity_timestamp ON userActivityTransition(timestamp);
 
 -- INSERT INTO userActivity (activity_type, transition_type, elapsed_real_time_millis)
 -- VALUES (1, 2, 3);
 
 selectAll:
 SELECT *
-FROM userActivity;
+FROM userActivityTransition;
+
+latest:
+SELECT *
+FROM userActivityTransition
+ORDER BY timestamp DESC LIMIT 1;
+
+--  LAG (activity_type, 1) OVER (ORDER BY timestamp) previous_timestamp
+-- transitionsForCurrentActivity:
+-- SELECT
+--   timestamp
+--   , activity_type
+--   , transition_type
+--   , LAG (activity_type) AS previous_timestamp
+-- FROM userActivityTransition
+-- WHERE activity_type = previous_timestamp
+-- ORDER BY timestamp DESC;
 
 select:
 SELECT *
-FROM userActivity
+FROM userActivityTransition
 WHERE :transition = transition_type
       AND timestamp >= :startInclusive
       AND timestamp < :endExclusive
+ORDER BY timestamp DESC;
+
+selectStarting:
+SELECT *
+FROM userActivityTransition
+WHERE :transition = transition_type
+      AND timestamp >= :startInclusive
 ORDER BY timestamp DESC;
 
 insert:
 -- The primary key value is not set, so when you insert a new row,
 -- SQLite assigns an integer that is one larger than the largest rowid in the table.
 -- In case you have never inserted any row, the rowid value is 1.
-INSERT INTO userActivity(activity_type, transition_type, elapsed_real_time_millis)
+INSERT INTO userActivityTransition(activity_type, transition_type, elapsed_real_time_millis)
 VALUES (?, ?, ?);

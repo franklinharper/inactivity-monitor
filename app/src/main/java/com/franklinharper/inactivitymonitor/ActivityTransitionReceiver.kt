@@ -3,31 +3,59 @@ package com.franklinharper.inactivitymonitor
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.google.android.gms.location.ActivityTransitionEvent
 import com.google.android.gms.location.ActivityTransitionResult
 import com.google.android.gms.location.DetectedActivity
-import java.lang.IllegalStateException
+import timber.log.Timber
 
 class ActivityTransitionReceiver : BroadcastReceiver() {
 
-//    lateinit var context: Context
-
-    private lateinit var dbQueries: UserActivityQueries
+//    private val TIMEOUT_SECS = 30 * 60 // 30 * 60
+    private val TIMEOUT_SECS = 30 // 30 * 60
+    private lateinit var transitionRepository: TransitionRepository
+    private lateinit var vibrationManager: VibrationManager
+    private lateinit var myAlarmManager: MyAlarmManager
 
     override fun onReceive(context: Context, intent: Intent?) {
-//        this.context = context!!
-        dbQueries = InactivityDb.from(context).queries
+        Timber.d("onReceive(context = $context,\n intent = $intent)\n")
+        initialize(context)
+        processIntent(intent)
+        manageWakeupAlarms()
+        manageAlerts()
+    }
 
-//        Log.i("RECEIVER", intent.toString())
+    private fun initialize(context: Context) {
+        val db = InactivityDb.from(context)
+        transitionRepository = TransitionRepository.from(db)
+        vibrationManager = VibrationManager.from(context)
+        myAlarmManager = MyAlarmManager.from(context)
+    }
+
+    private fun processIntent(intent: Intent?) {
         if (ActivityTransitionResult.hasResult(intent)) {
+            vibrationManager.vibrate(1000)
             val result = ActivityTransitionResult.extractResult(intent)!!
             processTransitionResult(result)
         }
     }
 
+    private fun manageWakeupAlarms() {
+        myAlarmManager.createNextAlarm(TIMEOUT_SECS)
+//        val latestActivity = transitionRepository.latest().executeAsOneOrNull()
+//        if (latestActivity?.activity_type == DetectedActivity.STILL) {
+//            myAlarmManager.createNextAlarm(TIMEOUT_SECS)
+//        } else {
+//            myAlarmManager.removeAlarm()
+//        }
+    }
+
+    private fun manageAlerts() {
+        if (transitionRepository.userIsStillForTooLong()) {
+            vibrationManager.vibrate(3000)
+        }
+    }
+
     private fun processTransitionResult(result: ActivityTransitionResult) {
-//        Log.d("RECEIVER", result.toString())
         for (event in result.transitionEvents) {
             onDetectedTransitionEvent(event)
         }
@@ -35,11 +63,11 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
 
     private fun onDetectedTransitionEvent(activity: ActivityTransitionEvent) {
         val detectedActivity = DetectedActivity(activity.activityType, 100)
-        Log.i("InactivityMonitor", "$detectedActivity")
+        Timber.i("onDetectedTransitionEvent: $detectedActivity")
 //        val transition = activity.transitionType.toEnum()
         with(activity) {
             val elapsedMillis = (elapsedRealTimeNanos / 1e+6).toLong()
-            dbQueries.insert(activityType, transitionType, elapsedMillis)
+            transitionRepository.insert(activityType, transitionType, elapsedMillis)
         }
 //        when (activity.activityType) {
 //            DetectedActivity.ON_BICYCLE,
