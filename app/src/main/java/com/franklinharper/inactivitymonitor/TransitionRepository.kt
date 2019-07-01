@@ -1,6 +1,5 @@
 package com.franklinharper.inactivitymonitor
 
-import android.content.Context
 import com.google.android.gms.location.ActivityTransition
 import com.squareup.sqldelight.Query
 import java.time.LocalDate

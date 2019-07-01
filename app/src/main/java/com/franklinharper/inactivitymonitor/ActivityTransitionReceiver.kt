@@ -1,5 +1,6 @@
 package com.franklinharper.inactivitymonitor
 
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -10,18 +11,19 @@ import timber.log.Timber
 
 class ActivityTransitionReceiver : BroadcastReceiver() {
 
-//    private val TIMEOUT_SECS = 30 * 60 // 30 * 60
+    //    private val TIMEOUT_SECS = 30 * 60 // 30 * 60
     private val TIMEOUT_SECS = 30 // 30 * 60
     private lateinit var transitionRepository: TransitionRepository
     private lateinit var vibrationManager: VibrationManager
     private lateinit var myAlarmManager: MyAlarmManager
+    private lateinit var notificationManager: NotificationManager
 
     override fun onReceive(context: Context, intent: Intent?) {
         Timber.d("onReceive(context = $context,\n intent = $intent)\n")
         initialize(context)
         processIntent(intent)
         manageWakeupAlarms()
-        manageAlerts()
+        manageVibration()
     }
 
     private fun initialize(context: Context) {
@@ -29,6 +31,7 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
         transitionRepository = TransitionRepository.from(db)
         vibrationManager = VibrationManager.from(context)
         myAlarmManager = MyAlarmManager.from(context)
+        notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
 
     private fun processIntent(intent: Intent?) {
@@ -49,8 +52,12 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
 //        }
     }
 
-    private fun manageAlerts() {
-        if (transitionRepository.userIsStillForTooLong()) {
+    private fun manageVibration() {
+        val interruptionFilter = notificationManager.currentInterruptionFilter
+        // Only vibrate when Do Not Disturb mode is off!
+        if (interruptionFilter == NotificationManager.INTERRUPTION_FILTER_ALL
+            && transitionRepository.userIsStillForTooLong()
+        ) {
             vibrationManager.vibrate(3000)
         }
     }

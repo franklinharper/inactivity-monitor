@@ -1,0 +1,12 @@
+TODO Show notifications
+TODO Snooze vibrations (if possible with a physical button)
+TODO dependency injection
+TODO make MainActivity reactive.
+TODO unit tests & refactor code into testable components
+TODO refactor TransitionRepository to ActivityRepository (aggregated transitions)
+TODO show aggregated transitions (aka Activities) in the log instead of every transition
+TODO optimize AlarmManager usage, by scheduling alarms only when necessary
+TODO sync to backend
+TODO vibrate on the watch
+TODO detect activity transitions on the watch
+
