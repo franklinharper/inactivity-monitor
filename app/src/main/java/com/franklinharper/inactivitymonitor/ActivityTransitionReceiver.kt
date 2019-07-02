@@ -13,17 +13,23 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
 
     //    private val TIMEOUT_SECS = 30 * 60 // 30 * 60
     private val TIMEOUT_SECS = 30 // 30 * 60
+    private val STILL_THRESHOLD = 30 * 60 // 30 minutes
     private lateinit var transitionRepository: TransitionRepository
     private lateinit var vibrationManager: VibrationManager
     private lateinit var myAlarmManager: MyAlarmManager
-    private lateinit var notificationManager: NotificationManager
+    private lateinit var notificationManager: MyNotificationManager
 
     override fun onReceive(context: Context, intent: Intent?) {
         Timber.d("onReceive(context = $context,\n intent = $intent)\n")
         initialize(context)
         processIntent(intent)
         manageWakeupAlarms()
-        manageVibration()
+        val latestActivity = transitionRepository.latestActivity()
+        latestActivity.let {
+            if (it?.type == "STILL" && it.duration > STILL_THRESHOLD) {
+                informUser(it)
+            }
+        }
     }
 
     private fun initialize(context: Context) {
@@ -31,7 +37,7 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
         transitionRepository = TransitionRepository.from(db)
         vibrationManager = VibrationManager.from(context)
         myAlarmManager = MyAlarmManager.from(context)
-        notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager = MyNotificationManager.from(context)
     }
 
     private fun processIntent(intent: Intent?) {
@@ -43,6 +49,7 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
     }
 
     private fun manageWakeupAlarms() {
+        // TODO wake up much less often, this wastes battery!
         myAlarmManager.createNextAlarm(TIMEOUT_SECS)
 //        val latestActivity = transitionRepository.latest().executeAsOneOrNull()
 //        if (latestActivity?.activity_type == DetectedActivity.STILL) {
@@ -52,12 +59,15 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
 //        }
     }
 
-    private fun manageVibration() {
-        val interruptionFilter = notificationManager.currentInterruptionFilter
+    private fun informUser(activity: UserActivity) {
+        val minutes = "%.2f".format((activity.duration ?: 0) / 60.0)
+
+        notificationManager.sendNotification("Time to move!","${activity.type} for $minutes")
         // Only vibrate when Do Not Disturb mode is off!
-        if (interruptionFilter == NotificationManager.INTERRUPTION_FILTER_ALL
-            && transitionRepository.userIsStillForTooLong()
-        ) {
+        val allowInterruptions =
+            notificationManager.currentInterruptionFilter == NotificationManager.INTERRUPTION_FILTER_ALL
+
+        if (allowInterruptions && transitionRepository.userIsStillForTooLong()) {
             vibrationManager.vibrate(3000)
         }
     }

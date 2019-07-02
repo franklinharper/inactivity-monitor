@@ -28,7 +28,9 @@ class TransitionRepository private constructor(transitionDb: InactivityDb) {
 
     fun latest() = userActivityQueries.latest()
 
-    fun userIsStillForTooLong(): Boolean {
+    fun userIsStillForTooLong() = latestActivity().let { it != null && it.type == "STILL" && it.duration > TIMEOUT }
+
+    fun latestActivity(): UserActivity? {
         val yesterdayMidnight = LocalDate.now().atStartOfDay(zoneId).minusDays(1)
         val transitions = userActivityQueries.selectStarting(
             transition = ActivityTransition.ACTIVITY_TRANSITION_ENTER,
@@ -37,7 +39,7 @@ class TransitionRepository private constructor(transitionDb: InactivityDb) {
             .executeAsList()
 
         if (transitions.isEmpty()) {
-            return false
+            return null
         }
 
         // Transitions are in reverse chronological order. I.e. most recent at index 0.
@@ -52,7 +54,7 @@ class TransitionRepository private constructor(transitionDb: InactivityDb) {
         val lastSame = transitions[indexFirstDifferent - 1]
 
         val now = ZonedDateTime.now()
-        return mostRecentActivityType == "STILL" && now.toEpochSecond() - lastSame.timestamp > TIMEOUT
+        return UserActivity(mostRecentActivityType, now.toEpochSecond() - lastSame.timestamp)
     }
 
     fun insert(activityType: Int, transitionType: Int, elapsedMillis: Long) {

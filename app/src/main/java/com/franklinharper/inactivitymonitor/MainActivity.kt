@@ -1,26 +1,25 @@
 package com.franklinharper.inactivitymonitor
 
 import android.annotation.SuppressLint
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.gms.location.*
+import com.google.android.gms.location.ActivityRecognition
+import com.google.android.gms.location.ActivityTransition
+import com.google.android.gms.location.ActivityTransitionRequest
+import com.google.android.gms.location.DetectedActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.squareup.sqldelight.runtime.rx.asObservable
 import com.squareup.sqldelight.runtime.rx.mapToOptional
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_main.*
+import timber.log.Timber
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -29,8 +28,6 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val UNKNOWN_ACTIVITY = "UNKNOWN_ACTIVITY"
-        private const val CHANNEL_ID = "DEFAULT"
-        private const val NOTIFICATION_ID = 1
     }
 
     @Suppress("SpellCheckingInspection")
@@ -93,17 +90,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.action_vibrate -> {
+            VibrationManager.from(this).vibrate(2500)
+            true
+        }
+
+        R.id.action_notify -> {
+            MyNotificationManager.from(this).sendNotification("Notification title", "text")
+            true
+        }
+
         R.id.action_settings -> {
             // User chose the "Settings" item, show the app settings UI...
             Toast.makeText(applicationContext, "Not implemented", Toast.LENGTH_SHORT).apply {
                 setGravity(Gravity.TOP or Gravity.END, 0, 200)
                 show()
             }
-            true
-        }
-
-        R.id.action_vibrate -> {
-            VibrationManager.from(this).vibrate(2500)
             true
         }
 
@@ -114,12 +116,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun update() {
-        updateSelectedNavigationItem(navigationView.selectedItemId)
-//        if (latestActivityType == "STILL" && latestActivityMinutes > 30) {
-//            sendNotification()
-//        }
-    }
+    private fun update() = updateSelectedNavigationItem(navigationView.selectedItemId)
 
     private fun initialize() {
 
@@ -133,8 +130,6 @@ class MainActivity : AppCompatActivity() {
 
         observeTransitions()
 
-        createNotificationChannel()
-
         navigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
 
         val intent = Intent(this, ActivityTransitionReceiver::class.java)
@@ -147,51 +142,13 @@ class MainActivity : AppCompatActivity() {
         val task = client.requestActivityTransitionUpdates(activityTransitionRequest, pendingIntent)
 
         task.addOnSuccessListener {
-            Log.d("MAIN", "Success")
+            Timber.d("Success")
         }
 
         task.addOnFailureListener { e: Exception ->
-            Log.d("MAIN", "Fail", e)
+            Timber.d(e, "Fail")
         }
     }
-
-    private fun createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = getString(R.string.channel_name)
-            val descriptionText = getString(R.string.channel_description)
-            val importance = NotificationManager.IMPORTANCE_HIGH
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-                description = descriptionText
-            }
-            // Register the channel with the system
-            val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
-
-//    private fun sendNotification() {
-//        val intent = Intent(this, MainActivity::class.java).apply {
-//            //            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-//        }
-//        val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, intent, 0)
-//
-//        val formattedMinutes = "%.2f".format(latestActivityMinutes)
-//        var builder = NotificationCompat.Builder(this, CHANNEL_ID)
-//            .setContentIntent(pendingIntent)
-//            .setSmallIcon(R.drawable.ic_notifications_black_24dp)
-//            .setContentTitle("Move ASAP!")
-//            .setContentText("$latestActivityType for the last $formattedMinutes minutes")
-//            .setPriority(NotificationCompat.PRIORITY_MAX)
-//            .setCategory(NotificationCompat.CATEGORY_REMINDER)
-//            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-//            .setVibrate(longArrayOf(1000, 1000, 1000, 1000, 1000));
-//        with(NotificationManagerCompat.from(this)) {
-//            notify(NOTIFICATION_ID, builder.build())
-//        }
-//    }
 
     private fun updateSelectedNavigationItem(id: Int) {
 //        calculateTodaysActivities()
