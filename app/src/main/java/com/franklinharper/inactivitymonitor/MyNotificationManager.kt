@@ -53,6 +53,7 @@ class MyNotificationManager private constructor(private val context: Context) {
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setAutoCancel(true)
             .setVibrate(longArrayOf(1000, 1000, 1000, 1000, 1000))
 
         notificationManager.notify(NOTIFICATION_ID, builder.build())

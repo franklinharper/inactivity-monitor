@@ -1,31 +1,67 @@
--- comment in sql
+import com.franklinharper.inactivitymonitor.ActivityType;
 
-CREATE TABLE userActivityTransition (
+-- The table name "activity" would have been simpler than userActivity, but unfortunately it is already
+-- used by the Android SDK for one of its main components, so using Activity would have been confusing.
+CREATE TABLE userActivity (
   id INTEGER PRIMARY KEY,
-  -- The Unix timestamp is used by default. It is the number of *seconds* that have elapsed since
-  -- 00:00:00 Thursday, 1 January 1970, Coordinated Universal Time (UTC), minus leap seconds.
-  timestamp INTEGER NOT NULL DEFAULT (strftime('%s','now')),
-  activity_type INTEGER AS Int NOT NULL,
-  transition_type INTEGER AS Int NOT NULL,
-  -- Calculating using elapsed real_time_milli values would be more complicated than using seconds,
-  -- albeit more accurate. In this case it would be overkill.
-  elapsed_real_time_millis INTEGER NOT NULL
+  -- ActivityType enum: e.g. STILL, WALKING, etc.
+  type TEXT AS ActivityType NOT NULL,
+  -- activity type Int value as received from Google's ActivityRecognition API
+  transition_activity_type INTEGER AS Int,
+
+  -- The unix time when this Activity started (see comments below for details)
+  start INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+    --
+    -- "Start" is used for local datetime calculations (e.g. select today's Activities).
+    --
+    --- It is NOT used to ensure a strict ordering of UserActivities, the "id" is used for that purpose.
+    --
+    -- In certain edge-cases the "start" values may not monotonically increase
+    --
+    -- For example:
+    --   * the system admin changes the system clock
+    --   * there is a configuration error
+    --
+    -- In this case, these edge-cases can safely be ignored because they would NOT affect the ordering of events
+    -- which is ensured by the "id".
+    --
+    -- More info at https://en.wikipedia.org/wiki/Unix_time
 );
 
-CREATE INDEX user_activity_timestamp ON userActivityTransition(timestamp);
-
--- INSERT INTO userActivity (activity_type, transition_type, elapsed_real_time_millis)
--- VALUES (1, 2, 3);
+CREATE INDEX activity_start ON userActivity(start);
 
 selectAll:
 SELECT *
-FROM userActivityTransition;
+FROM userActivity;
 
-latest:
+selectLatest:
 SELECT *
-FROM userActivityTransition
-ORDER BY timestamp DESC LIMIT 1;
+FROM userActivity
+ORDER BY id DESC LIMIT 1;
 
+selectRange:
+SELECT *
+FROM userActivity
+WHERE start >= :startInclusive
+      AND start < :endExclusive
+ORDER BY id DESC;
+
+selectStarting:
+SELECT *
+FROM userActivity
+WHERE start >= :startInclusive
+ORDER BY id DESC;
+
+insert:
+-- The values for id and start columns are set by SQLite using default values, so that when a row is inserted:
+--
+--   * Id is an integer that is one larger than the largest rowid in the table, or 1 when the table is empty
+--   * Start is the current unix time stamp in seconds
+--
+INSERT INTO userActivity(type, transition_activity_type)
+VALUES (?, ?);
+
+-- The LAG function could be used for calculating Activity durations in SQL
 --  LAG (activity_type, 1) OVER (ORDER BY timestamp) previous_timestamp
 -- transitionsForCurrentActivity:
 -- SELECT
@@ -37,24 +73,3 @@ ORDER BY timestamp DESC LIMIT 1;
 -- WHERE activity_type = previous_timestamp
 -- ORDER BY timestamp DESC;
 
-select:
-SELECT *
-FROM userActivityTransition
-WHERE :transition = transition_type
-      AND timestamp >= :startInclusive
-      AND timestamp < :endExclusive
-ORDER BY timestamp DESC;
-
-selectStarting:
-SELECT *
-FROM userActivityTransition
-WHERE :transition = transition_type
-      AND timestamp >= :startInclusive
-ORDER BY timestamp DESC;
-
-insert:
--- The primary key value is not set, so when you insert a new row,
--- SQLite assigns an integer that is one larger than the largest rowid in the table.
--- In case you have never inserted any row, the rowid value is 1.
-INSERT INTO userActivityTransition(activity_type, transition_type, elapsed_real_time_millis)
-VALUES (?, ?, ?);
