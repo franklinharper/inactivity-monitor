@@ -1,47 +1,59 @@
 package com.franklinharper.inactivitymonitor
 
-import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.google.android.gms.location.ActivityTransitionResult
 import timber.log.Timber
-import java.time.LocalTime
 
 class ActivityTransitionReceiver : BroadcastReceiver() {
 
-  //    private val TIMEOUT_SECS = 30 * 60 // 30 * 60
-  private val TIMEOUT_SECS = 30 // 30 * 60
-  private val STILL_THRESHOLD = 30 * 60 // 30 minutes
+  private val ALARM_INTERVAL = 30
+  private val STILL_TIME_LIMIT_SECS = 30 * 60 // 30 minutes
+
   private lateinit var activityRepository: ActivityRepository
   private lateinit var vibrationManager: VibrationManager
   private lateinit var myAlarmManager: MyAlarmManager
-  private lateinit var notificationManager: MyNotificationManager
+  private lateinit var myNotificationManager: MyNotificationManager
+  private lateinit var context: Context
 
 
   override fun onReceive(context: Context, intent: Intent?) {
+    logDebugInfo(context, intent)
+    initializeFromContext(context)
+    storeIntentDataInDb(intent)
+    scheduleNextWakeupAlarm()
+
+    activityRepository
+      .selectLatestActivity()
+      .executeAsOneOrNull()?.let {
+        val remindToMove =
+          it.type == ActivityType.STILL // TODO Decide how to handle ActivityType.IN_VEHICLE? The same as being STILL?
+            && it.secsSinceStart() > STILL_TIME_LIMIT_SECS
+            && myNotificationManager.doNotDisturbOff
+        if (remindToMove) {
+          remindUserToMove(it)
+        } else {
+          myNotificationManager.cancelNotification()
+        }
+      }
+  }
+
+  private fun logDebugInfo(context: Context, intent: Intent?) {
     Timber.d("onReceive(context = $context,\n intent = $intent)\n")
     val bundle = intent?.extras
     bundle?.keySet()?.forEach { key ->
       Timber.d("extra $key: ${bundle[key]}")
     }
-    initialize(context)
-    processIntent(intent)
-    manageWakeupAlarms()
-    activityRepository.selectLatestActivity().executeAsOneOrNull()?.let {
-      val durationInSecs = it.secsSinceStart()
-      if (it.type == ActivityType.STILL && durationInSecs > STILL_THRESHOLD) {
-        informUser(it)
-      }
-    }
   }
 
-  private fun initialize(context: Context) {
+  private fun initializeFromContext(context: Context) {
+    this.context = context
     val db = ActivityDb.from(context)
     activityRepository = ActivityRepository.from(db)
     vibrationManager = VibrationManager.from(context)
     myAlarmManager = MyAlarmManager.from(context)
-    notificationManager = MyNotificationManager.from(context)
+    myNotificationManager = MyNotificationManager.from(context)
   }
 
   // A new Activity Transition can be of the same type as the previous Activity Transition.
@@ -50,7 +62,7 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
   //
   // Deduping the stream allows calculating time duration of an Activity by subtracting successive start timestamps.
   // If the stream wasn't deduped the same calculation would require looping over multiple rows in the table.
-  private fun processIntent(intent: Intent?) {
+  private fun storeIntentDataInDb(intent: Intent?) {
     if (ActivityTransitionResult.hasResult(intent)) {
       vibrationManager.vibrate(1000)
       val result = ActivityTransitionResult.extractResult(intent)!!
@@ -69,31 +81,24 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
     }
   }
 
-  private fun manageWakeupAlarms() {
+  private fun scheduleNextWakeupAlarm() {
     // TODO wake ourselves up much less often, this brute force approach wastes battery!
-    myAlarmManager.createNextAlarm(TIMEOUT_SECS)
+    myAlarmManager.createNextAlarm(ALARM_INTERVAL)
 //        val latestActivity = transitionRepository.previous().executeAsOneOrNull()
 //        if (latestActivity?.activity_type == DetectedActivity.STILL) {
-//            myAlarmManager.createNextAlarm(TIMEOUT_SECS)
+//            myAlarmManager.createNextAlarm(ALARM_INTERVAL)
 //        } else {
 //            myAlarmManager.removeAlarm()
 //        }
   }
 
-  private fun informUser(activity: UserActivity) {
-    val localTime = LocalTime.now()
-    val allowInterruptions =
-      notificationManager.currentInterruptionFilter == NotificationManager.INTERRUPTION_FILTER_ALL
-        && localTime.hour > 6
-        && localTime.hour < 22
-
-    val minutes = "%.2f".format((activity.secsSinceStart()) / 60.0)
-
-    notificationManager.sendNotification("Time to move!", "${activity.type} for $minutes")
-    // Only vibrate when Do Not Disturb mode is off!
-    if (allowInterruptions && activityRepository.userIsStillForTooLong()) {
-      vibrationManager.vibrate(3000)
-    }
+  private fun remindUserToMove(activity: UserActivity) {
+    Timber.d("Reminding user to move")
+    myNotificationManager.sendNotification(
+      context.getString(R.string.notification_time_to_move_title),
+      context.getString(R.string.notification_time_to_move_text, activity.type, activity.secsSinceStart() / 60.0)
+    )
+    vibrationManager.vibrate(3000)
   }
 
 }

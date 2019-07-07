@@ -1,52 +1,47 @@
 package com.franklinharper.inactivitymonitor
 
-import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Bundle
+import android.text.SpannableStringBuilder
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.text.toSpannable
 import com.google.android.gms.location.ActivityRecognition
 import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionRequest
 import com.google.android.gms.location.DetectedActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-// For faster development, we'll delay implementing I18n until it becomes necessary
-@SuppressLint("SetTextI18n")
+//TODO dependency injection
+//TODO unit tests & refactor code into testable components
+//TODO Handle case where the phone is turned off for a while (schedule alarm on boot)
+//TODO Add ability to snooze Move It reminders
+//TODO make MainActivity reactive.
+//TODO optimize AlarmManager usage, by scheduling alarms only when necessary
+//TODO sync to cloud backend
+//TODO vibrate on the watch
+//TODO detect activity transitions on the watch
+
 class MainActivity : AppCompatActivity() {
 
   @Suppress("SpellCheckingInspection")
   private val todaysLog = StringBuilder()
 
-  // Track Activity starts (aka ENTER)
-  private val transitions = listOf<ActivityTransition>(
-    createActivityTransition(DetectedActivity.IN_VEHICLE, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-    , createActivityTransition(DetectedActivity.ON_BICYCLE, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-    , createActivityTransition(DetectedActivity.ON_FOOT, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-    , createActivityTransition(DetectedActivity.STILL, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-    , createActivityTransition(DetectedActivity.WALKING, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-    , createActivityTransition(DetectedActivity.RUNNING, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-    // TILTING is not supported. When it is added to this list,
-    // requestActivityTransitionUpdates throws an exception with this message:
-    //    SecurityException: ActivityTransitionRequest specified an unsupported transition activity type
-    // , createActivityTransition(DetectedActivity.TILTING, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-  )
+  private val db = ActivityDb.from(this)
+  private val activityRepository = ActivityRepository.from(db)
 
-  private var dashBoardText = ""
-
-  private lateinit var activityRepository: ActivityRepository
-  private lateinit var myAlarmManager: MyAlarmManager
+  // Late initialization is necessary because System services are not available to Activities before onCreate()
+  private lateinit var myNotificationManager: MyNotificationManager
 
   private val zoneId = ZoneId.systemDefault()
   private val timeFormatter = DateTimeFormatter.ofPattern("kk:mm:ss").withZone(zoneId)
@@ -56,13 +51,17 @@ class MainActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
-    initialize()
-    update()
+    myNotificationManager = MyNotificationManager.from(this)
+    // Schedule a wake up call. Subsequent wake up calls are scheduled when Transition events are processed.
+    MyAlarmManager.from(this).also { it.createNextAlarm(30) }
+    setSupportActionBar(findViewById(R.id.my_toolbar))
+    initializeBottomNavView()
+    initializeActivityDetection()
   }
 
   override fun onResume() {
     super.onResume()
-    update()
+    updateSelectedNavigationItem(navigationView.selectedItemId)
   }
 
   override fun onDestroy() {
@@ -102,21 +101,23 @@ class MainActivity : AppCompatActivity() {
     }
   }
 
-  private fun update() = updateSelectedNavigationItem(navigationView.selectedItemId)
-
-  private fun initialize() {
-
-    setSupportActionBar(findViewById(R.id.my_toolbar))
-
-    val db = ActivityDb.from(this)
-    activityRepository = ActivityRepository.from(db)
-    myAlarmManager = MyAlarmManager.from(this)
-
-    myAlarmManager.createNextAlarm(30)
-
-    observeRepository()
-
+  private fun initializeBottomNavView() =
     navigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
+
+  private fun initializeActivityDetection() {
+    // Detect when activities start (aka ACTIVITY_TRANSITION_ENTER)
+    val transitions = listOf(
+      createActivityTransition(DetectedActivity.IN_VEHICLE, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+      , createActivityTransition(DetectedActivity.ON_BICYCLE, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+      , createActivityTransition(DetectedActivity.ON_FOOT, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+      , createActivityTransition(DetectedActivity.STILL, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+      , createActivityTransition(DetectedActivity.WALKING, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+      , createActivityTransition(DetectedActivity.RUNNING, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+      // TILTING is not supported. When it is added to this list,
+      // requestActivityTransitionUpdates throws an exception with this message:
+      //    SecurityException: ActivityTransitionRequest specified an unsupported transition activity type
+      // , createActivityTransition(DetectedActivity.TILTING, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+    )
 
     val intent = Intent(this, ActivityTransitionReceiver::class.java)
 
@@ -132,43 +133,44 @@ class MainActivity : AppCompatActivity() {
     }
 
     task.addOnFailureListener { e: Exception ->
-      Timber.d(e, "Fail")
+      Timber.e(e, "Fail")
     }
   }
 
   private fun updateSelectedNavigationItem(id: Int) {
-//        calculateTodaysActivities()
     when (id) {
-      R.id.navigation_dashboard -> showDashboard()
-      R.id.navigation_log -> showLogForToday()
-      R.id.navigation_notifications -> showNotificationsForToday()
-      else -> IllegalStateException()
+      R.id.navigation_dashboard -> updateDashboard()
+      R.id.navigation_log -> updateLog()
+      R.id.navigation_notifications -> updateNotifications()
+      else -> throw IllegalStateException()
     }
   }
 
-  private fun showDashboard() {
+  private fun updateDashboard() {
+    val contents = SpannableStringBuilder()
     val latestActivity = activityRepository.selectLatestActivity().executeAsOneOrNull()
     if (latestActivity == null) {
-      message.text = "No activities have been detected, try moving around with your phone in your pocket"
+      contents.append(getString(R.string.main_activity_no_activies_detectd))
     } else {
-      val minutes = "%.2f".format(latestActivity.secsSinceStart() / 60.0)
-      message.text =
-        """
-
-             Current status
-
-             ${latestActivity.type.name} for $minutes minutes.
-           """.trimIndent()
+      val minutes = latestActivity.secsSinceStart() / 60.0
+      contents.append(getString(R.string.main_activity_current_status, latestActivity.type, minutes))
     }
+    val dndStatus = if (myNotificationManager.doNotDisturbOn)
+      getText(R.string.main_activity_do_not_disturb_on)
+    else
+      getText(R.string.main_activity_do_not_disturb_off)
+
+    contents.append(dndStatus)
+    message.text = contents.toSpannable()
   }
 
-  private fun showLogForToday() {
+  private fun updateLog() {
     calculateTodaysActivities()
     message.text = todaysLog.toString()
   }
 
-  private fun showNotificationsForToday() {
-    message.text = "Not yet implemented"
+  private fun updateNotifications() {
+    message.text = getString(R.string.main_activity_not_yet_implemented)
   }
 
   private fun calculateTodaysActivities() {
@@ -183,7 +185,7 @@ class MainActivity : AppCompatActivity() {
       .forEach { activity ->
         val timestamp = timeFormatter.format(Instant.ofEpochSecond(activity.start))
         val minutes = "%.2f".format(activity.secsSinceStart(end = currentEnd) / 60.0)
-        todaysLog.append("$timestamp => ${activity.type} $minutes mins\n")
+        todaysLog.append("$timestamp => ${activity.type} $minutes minutes\n")
         currentEnd = activity.start
       }
   }
@@ -199,13 +201,5 @@ class MainActivity : AppCompatActivity() {
       .setActivityTransition(transition)
       .build()
   }
-
-  private fun observeRepository() {
-
-  }
-
 }
 
-private operator fun CompositeDisposable.plusAssign(disposable: Disposable) {
-  add(disposable)
-}

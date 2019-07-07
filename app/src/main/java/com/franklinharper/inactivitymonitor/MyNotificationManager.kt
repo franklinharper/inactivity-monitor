@@ -10,52 +10,62 @@ import androidx.core.app.NotificationCompat
 
 class MyNotificationManager private constructor(private val context: Context) {
 
-    private val CHANNEL_ID = "DEFAULT"
-    private val NOTIFICATION_ID = 1
+  private val currentInterruptionFilter: Int
+    get() = notificationManager.currentInterruptionFilter
 
-    private val notificationManager = (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+  val doNotDisturbOff: Boolean
+    get() = currentInterruptionFilter == NotificationManager.INTERRUPTION_FILTER_ALL
 
-    val currentInterruptionFilter: Int
-        get() = notificationManager.currentInterruptionFilter
+  val doNotDisturbOn: Boolean
+    get() = !doNotDisturbOff
 
-    init {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createNotificationChannel()
-        }
+  private val CHANNEL_ID = "DEFAULT"
+  private val NOTIFICATION_ID = 1
+
+  private val notificationManager = (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+
+  init {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      createNotificationChannel()
     }
+  }
 
-    companion object : SingletonHolder<MyNotificationManager, Context>(::MyNotificationManager)
+  companion object : SingletonHolder<MyNotificationManager, Context>(::MyNotificationManager)
 
-    private fun createNotificationChannel() {
-        val name = context.getString(R.string.channel_name)
-        val descriptionText = context.getString(R.string.channel_description)
-        val importance = NotificationManager.IMPORTANCE_HIGH
-        val channel = NotificationChannel(CHANNEL_ID, name, importance)
-            .apply {
-                description = descriptionText
-            }
-        notificationManager.createNotificationChannel(channel)
-    }
+  private fun createNotificationChannel() {
+    val name = context.getString(R.string.channel_name)
+    val descriptionText = context.getString(R.string.channel_description)
+    val importance = NotificationManager.IMPORTANCE_HIGH
+    val channel = NotificationChannel(CHANNEL_ID, name, importance)
+      .apply {
+        description = descriptionText
+      }
+    notificationManager.createNotificationChannel(channel)
+  }
 
-    fun sendNotification(title:String, text: String) {
-        val intent = Intent(context, MainActivity::class.java)
-            .apply {
-                //            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
-        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setContentIntent(pendingIntent)
-            .setSmallIcon(R.drawable.ic_notifications_black_24dp)
-            .setContentTitle(title)
+  fun sendNotification(title: String, text: String) {
+    val intent = Intent(context, MainActivity::class.java)
+      .apply {
+        //            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+      }
+    val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
+    val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+      .setContentIntent(pendingIntent)
+      .setSmallIcon(R.drawable.ic_notifications_black_24dp)
+      .setContentTitle(title)
 //            .setContentTitle("Move ASAP!")
 //            .setContentText("$latestActivityType for the last $formattedMinutes minutes")
-            .setContentText(text)
-            .setPriority(NotificationCompat.PRIORITY_MAX)
-            .setCategory(NotificationCompat.CATEGORY_REMINDER)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setAutoCancel(true)
-            .setVibrate(longArrayOf(1000, 1000, 1000, 1000, 1000))
+      .setContentText(text)
+      .setPriority(NotificationCompat.PRIORITY_MAX)
+      .setCategory(NotificationCompat.CATEGORY_REMINDER)
+      .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+      .setAutoCancel(true)
+      .setVibrate(longArrayOf(1000, 1000, 1000, 1000, 1000))
 
-        notificationManager.notify(NOTIFICATION_ID, builder.build())
-    }
+    notificationManager.notify(NOTIFICATION_ID, builder.build())
+  }
+
+  fun cancelNotification() {
+    notificationManager.cancel(NOTIFICATION_ID)
+  }
 }
