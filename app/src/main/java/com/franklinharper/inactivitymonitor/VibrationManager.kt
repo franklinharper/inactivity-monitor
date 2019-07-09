@@ -4,12 +4,10 @@ import android.content.Context
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.VibrationEffect.DEFAULT_AMPLITUDE
-import android.os.VibrationEffect.EFFECT_HEAVY_CLICK
 import android.os.Vibrator
-import android.util.Log
 import timber.log.Timber
 
-class VibrationManager private constructor(context: Context) {
+class VibrationManager(context: Context) {
 
     private val vibrator: Vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
@@ -27,6 +25,4 @@ class VibrationManager private constructor(context: Context) {
             Timber.e("No vibrator")
         }
     }
-
-    companion object : SingletonHolder<VibrationManager, Context>(::VibrationManager)
 }

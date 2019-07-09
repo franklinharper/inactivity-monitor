@@ -8,7 +8,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 
-class MyNotificationManager private constructor(private val context: Context) {
+class MyNotificationManager(private val context: Context) {
 
   private val currentInterruptionFilter: Int
     get() = notificationManager.currentInterruptionFilter
@@ -30,8 +30,6 @@ class MyNotificationManager private constructor(private val context: Context) {
     }
   }
 
-  companion object : SingletonHolder<MyNotificationManager, Context>(::MyNotificationManager)
-
   private fun createNotificationChannel() {
     val name = context.getString(R.string.channel_name)
     val descriptionText = context.getString(R.string.channel_description)
@@ -43,7 +41,18 @@ class MyNotificationManager private constructor(private val context: Context) {
     notificationManager.createNotificationChannel(channel)
   }
 
-  fun sendNotification(title: String, text: String) {
+  fun cancelNotification() {
+    notificationManager.cancel(NOTIFICATION_ID)
+  }
+
+  fun sendMoveNotification(type: ActivityType, minutes: Double) {
+    sendNotification(
+      context.getString(R.string.notification_time_to_move_title),
+      context.getString(R.string.notification_time_to_move_text, type, minutes)
+    )
+  }
+
+  private fun sendNotification(title: String, text: String) {
     val intent = Intent(context, MainActivity::class.java)
       .apply {
         //            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -53,8 +62,6 @@ class MyNotificationManager private constructor(private val context: Context) {
       .setContentIntent(pendingIntent)
       .setSmallIcon(R.drawable.ic_notifications_black_24dp)
       .setContentTitle(title)
-//            .setContentTitle("Move ASAP!")
-//            .setContentText("$latestActivityType for the last $formattedMinutes minutes")
       .setContentText(text)
       .setPriority(NotificationCompat.PRIORITY_MAX)
       .setCategory(NotificationCompat.CATEGORY_REMINDER)
@@ -65,7 +72,4 @@ class MyNotificationManager private constructor(private val context: Context) {
     notificationManager.notify(NOTIFICATION_ID, builder.build())
   }
 
-  fun cancelNotification() {
-    notificationManager.cancel(NOTIFICATION_ID)
-  }
 }

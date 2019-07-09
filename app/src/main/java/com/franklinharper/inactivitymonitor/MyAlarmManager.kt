@@ -6,15 +6,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
 
-class MyAlarmManager private constructor(context: Context) {
+class MyAlarmManager(application: Context) {
 
-    private val systemAlarmManager: AlarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    private val alarmIntent = Intent(context, ActivityTransitionReceiver::class.java).let { intent ->
-        PendingIntent.getBroadcast(context, 0, intent, 0)
+    private val systemAlarmManager: AlarmManager = application.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    private val alarmIntent = Intent(application, ActivityTransitionReceiver::class.java).let { intent ->
+        PendingIntent.getBroadcast(application, 0, intent, 0)
     }
-
-
-    companion object : SingletonHolder<MyAlarmManager, Context>(::MyAlarmManager)
 
     fun createNextAlarm(whenToTriggerSecs: Int) {
         removeAlarm()

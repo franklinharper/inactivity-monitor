@@ -4,14 +4,13 @@ import com.squareup.sqldelight.Query
 import java.time.LocalDate
 import java.time.ZoneId
 
-class ActivityRepository private constructor(ActivityDb: ActivityDb) {
-
+class ActivityRepository(
+    activityDb: ActivityDb = app().activityDb
+) {
     private val TIMEOUT = 30 * 60 // 30 minutes
 
     private val zoneId = ZoneId.systemDefault()
-    private var queries = ActivityDb.queries
-
-    companion object : SingletonHolder<ActivityRepository, ActivityDb>(::ActivityRepository)
+    private var queries = activityDb.queries
 
     fun selectLatestActivity() = queries.selectLatest()
 

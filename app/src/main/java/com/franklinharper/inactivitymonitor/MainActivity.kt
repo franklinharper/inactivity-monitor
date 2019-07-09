@@ -22,41 +22,44 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-//TODO dependency injection
-//TODO unit tests & refactor code into testable components
-//TODO Handle case where the phone is turned off for a while (schedule alarm on boot)
-//TODO Add ability to snooze Move It reminders
-//TODO make MainActivity reactive.
-//TODO optimize AlarmManager usage, by scheduling alarms only when necessary
-//TODO sync to cloud backend
-//TODO vibrate on the watch
-//TODO detect activity transitions on the watch
+// TODO display notification with current Activity, and time
+// TODO Add unit tests & refactor code into testable components
+// TODO optimize AlarmManager usage, by scheduling alarms only when necessary
+// TODO Handle case where the phone is turned off for a while (schedule alarm on boot)
+// TODO Add ability to snooze Move It reminders
+// TODO make MainActivity reactive.
+// TODO sync to cloud backend
+// TODO vibrate on the watch
+// TODO detect activity transitions on the watch
+
+// ===================================================
+// DONE decouple logic components from UI components
 
 class MainActivity : AppCompatActivity() {
 
+  // We can't inject dependencies through the constructor
+  // because this class is instantiated by the Android OS.
+  //
+  // So we fall back to injecting dependencies directly into the fields.
+  private val activityRepository = app().activityRepository
+  private val myNotificationManager = app().myNotificationManager
+  private val myAlarmManager = app().myAlarmManager
+  private val myVibrationManager = app().vibrationManager
+
   @Suppress("SpellCheckingInspection")
   private val todaysLog = StringBuilder()
-
-  private val db = ActivityDb.from(this)
-  private val activityRepository = ActivityRepository.from(db)
-
-  // Late initialization is necessary because System services are not available to Activities before onCreate()
-  private lateinit var myNotificationManager: MyNotificationManager
-
   private val zoneId = ZoneId.systemDefault()
   private val timeFormatter = DateTimeFormatter.ofPattern("kk:mm:ss").withZone(zoneId)
-
   private val compositeDisposable = CompositeDisposable()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
-    myNotificationManager = MyNotificationManager.from(this)
-    // Schedule a wake up call. Subsequent wake up calls are scheduled when Transition events are processed.
-    MyAlarmManager.from(this).also { it.createNextAlarm(30) }
     setSupportActionBar(findViewById(R.id.my_toolbar))
     initializeBottomNavView()
     initializeActivityDetection()
+    // Schedule a wake up call. Subsequent wake up calls are scheduled when Transition events are processed.
+    myAlarmManager.createNextAlarm(30)
   }
 
   override fun onResume() {
@@ -76,17 +79,16 @@ class MainActivity : AppCompatActivity() {
 
   override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
     R.id.action_vibrate -> {
-      VibrationManager.from(this).vibrate(2500)
+      myVibrationManager.vibrate(2500)
       true
     }
 
     R.id.action_notify -> {
-      MyNotificationManager.from(this).sendNotification("Notification title", "text")
+     myNotificationManager.sendMoveNotification(ActivityType.STILL, 0.0)
       true
     }
 
     R.id.action_settings -> {
-      // User chose the "Settings" item, show the app settings UI...
       Toast.makeText(applicationContext, "Not implemented", Toast.LENGTH_SHORT).apply {
         setGravity(Gravity.TOP or Gravity.END, 0, 200)
         show()
