@@ -46,30 +46,33 @@ class MyNotificationManager(private val context: Context) {
   }
 
   fun sendMoveNotification(type: ActivityType, minutes: Double) {
-    sendNotification(
-      context.getString(R.string.notification_time_to_move_title),
-      context.getString(R.string.notification_time_to_move_text, type, minutes)
-    )
+    val builder = defaultNotificationBuilder()
+    builder
+      .setContentTitle(context.getString(R.string.notification_time_to_move_title))
+      .setContentText(context.getString(R.string.notification_time_to_move_text, type, minutes))
+      .setCategory(NotificationCompat.CATEGORY_REMINDER)
+      .setVibrate(longArrayOf(1000, 1000, 1000, 1000, 1000))
+    notificationManager.notify(NOTIFICATION_ID, builder.build())
   }
 
-  private fun sendNotification(title: String, text: String) {
+  fun sendCurrentActivityNotification(type: ActivityType, minutes: Double) {
+    val builder = defaultNotificationBuilder()
+    builder
+      .setContentTitle(context.getString(R.string.notification_current_activity_title))
+      .setContentText(context.getString(R.string.notification_current_activity_text, type, minutes))
+      .setCategory(NotificationCompat.CATEGORY_STATUS)
+    notificationManager.notify(NOTIFICATION_ID, builder.build())
+  }
+
+  private fun defaultNotificationBuilder(): NotificationCompat.Builder {
     val intent = Intent(context, MainActivity::class.java)
-      .apply {
-        //            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-      }
     val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
-    val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+    return NotificationCompat.Builder(context, CHANNEL_ID)
       .setContentIntent(pendingIntent)
       .setSmallIcon(R.drawable.ic_notifications_black_24dp)
-      .setContentTitle(title)
-      .setContentText(text)
-      .setPriority(NotificationCompat.PRIORITY_MAX)
-      .setCategory(NotificationCompat.CATEGORY_REMINDER)
+      .setPriority(NotificationCompat.PRIORITY_HIGH)
       .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
       .setAutoCancel(true)
-      .setVibrate(longArrayOf(1000, 1000, 1000, 1000, 1000))
-
-    notificationManager.notify(NOTIFICATION_ID, builder.build())
   }
 
 }

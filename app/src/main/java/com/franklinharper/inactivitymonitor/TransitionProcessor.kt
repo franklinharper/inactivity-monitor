@@ -20,7 +20,7 @@ class TransitionProcessor(
     logDebugInfo(intent)
     storeIntentDataInDb(intent)
     scheduleNextWakeupAlarm()
-    remindToMoveWhenAppropriate()
+    informUserIfNotDnd()
   }
 
   private fun logDebugInfo(intent: Intent?) {
@@ -67,27 +67,33 @@ class TransitionProcessor(
 //        }
   }
 
-  private fun remindUserToMove(activity: UserActivity) {
-    Timber.d("Reminding user to move")
-    myNotificationManager.sendMoveNotification(activity.type, activity.secsSinceStart() / 60.0)
-    vibrationManager.vibrate(3000)
-  }
-
-  private fun remindToMoveWhenAppropriate() {
+  // When Do Not Disturb is On: don't show notifications
+  private fun informUserIfNotDnd() {
     activityRepository
       .selectLatestActivity()
       .executeAsOneOrNull()?.let {
+        val dndOff = myNotificationManager.doNotDisturbOff
         val remindToMove =
           it.type == ActivityType.STILL // TODO Decide how to handle ActivityType.IN_VEHICLE? The same as being STILL?
             && it.secsSinceStart() > STILL_TIME_LIMIT_SECS
-            && myNotificationManager.doNotDisturbOff
-        if (remindToMove) {
-          remindUserToMove(it)
-        } else {
-          myNotificationManager.cancelNotification()
+            && dndOff
+        when {
+          remindToMove -> remindUserToMove(it)
+          dndOff -> notifyCurrentActivityAndDuration(it)
+          else -> myNotificationManager.cancelNotification()
         }
       }
   }
 
+  private fun notifyCurrentActivityAndDuration(activity: UserActivity) {
+    Timber.d("Update current userActivity notification")
+    myNotificationManager.sendCurrentActivityNotification(activity.type, activity.secsSinceStart() / 60.0)
+  }
+
+  private fun remindUserToMove(activity: UserActivity) {
+    Timber.d("Remind user to move")
+    myNotificationManager.sendMoveNotification(activity.type, activity.secsSinceStart() / 60.0)
+    vibrationManager.vibrate(3000)
+  }
 }
 

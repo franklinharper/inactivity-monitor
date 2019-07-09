@@ -13,6 +13,10 @@
   <string name="main_activity_current_status">\nCurrent status\n\n    %1$s for %2$.2f minutes."</string>
   <string name="main_activity_do_not_disturb_on">\n\n<b>Do Not Disturb is ON.</b>\n\nYou will NOT receive reminders to move.</string>
   <string name="main_activity_do_not_disturb_off">\n\nDo Not Disturb mode is <b>OFF</b>.</string>
+
+  <!-- Notifications -->
   <string name="notification_time_to_move_title">Time to move!</string>
   <string name="notification_time_to_move_text">%1$s for %2$.2f minutes</string>
+  <string name="notification_current_activity_title">Current activity</string>
+  <string name="notification_current_activity_text">%1$s for %2$.2f minutes</string>
 </resources>

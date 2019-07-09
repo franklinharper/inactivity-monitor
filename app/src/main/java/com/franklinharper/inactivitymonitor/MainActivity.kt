@@ -22,7 +22,6 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-// TODO display notification with current Activity, and time
 // TODO Add unit tests & refactor code into testable components
 // TODO optimize AlarmManager usage, by scheduling alarms only when necessary
 // TODO Handle case where the phone is turned off for a while (schedule alarm on boot)
@@ -33,6 +32,7 @@ import java.time.format.DateTimeFormatter
 // TODO detect activity transitions on the watch
 
 // ===================================================
+// DONE display notification with current Activity, and time
 // DONE decouple logic components from UI components
 
 class MainActivity : AppCompatActivity() {
