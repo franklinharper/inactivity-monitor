@@ -3,8 +3,6 @@
   <string name="title_activity_log">Log</string>
   <string name="title_dashboard">Dashboard</string>
   <string name="title_notifications">Notifications</string>
-  <string name="channel_name">Time to move</string>
-  <string name="channel_description">Tells you when to move</string>
   <string name="action_vibrate">Test vibration</string>
   <string name="action_notify">Test notification</string>
   <string name="action_settings">Settings</string>
@@ -15,8 +13,12 @@
   <string name="main_activity_do_not_disturb_off">\n\nDo Not Disturb mode is <b>OFF</b>.</string>
 
   <!-- Notifications -->
+  <string name="notification_move_channel_name">Reminders to move</string>
+  <string name="notification_move_channel_description">Reminds you to move when you\'ve been still for too long</string>
+  <string name="notification_status_channel_name">Current activity</string>
+  <string name="notification_status_channel_description">Shows what your activity currently is</string>
   <string name="notification_time_to_move_title">Time to move!</string>
   <string name="notification_time_to_move_text">%1$s for %2$.2f minutes</string>
   <string name="notification_current_activity_title">Current activity</string>
-  <string name="notification_current_activity_text">%1$s for %2$.2f minutes</string>
+  <string name="notification_current_activity_text">%1$s</string>
 </resources>
