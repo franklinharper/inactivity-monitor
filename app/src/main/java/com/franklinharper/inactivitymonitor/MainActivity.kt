@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter
 
 // TODO Add unit tests & refactor code into testable components
 // TODO optimize AlarmManager usage, by scheduling alarms only when necessary
-// TODO Handle case where the phone is turned off for a while (schedule alarm on boot)
+// TODO Handle case where the phone is turned off for a while by receiving shutdown broadcasts, and insert a row into the DB. See https://www.google.com/search?client=firefox-b-1-d&q=android+receive+broadcast+when+shutdown
 // TODO Add ability to snooze Move It reminders
 // TODO make MainActivity reactive.
 // TODO sync to cloud backend

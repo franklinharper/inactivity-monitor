@@ -12,7 +12,7 @@ class TransitionProcessor(
 ) {
 
   companion object {
-    private const val ALARM_INTERVAL = 30
+    const val ALARM_INTERVAL = 30
     private const val STILL_TIME_LIMIT_SECS = 30 * 60 // 30 minutes
   }
 
