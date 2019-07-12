@@ -3,6 +3,8 @@ package com.franklinharper.inactivitymonitor
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.google.android.gms.location.ActivityTransitionResult
+import timber.log.Timber
 
 class ActivityTransitionReceiver : BroadcastReceiver() {
 
@@ -12,7 +14,17 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
   private val transitionProcessor = app().transitionProcessor
 
   override fun onReceive(context: Context, intent: Intent?) {
-    transitionProcessor.receiveTransition(intent)
+    logDebugInfo(intent)
+    val transitionResult = ActivityTransitionResult.extractResult(intent)
+    transitionProcessor.receiveTransition(transitionResult)
+  }
+
+  private fun logDebugInfo(intent: Intent?) {
+    Timber.d("intent = $intent")
+    val bundle = intent?.extras
+    bundle?.keySet()?.forEach { key ->
+      Timber.d("extra $key: ${bundle[key]}")
+    }
   }
 }
 
