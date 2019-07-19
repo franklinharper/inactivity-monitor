@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
   private val activityRepository = app().activityRepository
   private val myNotificationManager = app().myNotificationManager
   private val myAlarmManager = app().myAlarmManager
-  private val myVibrationManager = app().vibrationManager
+  private val myVibrationManager = app().myVibrationManager
 
   @Suppress("SpellCheckingInspection")
   private val todaysLog = StringBuilder()
@@ -150,7 +150,7 @@ class MainActivity : AppCompatActivity() {
 
   private fun updateDashboard() {
     val contents = SpannableStringBuilder()
-    val latestActivity = activityRepository.selectLatestActivity().executeAsOneOrNull()
+    val latestActivity = activityRepository.selectLatestActivity()
     if (latestActivity == null) {
       contents.append(getString(R.string.main_activity_no_activies_detectd))
     } else {

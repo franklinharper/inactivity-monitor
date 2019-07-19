@@ -7,7 +7,7 @@ fun app() = AppComponent.instance
 interface AppComponent {
   val transitionProcessor: TransitionProcessor
   val myNotificationManager: MyNotificationManager
-  val vibrationManager: VibrationManager
+  val myVibrationManager: MyVibrationManager
   val activityRepository: ActivityRepository
   val activityDb: ActivityDb
   val myAlarmManager: MyAlarmManager
@@ -20,7 +20,7 @@ interface AppComponent {
 class AppModule(application: Context) : AppComponent {
   override val myAlarmManager = MyAlarmManager(application)
   override val myNotificationManager = MyNotificationManager(application)
-  override val vibrationManager = VibrationManager(application)
+  override val myVibrationManager = MyVibrationManager(application)
   override val activityDb = ActivityDb(application)
   override val activityRepository = ActivityRepository(activityDb)
   // We can't use default arguments to provide the dependencies,
@@ -28,7 +28,7 @@ class AppModule(application: Context) : AppComponent {
   override val transitionProcessor = TransitionProcessor(
     activityRepository = activityRepository,
     myAlarmManager = myAlarmManager,
-    vibrationManager = vibrationManager,
+    myVibrationManager = myVibrationManager,
     myNotificationManager = myNotificationManager
   )
 }

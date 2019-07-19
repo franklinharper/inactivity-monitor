@@ -10,7 +10,7 @@ class ActivityRepository(activityDb: ActivityDb = app().activityDb) {
   private val zoneId = ZoneId.systemDefault()
   private var queries = activityDb.queries
 
-  fun selectLatestActivity() = queries.selectLatest()
+  fun selectLatestActivity(): UserActivity? = queries.selectLatest().executeAsOneOrNull()
 
   fun todaysActivities(): Query<UserActivity> {
     val todayMidnight = LocalDate.now().atStartOfDay(zoneId)
