@@ -126,7 +126,7 @@ internal class ReceiveTransitionTest {
 
     // Assert
     verify(exactly = 1) {
-      emptyRepository.insert(ActivityType.STILL, DetectedActivity.STILL)
+      emptyRepository.insert(ActivityType.STILL, TransitionType.fromInt(DetectedActivity.STILL))
       myAlarmManager.createNextAlarm(TransitionProcessor.ALARM_INTERVAL)
       myVibrationManager.vibrate(TransitionProcessor.INFORMATION_VIBRATION_LENGTH)
       myNotificationManager.sendCurrentActivityNotification(ActivityType.STILL)
@@ -147,7 +147,7 @@ internal class ReceiveTransitionTest {
 
   private fun createActivityRepository(latestActivity:UserActivity?): ActivityRepository {
     return mockk<ActivityRepository>().apply {
-      every { selectLatestActivity() } returns latestActivity
+      every { selectLatestActivity(0) } returns latestActivity
       every { insert(any(), any()) } just Runs
     }
   }

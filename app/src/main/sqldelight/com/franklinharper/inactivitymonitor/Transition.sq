@@ -1,0 +1,70 @@
+import com.franklinharper.inactivitymonitor.ActivityType;
+import com.franklinharper.inactivitymonitor.TransitionType;
+
+CREATE TABLE transition (
+  id INTEGER PRIMARY KEY,
+  -- ActivityType enum: e.g. STILL, WALKING, etc.
+  activity_type TEXT AS ActivityType NOT NULL,
+  -- transition type Int value as received from Google's ActivityRecognition API
+  transition_type TEXT AS TransitionType NOT NULL,
+
+  -- The unix Epoch timestamp. See https://en.wikipedia.org/wiki/Unix_time
+  time INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+    --
+    --- time is NOT used to ensure a strict ordering of transitions, the "id" is used for that purpose.
+    --
+    -- In certain edge-cases the "time" values may not monotonically increase
+    --
+    -- For example:
+    --   * the system admin changes the system clock
+    --   * there is a configuration error
+    --
+    -- In this case, these edge-cases can safely be ignored because they would NOT affect the ordering of transitions
+    -- which is ensured by the "id".
+);
+
+CREATE INDEX transition_time ON transition(time);
+
+selectAll:
+SELECT *
+FROM transition;
+
+selectLatest:
+SELECT *
+FROM transition
+ORDER BY id DESC LIMIT 1;
+
+selectRange:
+SELECT *
+FROM transition
+WHERE time >= :startInclusive
+      AND time < :endExclusive
+ORDER BY id DESC;
+
+selectStarting:
+SELECT *
+FROM transition
+WHERE time >= :startInclusive
+ORDER BY id DESC;
+
+insert:
+-- The values for id and start columns are set by SQLite using default values, so that when a row is inserted:
+--
+--   * Id is an integer that is one larger than the largest rowid in the table, or 1 when the table is empty
+--   * Start is the current unix Epoch time
+--
+INSERT INTO transition(activity_type, transition_type)
+VALUES (?, ?);
+
+-- The LAG function could be used for calculating Activity durations in SQL
+--  LAG (activity_type, 1) OVER (ORDER BY timestamp) previous_timestamp
+-- transitionsForCurrentActivity:
+-- SELECT
+--   timestamp
+--   , activity_type
+--   , transition_type
+--   , LAG (activity_type) AS previous_timestamp
+-- FROM userActivityTransition
+-- WHERE activity_type = previous_timestamp
+-- ORDER BY timestamp DESC;
+

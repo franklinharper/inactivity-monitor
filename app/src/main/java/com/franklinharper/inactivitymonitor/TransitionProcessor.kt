@@ -2,6 +2,7 @@ package com.franklinharper.inactivitymonitor
 
 import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionResult
+import java.time.Instant
 
 class TransitionProcessor(
   private val activityRepository: ActivityRepository = app().activityRepository,
@@ -18,7 +19,7 @@ class TransitionProcessor(
   }
 
   fun receiveTransition(transitionResult: ActivityTransitionResult?) {
-    val latestActivity = activityRepository.selectLatestActivity()
+    val latestActivity = activityRepository.selectLatestActivity(Instant.now().epochSecond)
     if (transitionResult != null) {
       processTransitions(transitionResult, latestActivity)
     }
@@ -46,17 +47,15 @@ class TransitionProcessor(
     transitionResult: ActivityTransitionResult,
     latestActivity: UserActivity?
   ) {
-    var previousTransitionType = latestActivity?.transition_activity_type
+    var previousType = latestActivity?.type
     for (transition in transitionResult.transitionEvents) {
-      val newType = transition.activityType
-      val newTransition = transition.transitionType
-      if (newType != previousTransitionType && newTransition == ActivityTransition.ACTIVITY_TRANSITION_ENTER) {
-        val activityType = ActivityType.fromInt(newType)
+      val newType = ActivityType.from(transition.activityType)
+      if (newType != previousType &&  transition.transitionType == ActivityTransition.ACTIVITY_TRANSITION_ENTER) {
         if (myNotificationManager.doNotDisturbOff) {
-          informUserOfNewActivity(activityType)
+          informUserOfNewActivity(newType)
         }
-        activityRepository.insert(activityType, transition.activityType)
-        previousTransitionType = newType
+        activityRepository.insert(newType, TransitionType.fromInt(transition.transitionType))
+        previousType = newType
       }
     }
   }
@@ -79,10 +78,10 @@ class TransitionProcessor(
 
   private fun userIsStillForTooLong(latestActivity: UserActivity): Boolean =
 // TODO Decide how to handle ActivityType.IN_VEHICLE? Is it the same as being STILL?
-    latestActivity.type == ActivityType.STILL && latestActivity.secsSinceStart() > STILL_TIME_LIMIT_SECS
+    latestActivity.type == ActivityType.STILL && latestActivity.duration > STILL_TIME_LIMIT_SECS
 
   private fun remindUserToMove(activity: UserActivity) {
-    myNotificationManager.sendMoveNotification(activity.type, activity.secsSinceStart() / 60.0)
+    myNotificationManager.sendMoveNotification(activity.type, activity.duration / 60.0)
     myVibrationManager.vibrate(MOVEMENT_REQUIRED_VIBRATION_LENGTH)
   }
 }

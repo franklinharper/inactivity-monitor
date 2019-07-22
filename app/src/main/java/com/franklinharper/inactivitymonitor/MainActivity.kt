@@ -22,16 +22,17 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-// TODO Add unit tests & refactor code into testable components
+// TODO Simplify viewing the Activity log by Ignoring short moments of STILLness
+// TODO sync to cloud backend
 // TODO optimize AlarmManager usage, by scheduling alarms only when necessary
 // TODO Handle case where the phone is turned off for a while by receiving shutdown broadcasts, and insert a row into the DB. See https://www.google.com/search?client=firefox-b-1-d&q=android+receive+broadcast+when+shutdown
 // TODO Add ability to snooze Move It reminders
 // TODO make MainActivity reactive.
-// TODO sync to cloud backend
 // TODO vibrate on the watch
 // TODO detect activity transitions on the watch
 
 // ===================================================
+// DONE Add first unit tests
 // DONE display notification with current Activity, and time
 // DONE decouple logic components from UI components
 
@@ -150,11 +151,11 @@ class MainActivity : AppCompatActivity() {
 
   private fun updateDashboard() {
     val contents = SpannableStringBuilder()
-    val latestActivity = activityRepository.selectLatestActivity()
+    val latestActivity = activityRepository.selectLatestActivity(end = Instant.now().epochSecond)
     if (latestActivity == null) {
       contents.append(getString(R.string.main_activity_no_activies_detectd))
     } else {
-      val minutes = latestActivity.secsSinceStart() / 60.0
+      val minutes = latestActivity.duration / 60.0
       contents.append(getString(R.string.main_activity_current_status, latestActivity.type, minutes))
     }
     val dndStatus = if (myNotificationManager.doNotDisturbOn)
@@ -180,15 +181,12 @@ class MainActivity : AppCompatActivity() {
     val nowSecs = System.currentTimeMillis() / 1000
     todaysLog.append("Updated ${timeFormatter.format(Instant.ofEpochSecond(nowSecs))}\n\n")
 
-    var currentEnd = nowSecs
-    activityRepository.todaysActivities()
-      .executeAsList()
+    activityRepository.todaysActivities(stillnessThreshold = 30)
       // Go backwards in time displaying the duration of each successive activity
       .forEach { activity ->
         val timestamp = timeFormatter.format(Instant.ofEpochSecond(activity.start))
-        val minutes = "%.2f".format(activity.secsSinceStart(end = currentEnd) / 60.0)
+        val minutes = "%.2f".format(activity.duration / 60.0)
         todaysLog.append("$timestamp => ${activity.type} $minutes minutes\n")
-        currentEnd = activity.start
       }
   }
 
