@@ -39,7 +39,7 @@ SELECT *
 FROM transition
 WHERE time >= :startInclusive
       AND time < :endExclusive
-ORDER BY id DESC;
+ORDER BY time ASC;
 
 selectStarting:
 SELECT *

@@ -8,11 +8,6 @@ import org.junit.jupiter.api.Test
 
 class ActivityRepositoryFilterShortStillActivities {
 
-  // TODO write a parameterized test that has
-  //   input: List<Transition>
-  //   expected output: List<UserActivity>
-  //   See https://blog.codefx.org/libraries/junit-5-parameterized-tests/ for implementation details
-
   @Test
   fun `Given an empty list, then the result is an empty list`() {
 
@@ -87,7 +82,7 @@ class ActivityRepositoryFilterShortStillActivities {
 
     // Assert
     val expected = listOf(
-      UserActivity(WALKING, start = 0, duration = 120)
+      UserActivity(WALKING, start = 59, duration = 61)
     )
     assertEquals(expected, actual)
   }
@@ -102,17 +97,15 @@ class ActivityRepositoryFilterShortStillActivities {
       now = 120,
       shortLimit = 60,
       transitions = listOf(
-        // The Transitions must be sorted by "id" in ascending order.
-        // Except for extreme edge cases, the transition "time" is monotonically ascending
-        Transition.Impl(id = 1, time = 0, activity_type = STILL, transition_type = ENTER),
-        Transition.Impl(id = 2, time = 59, activity_type = WALKING, transition_type = ENTER),
-        Transition.Impl(id = 3, time = 118, activity_type = STILL, transition_type = ENTER)
+        Transition.Impl(time = 0, activity_type = STILL, transition_type = ENTER, id = 1),
+        Transition.Impl(time = 59, activity_type = WALKING, transition_type = ENTER, id = 2),
+        Transition.Impl(time = 118, activity_type = STILL, transition_type = ENTER, id = 3)
       )
     )
 
     // Assert
     val expected = listOf(
-      UserActivity(WALKING, start = 0, duration = 120)
+      UserActivity(WALKING, start = 59, duration = 61)
     )
 
     assertEquals(expected, result)
@@ -128,17 +121,15 @@ class ActivityRepositoryFilterShortStillActivities {
       now = 62,
       shortLimit = 60,
       transitions = listOf(
-        // The Transitions must be sorted by "id" in ascending order.
-        // Except for extreme edge cases, the transition "time" is monotonically ascending
-        Transition.Impl(id = 1, time = 0, activity_type = STILL, transition_type = ENTER),
-        Transition.Impl(id = 2, time = 1, activity_type = WALKING, transition_type = ENTER),
-        Transition.Impl(id = 3, time = 2, activity_type = STILL, transition_type = ENTER)
+        Transition.Impl(time = 0, activity_type = STILL, transition_type = ENTER, id = 1),
+        Transition.Impl(time = 1, activity_type = WALKING, transition_type = ENTER, id = 2),
+        Transition.Impl(time = 2, activity_type = STILL, transition_type = ENTER, id = 3)
       )
     )
 
     // Assert
     val expected = listOf(
-      UserActivity(WALKING, start = 0, duration = 2),
+      UserActivity(WALKING, start = 1, duration = 1),
       UserActivity(STILL, start = 2, duration = 60)
     )
 

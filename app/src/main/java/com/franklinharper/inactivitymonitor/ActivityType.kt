@@ -7,11 +7,13 @@ enum class ActivityType {
 
   IN_VEHICLE,
   ON_BICYCLE,
-  ON_FOOT,
+  ON_FOOT, // The device is on a user who is walking or running.
   STILL,
-  WALKING,
-  RUNNING,
-  OTHER;
+  WALKING, // The device is on a user who is walking.
+  RUNNING, // The device is on a user who is running.
+  OTHER,
+  // The SENTINEL value is used to indicate the time at which the end of an Activity occurred.
+  SENTINEL;
 
   companion object {
     // Map the Int provided by the Google API to an enum which is under our control

@@ -48,7 +48,6 @@ class MainActivity : AppCompatActivity() {
   private val myVibrationManager = app().myVibrationManager
 
   @Suppress("SpellCheckingInspection")
-  private val todaysLog = StringBuilder()
   private val zoneId = ZoneId.systemDefault()
   private val timeFormatter = DateTimeFormatter.ofPattern("kk:mm:ss").withZone(zoneId)
   private val compositeDisposable = CompositeDisposable()
@@ -85,7 +84,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     R.id.action_notify -> {
-     myNotificationManager.sendMoveNotification(ActivityType.STILL, 0.0)
+      myNotificationManager.sendMoveNotification(ActivityType.STILL, 0.0)
       true
     }
 
@@ -168,26 +167,24 @@ class MainActivity : AppCompatActivity() {
   }
 
   private fun updateLog() {
-    calculateTodaysActivities()
+    val todaysLog = StringBuilder()
+    val nowSecs = System.currentTimeMillis() / 1000
+    todaysLog.append("Updated ${timeFormatter.format(Instant.ofEpochSecond(nowSecs))}\n\n")
+
+    activityRepository
+      .todaysActivities(stillnessThreshold = 60)
+      .reversed()
+      .forEach { activity ->
+        // Go backwards in time displaying the duration of each successive activity
+        val timestamp = timeFormatter.format(Instant.ofEpochSecond(activity.start))
+        val minutes = "%.2f".format(activity.duration / 60.0)
+        todaysLog.append("$timestamp => ${activity.type} $minutes minutes\n")
+      }
     message.text = todaysLog.toString()
   }
 
   private fun updateNotifications() {
     message.text = getString(R.string.main_activity_not_yet_implemented)
-  }
-
-  private fun calculateTodaysActivities() {
-    todaysLog.clear()
-    val nowSecs = System.currentTimeMillis() / 1000
-    todaysLog.append("Updated ${timeFormatter.format(Instant.ofEpochSecond(nowSecs))}\n\n")
-
-    activityRepository.todaysActivities(stillnessThreshold = 30)
-      // Go backwards in time displaying the duration of each successive activity
-      .forEach { activity ->
-        val timestamp = timeFormatter.format(Instant.ofEpochSecond(activity.start))
-        val minutes = "%.2f".format(activity.duration / 60.0)
-        todaysLog.append("$timestamp => ${activity.type} $minutes minutes\n")
-      }
   }
 
   private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
