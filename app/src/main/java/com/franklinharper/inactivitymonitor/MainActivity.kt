@@ -22,16 +22,16 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-// TODO Simplify viewing the Activity log by Ignoring short moments of STILLness
 // TODO sync to cloud backend
 // TODO optimize AlarmManager usage, by scheduling alarms only when necessary
 // TODO Handle case where the phone is turned off for a while by receiving shutdown broadcasts, and insert a row into the DB. See https://www.google.com/search?client=firefox-b-1-d&q=android+receive+broadcast+when+shutdown
-// TODO Add ability to snooze Move It reminders
+// TODO Add ability to turn off  Move It reminders for period of time
 // TODO make MainActivity reactive.
 // TODO vibrate on the watch
 // TODO detect activity transitions on the watch
 
 // ===================================================
+// DONE Declutter the Activity log by ignoring short periods of STILLness
 // DONE Add first unit tests
 // DONE display notification with current Activity, and time
 // DONE decouple logic components from UI components

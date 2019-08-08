@@ -23,7 +23,6 @@ fun Application.main() {
 
   // Registers routes
   routing {
-    get()
     // Here we use a DSL for building HTML on the route "/"
     // @see https://github.com/Kotlin/kotlinx.html
     get("/") {
