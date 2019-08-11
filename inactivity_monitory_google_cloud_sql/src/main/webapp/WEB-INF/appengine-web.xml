@@ -5,5 +5,13 @@
     <system-properties>
         <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
     </system-properties>
+    <env-variables>
+        <env-var name="DEFAULT_ENCODING" value="UTF-8" />
+        <env-var name="GOOGLE_APPLICATION_CREDENTIALS" value="********" />
+        <env-var name="CLOUD_SQL_CONNECTION_NAME" value="********" />
+        <env-var name="DB_USER" value="********" />
+        <env-var name="DB_NAME" value="********" />
+        <env-var name="DB_PASS" value="********" />
+    </env-variables>
 </appengine-web-app>
 
