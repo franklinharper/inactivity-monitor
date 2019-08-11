@@ -55,11 +55,11 @@ fun Application.main() {
 
   routing {
 //    Next steps:
-//    1) create a POST route for adding Transitions
-//    2) decode parameters into a kotlin data class
 //    3) store Transition in a DB (Postgres SQL + JDBI?)
 //    4) Connect to backend in client app
 //    5) On client upload Transitions from local DB to the backend
+    // 6) Set up Private IP: https://cloud.google.com/sql/docs/postgres/private-ip
+    // 7) Set up authentication on the REST api
     post("/transition") {
       val transition = call.receive<Transition>()
       call.respondHtml {
