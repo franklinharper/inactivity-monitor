@@ -7,8 +7,13 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.squareup.sqldelight'
 
 repositories {
-    google()
-    mavenCentral()
+    // This is where we define repositories specific to this project
+
+    // JCenter and Bintray are not trustworthy artifact hosts.
+    // Ideally we would fetch nothing from them!
+    // But firebase-ui-auth is only available through JCenter :( !
+    // For more details on why this is a security risk see: https://blog.autsoft.hu/a-confusing-dependency/
+    jcenter()
 }
 
 android {
@@ -55,11 +60,8 @@ dependencies {
 
     // Firebase SDKs
     implementation 'com.google.firebase:firebase-analytics:17.0.1'
-    implementation 'com.firebaseui:firebase-ui-auth:4.3.1'
-
-//    implementation 'com.google.firebase:firebase-auth:18.1.0'
-//    implementation 'com.google.firebase:firebase-firestore:20.2.0'
-    // See maven.google.com for the latest versions
+    implementation 'com.google.firebase:firebase-auth:18.1.0'
+    implementation 'com.firebaseui:firebase-ui-auth:5.0.0'
     implementation 'com.google.firebase:firebase-firestore-ktx:20.2.0'
 
     // ==============================================================

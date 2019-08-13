@@ -417,8 +417,8 @@ class ActivityRepositoryTest {
     }
   }
 
-  private fun createRepository(init: ((activityDb: ActivityDb) -> Unit)?): ActivityRepository {
-    val db = mockk<ActivityDb>().also {
+  private fun createRepository(init: ((activityDb: LocalDb) -> Unit)?): ActivityRepository {
+    val db = mockk<LocalDb>().also {
       val queries = mockk<TransitionQueries>()
 
       // Configure standard mock behaviors

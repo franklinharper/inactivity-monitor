@@ -24,10 +24,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        // JCenter and Bintray are not trustworthy artifact hosts.
-        // Ideally we fetch nothing from them!
-        // jcenter()
-        // For more details see: https://blog.autsoft.hu/a-confusing-dependency/
     }
 }
 

@@ -2,6 +2,12 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
   <item
+      android:id="@+id/action_sync_to_cloud"
+      android:title="@string/action_sync_to_cloud"
+      app:showAsAction="never"
+      />
+
+  <item
       android:id="@+id/action_vibrate"
       android:title="@string/action_vibrate"
       app:showAsAction="never"

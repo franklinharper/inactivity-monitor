@@ -31,13 +31,14 @@ data class UserActivity(
 
 }
 
-class ActivityRepository(activityDb: ActivityDb = app().activityDb) {
+class ActivityRepository(
+  val localDb: LocalDb = app().localDb,
+  val cloudDb: MyFirebaseDb
+) {
 
-
-  private var queries = activityDb.queries
 
   fun selectLatestActivity(end: Long): UserActivity? =
-    UserActivity.from(queries.selectLatest().executeAsOneOrNull(), end)
+    UserActivity.from(localDb.queries.selectLatest().executeAsOneOrNull(), end)
 
   fun todaysActivities(
     stillnessThreshold: Long,
@@ -46,7 +47,7 @@ class ActivityRepository(activityDb: ActivityDb = app().activityDb) {
     val todayMidnight = now.startOfDay()
     val tomorrowMidnight = now.plusDays(1).startOfDay()
 
-    val todaysTransitions = queries.selectRange(
+    val todaysTransitions = localDb.queries.selectRange(
       startInclusive = todayMidnight.toEpochSecond(),
       endExclusive = tomorrowMidnight.toEpochSecond()
     )
@@ -56,7 +57,7 @@ class ActivityRepository(activityDb: ActivityDb = app().activityDb) {
 
   fun insert(activityType: ActivityType, transitionType: TransitionType) {
     Timber.d("Db insert: $activityType, $transitionType")
-    queries.insert(activityType, transitionType)
+    localDb.queries.insert(activityType, transitionType)
   }
 
   // For an in depth discussion on calculating the start of a day in local time see:
@@ -65,6 +66,14 @@ class ActivityRepository(activityDb: ActivityDb = app().activityDb) {
   // When the local time changes (e.g. when changing from Summer time to Winter time) there can be 2 midnights!
   // In this case we choose to use the earlier start of the day, and the "day" will be 25 hours long!
   fun ZonedDateTime.startOfDay(): ZonedDateTime = toLocalDate().atStartOfDay(zone)
+
+  fun syncToCloud(time: ZonedDateTime) {
+    // TODO Add a flag to the local DB schema, and use it to track which Activities have already been uploaded
+    // TODO Handle the case where it hasn't been possible to sync for more than 24 hours,
+    //  and more than one day of activites needs to be written.
+    val todaysActivities = todaysActivities(stillnessThreshold = 60)
+    cloudDb.writeDailyActivities(time, todaysActivities)
+  }
 
   companion object {
 
