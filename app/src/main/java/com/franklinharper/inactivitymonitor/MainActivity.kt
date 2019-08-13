@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Bundle
 import android.text.SpannableStringBuilder
+import android.util.Log
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
@@ -15,6 +16,7 @@ import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionRequest
 import com.google.android.gms.location.DetectedActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.firestore.FirebaseFirestore
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
@@ -47,6 +49,8 @@ class MainActivity : AppCompatActivity() {
   private val myAlarmManager = app().myAlarmManager
   private val myVibrationManager = app().myVibrationManager
 
+  val db = FirebaseFirestore.getInstance()
+
   @Suppress("SpellCheckingInspection")
   private val zoneId = ZoneId.systemDefault()
   private val timeFormatter = DateTimeFormatter.ofPattern("kk:mm:ss").withZone(zoneId)
@@ -60,6 +64,34 @@ class MainActivity : AppCompatActivity() {
     initializeActivityDetection()
     // Schedule a wake up call. Subsequent wake up calls are scheduled when Transition events are processed.
     myAlarmManager.createNextAlarm(30)
+
+    // Create a new user with a first and last name
+    val user = hashMapOf(
+      "first" to "Ada",
+      "last" to "Lovelace",
+      "born" to 1815
+    )
+
+// Add a new document with a generated ID
+    db.collection("users")
+      .add(user)
+      .addOnSuccessListener { documentReference ->
+        Timber.d("DocumentSnapshot added with ID: ${documentReference.id}")
+      }
+      .addOnFailureListener { e ->
+        Timber.w(e, "Error adding document")
+      }
+
+    db.collection("users")
+      .get()
+      .addOnSuccessListener { result ->
+        for (document in result) {
+          Timber.d("${document.id} => ${document.data}")
+        }
+      }
+      .addOnFailureListener { exception ->
+        Timber.w(exception, "Error getting documents.")
+      }
   }
 
   override fun onResume() {

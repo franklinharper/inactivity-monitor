@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "352138018335",
+    "firebase_url": "https://inactivitymonitorv4.firebaseio.com",
+    "project_id": "inactivitymonitorv4",
+    "storage_bucket": "inactivitymonitorv4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:352138018335:android:20796e421d29d8a6",
+        "android_client_info": {
+          "package_name": "com.franklinharper.inactivitymonitor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "352138018335-8slc0u97qrf79m5lphmg07i4cslqimf9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.franklinharper.inactivitymonitor",
+            "certificate_hash": "af029d6684ef98c57219bead71402c9c0e912fa9"
+          }
+        },
+        {
+          "client_id": "352138018335-pf6ef1vvsp6l8b48med1tu78dsjkhh6h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBI43ONJEFeTnugE-tNqiHPvpwkQ-RlSBM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "352138018335-pf6ef1vvsp6l8b48med1tu78dsjkhh6h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
