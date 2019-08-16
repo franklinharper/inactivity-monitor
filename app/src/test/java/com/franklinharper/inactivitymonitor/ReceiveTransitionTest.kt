@@ -20,7 +20,7 @@ internal class ReceiveTransitionTest {
   fun `Ignore null input list, and schedule the next alarm`() {
 
     // Arrange
-    val emptyRepository = createActivityRepository(latestActivity = null)
+    val emptyRepository = createEventRepository(latestActivity = null)
     val (
       transitionProcessor,
       myAlarmManager,
@@ -29,7 +29,7 @@ internal class ReceiveTransitionTest {
     ) = createDependencies(emptyRepository)
 
     // Act
-    transitionProcessor.receiveTransition(null)
+    transitionProcessor.processTransitionResult(null)
 
     // Assert
     verify {
@@ -47,7 +47,7 @@ internal class ReceiveTransitionTest {
   fun `Ignore empty input list, and schedule the next alarm`() {
 
     // Arrange
-    val emptyRepository = createActivityRepository(latestActivity = null)
+    val emptyRepository = createEventRepository(latestActivity = null)
     val (
       transitionProcessor,
       myAlarmManager,
@@ -56,7 +56,7 @@ internal class ReceiveTransitionTest {
     ) = createDependencies(emptyRepository)
 
     // Act
-    transitionProcessor.receiveTransition(ActivityTransitionResult(listOf<ActivityTransitionEvent>()))
+    transitionProcessor.processTransitionResult(ActivityTransitionResult(listOf<ActivityTransitionEvent>()))
 
     // Assert
     verify {
@@ -74,7 +74,7 @@ internal class ReceiveTransitionTest {
   fun `Ignore exit transition, and schedule the next alarm`() {
 
     // Arrange
-    val emptyRepository = createActivityRepository(latestActivity = null)
+    val emptyRepository = createEventRepository(latestActivity = null)
     val (
       transitionProcessor,
       myAlarmManager,
@@ -83,7 +83,7 @@ internal class ReceiveTransitionTest {
     ) = createDependencies(emptyRepository)
 
     // Act
-    transitionProcessor.receiveTransition(
+    transitionProcessor.processTransitionResult(
       ActivityTransitionResult(
         listOf(
           ActivityTransitionEvent(DetectedActivity.STILL, ActivityTransition.ACTIVITY_TRANSITION_EXIT, 1)
@@ -104,10 +104,10 @@ internal class ReceiveTransitionTest {
   }
 
   @Test
-  fun `Insert the first ENTER transition, and schedule the next alaram`() {
+  fun `Insert the first ENTER transition, and schedule the next alarm`() {
 
     // Arrange
-    val emptyRepository = createActivityRepository(latestActivity = null)
+    val emptyRepository = createEventRepository(latestActivity = null)
     val (
       transitionProcessor,
       myAlarmManager,
@@ -116,7 +116,7 @@ internal class ReceiveTransitionTest {
     ) = createDependencies(emptyRepository)
 
     // Act
-    transitionProcessor.receiveTransition(
+    transitionProcessor.processTransitionResult(
       ActivityTransitionResult(
         listOf(
           ActivityTransitionEvent(DetectedActivity.STILL, ActivityTransition.ACTIVITY_TRANSITION_ENTER, 1)
@@ -126,17 +126,17 @@ internal class ReceiveTransitionTest {
 
     // Assert
     verify(exactly = 1) {
-      emptyRepository.insert(ActivityType.STILL, TransitionType.fromInt(DetectedActivity.STILL))
+      emptyRepository.insert(EventType.START_STILL, Status.NEW)
       myAlarmManager.createNextAlarm(TransitionProcessor.ALARM_INTERVAL)
       myVibrationManager.vibrate(TransitionProcessor.INFORMATION_VIBRATION_LENGTH)
-      myNotificationManager.sendCurrentActivityNotification(ActivityType.STILL)
+      myNotificationManager.sendCurrentActivityNotification(EventType.START_STILL)
     }
   }
 
   // ============================ Only Utility functions below ============================
 
   private fun createDependencies(
-    activityRepository: ActivityRepository,
+    activityRepository: EventRepository,
     myAlarmManager: MyAlarmManager = myAlarmManager(),
     myVibrationManager: MyVibrationManager = myVibrationManager(),
     myNotificationManager: MyNotificationManager = myNotificationManager()
@@ -145,9 +145,9 @@ internal class ReceiveTransitionTest {
     return Dependencies(tp, myAlarmManager, myVibrationManager, myNotificationManager)
   }
 
-  private fun createActivityRepository(latestActivity:UserActivity?): ActivityRepository {
-    return mockk<ActivityRepository>().apply {
-      every { selectLatestActivity(0) } returns latestActivity
+  private fun createEventRepository(latestActivity:UserActivity?): EventRepository {
+    return mockk<EventRepository>().apply {
+      every { latestActivity(any()) } returns latestActivity
       every { insert(any(), any()) } just Runs
     }
   }

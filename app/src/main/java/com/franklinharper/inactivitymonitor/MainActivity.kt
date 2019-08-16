@@ -22,7 +22,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
 import java.time.Instant
 import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 // WIP sync to cloud backend
@@ -49,7 +48,7 @@ class MainActivity : AppCompatActivity() {
   // because this class is instantiated by the Android OS.
   //
   // So we fall back to injecting dependencies directly into the fields.
-  private val activityRepository = app().activityRepository
+  private val activityRepository = app().eventRepository
   private val myNotificationManager = app().myNotificationManager
   private val myAlarmManager = app().myAlarmManager
   private val myVibrationManager = app().myVibrationManager
@@ -126,7 +125,7 @@ class MainActivity : AppCompatActivity() {
   override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
 
     R.id.action_sync_to_cloud-> {
-      activityRepository.syncToCloud(ZonedDateTime.now())
+      activityRepository.syncToCloud()
       true
     }
     R.id.action_vibrate -> {
@@ -135,7 +134,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     R.id.action_notify -> {
-      myNotificationManager.sendMoveNotification(ActivityType.STILL, 0.0)
+      myNotificationManager.sendMoveNotification(EventType.START_STILL, 0.0)
       true
     }
 
@@ -201,7 +200,7 @@ class MainActivity : AppCompatActivity() {
 
   private fun updateDashboard() {
     val contents = SpannableStringBuilder()
-    val latestActivity = activityRepository.selectLatestActivity(end = Instant.now().epochSecond)
+    val latestActivity = activityRepository.latestActivity(end = Instant.now().epochSecond)
     if (latestActivity == null) {
       contents.append(getString(R.string.main_activity_no_activies_detectd))
     } else {
@@ -227,7 +226,7 @@ class MainActivity : AppCompatActivity() {
       .reversed()
       .forEach { activity ->
         // Go backwards in time displaying the duration of each successive activity
-        val timestamp = timeFormatter.format(Instant.ofEpochSecond(activity.start))
+        val timestamp = timeFormatter.format(activity.start.toZonedDateTime())
         val minutes = "%.2f".format(activity.duration / 60.0)
         todaysLog.append("$timestamp => ${activity.type} $minutes minutes\n")
       }

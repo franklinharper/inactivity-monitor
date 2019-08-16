@@ -59,7 +59,7 @@ class MyNotificationManager(private val context: Context) {
     notificationManager.cancel(NOTIFICATION_ID)
   }
 
-  fun sendMoveNotification(type: ActivityType, minutes: Double) {
+  fun sendMoveNotification(type: EventType, minutes: Double) {
     Timber.d("Move notification: $type, minutes: $minutes")
     val builder = defaultNotificationBuilder(MOVE_CHANNEL_ID)
     builder
@@ -69,7 +69,7 @@ class MyNotificationManager(private val context: Context) {
     notificationManager.notify(NOTIFICATION_ID, builder.build())
   }
 
-  fun sendCurrentActivityNotification(type: ActivityType) {
+  fun sendCurrentActivityNotification(type: EventType) {
     Timber.d("Current Activity notification: $type")
     val builder = defaultNotificationBuilder(STATUS_CHANNEL_ID)
     builder

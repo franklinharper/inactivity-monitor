@@ -2,6 +2,8 @@
   <dictionary name="frank">
     <words>
       <w>firebase</w>
+      <w>firestore</w>
+      <w>schemaless</w>
       <w>todays</w>
     </words>
   </dictionary>

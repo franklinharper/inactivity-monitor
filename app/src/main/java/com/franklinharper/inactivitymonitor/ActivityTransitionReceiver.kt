@@ -16,7 +16,7 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
   override fun onReceive(context: Context, intent: Intent?) {
     logDebugInfo(intent)
     val transitionResult = ActivityTransitionResult.extractResult(intent)
-    transitionProcessor.receiveTransition(transitionResult)
+    transitionProcessor.processTransitionResult(transitionResult)
   }
 
   private fun logDebugInfo(intent: Intent?) {

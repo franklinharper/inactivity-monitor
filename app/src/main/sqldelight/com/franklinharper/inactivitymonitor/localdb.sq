@@ -1,0 +1,64 @@
+import com.franklinharper.inactivitymonitor.EventType;
+import com.franklinharper.inactivitymonitor.Status;
+import com.franklinharper.inactivitymonitor.Timestamp;
+
+CREATE TABLE event (
+  id INTEGER PRIMARY KEY,
+
+  -- ActivityType enum: e.g. STILL, WALKING, etc.
+  type TEXT AS EventType NOT NULL,
+
+  -- Status enum
+  status TEXT AS Status NOT NULL,
+
+  -- The unix Epoch timestamp. See https://en.wikipedia.org/wiki/Unix_time
+  time INTEGER AS Timestamp NOT NULL DEFAULT (strftime('%s','now'))
+    --
+    --- time is NOT used to ensure a strict ordering of transitions, the "id" is used for that purpose.
+    --
+    -- In certain edge-cases the "time" values may not monotonically increase
+    --
+    -- For example:
+    --   * the system admin changes the system clock
+    --   * there is a configuration error
+    --
+    -- In this case, these edge-cases can safely be ignored because they would NOT affect the ordering of transitions
+    -- which is ensured by the "id".
+);
+
+CREATE INDEX event_time ON event(time);
+
+selectAll:
+SELECT *
+FROM event;
+
+selectLatest:
+SELECT *
+FROM event
+ORDER BY id DESC LIMIT 1;
+
+selectRange:
+SELECT *
+FROM event
+WHERE time >= :startInclusive
+      AND time < :endExclusive
+ORDER BY time ASC;
+
+selectStarting:
+SELECT *
+FROM event
+WHERE time >= :startInclusive
+ORDER BY id DESC;
+
+selectByStatus:
+SELECT *
+FROM event
+WHERE status = :status
+ORDER BY id ASC;
+
+insert:
+-- The values for "id" and "time" are set by SQLite using default values, so that when a row is inserted.
+-- See table definition for details.
+INSERT INTO event(type, status)
+VALUES (?, ?);
+

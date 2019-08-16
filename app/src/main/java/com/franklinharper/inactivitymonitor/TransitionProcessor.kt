@@ -5,7 +5,7 @@ import com.google.android.gms.location.ActivityTransitionResult
 import java.time.Instant
 
 class TransitionProcessor(
-  private val activityRepository: ActivityRepository = app().activityRepository,
+  private val eventRepository: EventRepository = app().eventRepository,
   private val myAlarmManager: MyAlarmManager = app().myAlarmManager,
   private val myVibrationManager: MyVibrationManager = app().myVibrationManager,
   private val myNotificationManager: MyNotificationManager = app().myNotificationManager
@@ -18,8 +18,8 @@ class TransitionProcessor(
     private const val STILL_TIME_LIMIT_SECS = 30 * 60 // 30 minutes
   }
 
-  fun receiveTransition(transitionResult: ActivityTransitionResult?) {
-    val latestActivity = activityRepository.selectLatestActivity(Instant.now().epochSecond)
+  fun processTransitionResult(transitionResult: ActivityTransitionResult?) {
+    val latestActivity = eventRepository.latestActivity(Instant.now().epochSecond)
     if (transitionResult != null) {
       processTransitions(transitionResult, latestActivity)
     }
@@ -33,34 +33,35 @@ class TransitionProcessor(
     }
   }
 
-  // A new Activity Transition can be of the same type as the previous Activity Transition.
-  // E.g. over time the data stream could be: ..., STILL, STILL, WALKING, ...
+  // A Transition returned by the DetectedActivity API can be of the same type as the previous Transition.
   //
-  // When successive Activity Types are equal the data is not written to the DB.
-  // Only ENTER transitions are written to the DB (not EXIT).
+  // E.g. over time the stream of Transitions can be: ..., START_STILL, START_STILL, START_WALKING, ...
   //
-  // Deduping the stream in this way allows calculating the duration of an Activity by subtracting
-  // successive start timestamps.
+  // EXIT Transition events are not written to the DB.
   //
-  // If the stream wasn't deduped the same calculation would require looping over multiple rows in the table.
+  // When successive Activity Types are equal the Transition event is not written to the DB.
+  // Deduping the Transition events in this way allows calculating durations by subtracting
+  // successive start times.
+  //
+  // If the Transition events weren't deduped the same calculation would require looping over multiple Transition events.
   private fun processTransitions(
     transitionResult: ActivityTransitionResult,
     latestActivity: UserActivity?
   ) {
     var previousType = latestActivity?.type
     for (transition in transitionResult.transitionEvents) {
-      val newType = ActivityType.from(transition.activityType)
+      val newType = EventType.from(transition.activityType)
       if (newType != previousType &&  transition.transitionType == ActivityTransition.ACTIVITY_TRANSITION_ENTER) {
         if (myNotificationManager.doNotDisturbOff) {
           informUserOfNewActivity(newType)
         }
-        activityRepository.insert(newType, TransitionType.fromInt(transition.transitionType))
+        eventRepository.insert(newType, Status.NEW)
         previousType = newType
       }
     }
   }
 
-  private fun informUserOfNewActivity(activityType: ActivityType) {
+  private fun informUserOfNewActivity(activityType: EventType) {
     myVibrationManager.vibrate(INFORMATION_VIBRATION_LENGTH)
     myNotificationManager.sendCurrentActivityNotification(activityType)
   }
@@ -69,7 +70,7 @@ class TransitionProcessor(
     // TODO wake ourselves up much less often, this brute force approach wastes battery!
     myAlarmManager.createNextAlarm(ALARM_INTERVAL)
 //        val latestActivity = transitionRepository.previous().executeAsOneOrNull()
-//        if (latestActivity?.activity_type == DetectedActivity.STILL) {
+//        if (latestActivity?.activity_type == DetectedActivity.START_STILL) {
 //            myAlarmManager.createNextAlarm(ALARM_INTERVAL)
 //        } else {
 //            myAlarmManager.removeAlarm()
@@ -77,8 +78,8 @@ class TransitionProcessor(
   }
 
   private fun userIsStillForTooLong(latestActivity: UserActivity): Boolean =
-// TODO Decide how to handle ActivityType.IN_VEHICLE? Is it the same as being STILL?
-    latestActivity.type == ActivityType.STILL && latestActivity.duration > STILL_TIME_LIMIT_SECS
+// TODO Decide how to handle ActivityType.START_IN_VEHICLE? Is it the same as being START_STILL?
+    latestActivity.type == EventType.START_STILL && latestActivity.duration > STILL_TIME_LIMIT_SECS
 
   private fun remindUserToMove(activity: UserActivity) {
     myNotificationManager.sendMoveNotification(activity.type, activity.duration / 60.0)
