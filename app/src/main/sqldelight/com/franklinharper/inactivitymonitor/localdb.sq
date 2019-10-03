@@ -62,3 +62,8 @@ insert:
 INSERT INTO event(type, status)
 VALUES (?, ?);
 
+setStatus:
+UPDATE event
+SET status = :status
+WHERE id IN :eventKeys;
+

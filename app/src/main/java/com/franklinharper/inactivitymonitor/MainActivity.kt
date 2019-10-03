@@ -122,35 +122,39 @@ class MainActivity : AppCompatActivity() {
     return true
   }
 
-  override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+  override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
-    R.id.action_sync_to_cloud-> {
-      activityRepository.syncToCloud()
-      true
-    }
-    R.id.action_vibrate -> {
-      myVibrationManager.vibrate(2500)
-      true
-    }
-
-    R.id.action_notify -> {
-      myNotificationManager.sendMoveNotification(EventType.START_STILL, 0.0)
-      true
-    }
-
-    R.id.action_settings -> {
-      Toast.makeText(applicationContext, "Not implemented", Toast.LENGTH_SHORT).apply {
-        setGravity(Gravity.TOP or Gravity.END, 0, 200)
-        show()
+    return when (item.itemId) {
+      R.id.action_record_walking -> {
+        activityRepository.insert(EventType.WALKING_START, Status.NEW)
+        true
       }
-      true
+      R.id.action_sync_to_cloud -> {
+        activityRepository.syncToCloud()
+        true
+      }
+      R.id.action_vibrate -> {
+        myVibrationManager.vibrate(2500)
+        true
+      }
+      R.id.action_notify -> {
+        myNotificationManager.sendMoveNotification(EventType.STILL_START, 0.0)
+        true
+      }
+      R.id.action_settings -> {
+        Toast.makeText(applicationContext, "Not implemented", Toast.LENGTH_SHORT).apply {
+          setGravity(Gravity.TOP or Gravity.END, 0, 200)
+          show()
+        }
+        true
+      }
+      else -> {
+        // If we got here, the user's action was not recognized.
+        // Invoke the superclass to handle it.
+        super.onOptionsItemSelected(item)
+      }
     }
 
-    else -> {
-      // If we got here, the user's action was not recognized.
-      // Invoke the superclass to handle it.
-      super.onOptionsItemSelected(item)
-    }
   }
 
   private fun initializeBottomNavView() =
@@ -159,12 +163,32 @@ class MainActivity : AppCompatActivity() {
   private fun initializeActivityDetection() {
     // Detect when activities start (aka ACTIVITY_TRANSITION_ENTER)
     val transitions = listOf(
-      createActivityTransition(DetectedActivity.IN_VEHICLE, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-      , createActivityTransition(DetectedActivity.ON_BICYCLE, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-      , createActivityTransition(DetectedActivity.ON_FOOT, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-      , createActivityTransition(DetectedActivity.STILL, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-      , createActivityTransition(DetectedActivity.WALKING, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-      , createActivityTransition(DetectedActivity.RUNNING, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+      createActivityTransition(
+        DetectedActivity.IN_VEHICLE,
+        ActivityTransition.ACTIVITY_TRANSITION_ENTER
+      )
+      ,
+      createActivityTransition(
+        DetectedActivity.ON_BICYCLE,
+        ActivityTransition.ACTIVITY_TRANSITION_ENTER
+      )
+      ,
+      createActivityTransition(
+        DetectedActivity.ON_FOOT,
+        ActivityTransition.ACTIVITY_TRANSITION_ENTER
+      )
+      ,
+      createActivityTransition(DetectedActivity.STILL, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+      ,
+      createActivityTransition(
+        DetectedActivity.WALKING,
+        ActivityTransition.ACTIVITY_TRANSITION_ENTER
+      )
+      ,
+      createActivityTransition(
+        DetectedActivity.RUNNING,
+        ActivityTransition.ACTIVITY_TRANSITION_ENTER
+      )
       // TILTING is not supported. When it is added to this list,
       // requestActivityTransitionUpdates throws an exception with this message:
       //    SecurityException: ActivityTransitionRequest specified an unsupported transition activity type
@@ -205,7 +229,13 @@ class MainActivity : AppCompatActivity() {
       contents.append(getString(R.string.main_activity_no_activies_detectd))
     } else {
       val minutes = latestActivity.duration / 60.0
-      contents.append(getString(R.string.main_activity_current_status, latestActivity.type, minutes))
+      contents.append(
+        getString(
+          R.string.main_activity_current_status,
+          latestActivity.type,
+          minutes
+        )
+      )
     }
     val dndStatus = if (myNotificationManager.doNotDisturbOn)
       getText(R.string.main_activity_do_not_disturb_on)
@@ -237,10 +267,11 @@ class MainActivity : AppCompatActivity() {
     message.text = getString(R.string.main_activity_not_yet_implemented)
   }
 
-  private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-    updateSelectedNavigationItem(item.itemId)
-    return@OnNavigationItemSelectedListener true
-  }
+  private val onNavigationItemSelectedListener =
+    BottomNavigationView.OnNavigationItemSelectedListener { item ->
+      updateSelectedNavigationItem(item.itemId)
+      return@OnNavigationItemSelectedListener true
+    }
 
   private fun createActivityTransition(type: Int, transition: Int): ActivityTransition {
     return ActivityTransition.Builder()

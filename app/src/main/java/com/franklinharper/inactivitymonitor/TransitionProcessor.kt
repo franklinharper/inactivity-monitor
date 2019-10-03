@@ -35,7 +35,7 @@ class TransitionProcessor(
 
   // A Transition returned by the DetectedActivity API can be of the same type as the previous Transition.
   //
-  // E.g. over time the stream of Transitions can be: ..., START_STILL, START_STILL, START_WALKING, ...
+  // E.g. over time the stream of Transitions can be: ..., STILL_START, STILL_START, WALKING_START, ...
   //
   // EXIT Transition events are not written to the DB.
   //
@@ -70,7 +70,7 @@ class TransitionProcessor(
     // TODO wake ourselves up much less often, this brute force approach wastes battery!
     myAlarmManager.createNextAlarm(ALARM_INTERVAL)
 //        val latestActivity = transitionRepository.previous().executeAsOneOrNull()
-//        if (latestActivity?.activity_type == DetectedActivity.START_STILL) {
+//        if (latestActivity?.activity_type == DetectedActivity.STILL_START) {
 //            myAlarmManager.createNextAlarm(ALARM_INTERVAL)
 //        } else {
 //            myAlarmManager.removeAlarm()
@@ -78,8 +78,8 @@ class TransitionProcessor(
   }
 
   private fun userIsStillForTooLong(latestActivity: UserActivity): Boolean =
-// TODO Decide how to handle ActivityType.START_IN_VEHICLE? Is it the same as being START_STILL?
-    latestActivity.type == EventType.START_STILL && latestActivity.duration > STILL_TIME_LIMIT_SECS
+// TODO Decide how to handle ActivityType.IN_VEHICLE_START? Is it the same as being STILL_START?
+    latestActivity.type == EventType.STILL_START && latestActivity.duration > STILL_TIME_LIMIT_SECS
 
   private fun remindUserToMove(activity: UserActivity) {
     myNotificationManager.sendMoveNotification(activity.type, activity.duration / 60.0)

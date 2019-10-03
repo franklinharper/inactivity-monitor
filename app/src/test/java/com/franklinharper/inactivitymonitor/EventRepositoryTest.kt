@@ -108,7 +108,7 @@ class EventRepositoryTest {
           /* now */ Timestamp(59),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 0), type = START_STILL,  id = 0, status = Status.NEW)
+            Event.Impl(time = Timestamp( 0), type = STILL_START,  id = 0, status = Status.NEW)
           ),
           /* expected */
           emptyList<UserActivity>()
@@ -121,27 +121,27 @@ class EventRepositoryTest {
           /* now */ Timestamp(59),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 0), type = START_WALKING,  id = 0, status = Status.NEW)
+            Event.Impl(time = Timestamp( 0), type = WALKING_START,  id = 0, status = Status.NEW)
           ),
           /* expected */
-          listOf(UserActivity(START_WALKING, start = Timestamp( 0), duration = 59))
+          listOf(UserActivity(WALKING_START, start = Timestamp( 0), duration = 59))
         ),
 
         // Cases when the input contains 2 Events
         // ===========================================
         //
-        //   case 4: (SS, x) -> (x), when x == Short START_ON_BICYCLE
+        //   case 4: (SS, x) -> (x), when x == Short ON_BICYCLE_START
         Arguments.of(
           /* caseNumber */ 4,
           /* shortLimit */ 60,
           /* now */ Timestamp(59),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 0), type = START_STILL,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 59), type = START_ON_BICYCLE,  id = 1, status = Status.NEW)
+            Event.Impl(time = Timestamp( 0), type = STILL_START,  id = 0, status = Status.NEW),
+            Event.Impl(time = Timestamp( 59), type = ON_BICYCLE_START,  id = 1, status = Status.NEW)
           ),
           /* expected */
-          listOf(UserActivity(START_ON_BICYCLE, start = Timestamp( 59), duration = 0))
+          listOf(UserActivity(ON_BICYCLE_START, start = Timestamp( 59), duration = 0))
         ),
         //   case 5: (x, SS) -> (x + SS), when x in { SA, LA }
         Arguments.of(
@@ -150,11 +150,11 @@ class EventRepositoryTest {
           /* now */ Timestamp(159),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 5), type = START_WALKING,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 100), type = START_STILL,  id = 1, status = Status.NEW)
+            Event.Impl(time = Timestamp( 5), type = WALKING_START,  id = 0, status = Status.NEW),
+            Event.Impl(time = Timestamp( 100), type = STILL_START,  id = 1, status = Status.NEW)
           ),
           /* expected */
-          listOf(UserActivity(START_WALKING, start = Timestamp( 5), duration = 154))
+          listOf(UserActivity(WALKING_START, start = Timestamp( 5), duration = 154))
         ),
         //   case 6: (x, y) -> (x, y), when x != y AND x,y in { LS, SA, LA }
         Arguments.of(
@@ -163,13 +163,13 @@ class EventRepositoryTest {
           /* now */ Timestamp(121),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 0), type = START_STILL,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 60), type = START_RUNNING,  id = 1, status = Status.NEW)
+            Event.Impl(time = Timestamp( 0), type = STILL_START,  id = 0, status = Status.NEW),
+            Event.Impl(time = Timestamp( 60), type = RUNNING_START,  id = 1, status = Status.NEW)
           ),
           /* expected */
           listOf(
-            UserActivity(START_STILL, start = Timestamp( 0), duration = 60),
-            UserActivity(START_RUNNING, start = Timestamp( 60), duration = 61)
+            UserActivity(STILL_START, start = Timestamp( 0), duration = 60),
+            UserActivity(RUNNING_START, start = Timestamp( 60), duration = 61)
           )
         ),
 
@@ -183,14 +183,14 @@ class EventRepositoryTest {
           /* now */ Timestamp(60),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 0), type = START_STILL,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 0), type = START_ON_FOOT,  id = 1, status = Status.NEW),
-            Event.Impl(time = Timestamp( 0), type = START_STILL,  id = 2, status = Status.NEW)
+            Event.Impl(time = Timestamp( 0), type = STILL_START,  id = 0, status = Status.NEW),
+            Event.Impl(time = Timestamp( 0), type = ON_FOOT_START,  id = 1, status = Status.NEW),
+            Event.Impl(time = Timestamp( 0), type = STILL_START,  id = 2, status = Status.NEW)
           ),
           /* expected */
           listOf(
-            UserActivity(START_ON_FOOT, start = Timestamp( 0), duration = 0),
-            UserActivity(START_STILL, start = Timestamp( 0), duration = 60)
+            UserActivity(ON_FOOT_START, start = Timestamp( 0), duration = 0),
+            UserActivity(STILL_START, start = Timestamp( 0), duration = 60)
           )
         ),
         //
@@ -201,14 +201,14 @@ class EventRepositoryTest {
           /* now */ Timestamp(60),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 0), type = START_ON_FOOT,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 1), type = START_STILL,  id = 1, status = Status.NEW),
-            Event.Impl(time = Timestamp( 60), type = START_ON_BICYCLE,  id = 2, status = Status.NEW)
+            Event.Impl(time = Timestamp( 0), type = ON_FOOT_START,  id = 0, status = Status.NEW),
+            Event.Impl(time = Timestamp( 1), type = STILL_START,  id = 1, status = Status.NEW),
+            Event.Impl(time = Timestamp( 60), type = ON_BICYCLE_START,  id = 2, status = Status.NEW)
           ),
           /* expected */
           listOf(
-            UserActivity(START_ON_FOOT, start = Timestamp( 0), duration = 60),
-            UserActivity(START_ON_BICYCLE, start = Timestamp( 60), duration = 0)
+            UserActivity(ON_FOOT_START, start = Timestamp( 0), duration = 60),
+            UserActivity(ON_BICYCLE_START, start = Timestamp( 60), duration = 0)
           )
         ),
         //   case 9: (x1, SS, x2) -> (x1 + SS + x2), when x1 == x2, AND x1, x2 in { SA, LA }
@@ -218,13 +218,13 @@ class EventRepositoryTest {
           /* now */ Timestamp(140),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 100), type = START_ON_FOOT,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 101), type = START_STILL,  id = 1, status = Status.NEW),
-            Event.Impl(time = Timestamp( 130), type = START_ON_FOOT,  id = 2, status = Status.NEW)
+            Event.Impl(time = Timestamp( 100), type = ON_FOOT_START,  id = 0, status = Status.NEW),
+            Event.Impl(time = Timestamp( 101), type = STILL_START,  id = 1, status = Status.NEW),
+            Event.Impl(time = Timestamp( 130), type = ON_FOOT_START,  id = 2, status = Status.NEW)
           ),
           /* expected */
           listOf(
-            UserActivity(START_ON_FOOT, start = Timestamp( 100), duration = 40)
+            UserActivity(ON_FOOT_START, start = Timestamp( 100), duration = 40)
           )
         ),
         //   case 10: (x, y, SS) -> (x, y + SS), when y != x AND x in { LS, SA, LA }, in { LS, SA, LA }
@@ -234,14 +234,14 @@ class EventRepositoryTest {
           /* now */ Timestamp(71),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 10), type = START_ON_FOOT,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 69), type = START_RUNNING,  id = 1, status = Status.NEW),
-            Event.Impl(time = Timestamp( 70), type = START_STILL,  id = 2, status = Status.NEW)
+            Event.Impl(time = Timestamp( 10), type = ON_FOOT_START,  id = 0, status = Status.NEW),
+            Event.Impl(time = Timestamp( 69), type = RUNNING_START,  id = 1, status = Status.NEW),
+            Event.Impl(time = Timestamp( 70), type = STILL_START,  id = 2, status = Status.NEW)
           ),
           /* expected */
           listOf(
-            UserActivity(START_ON_FOOT, start = Timestamp( 10), duration = 59),
-            UserActivity(START_RUNNING, start = Timestamp( 69), duration = 2)
+            UserActivity(ON_FOOT_START, start = Timestamp( 10), duration = 59),
+            UserActivity(RUNNING_START, start = Timestamp( 69), duration = 2)
           )
         ),
         //   case 11: (x, y, z) -> (x, y, z), when x != y AND y != z AND x,y,z = { LS, SA, LA }
@@ -251,15 +251,15 @@ class EventRepositoryTest {
           /* now */ Timestamp(180),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 10), type = START_ON_FOOT,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 70), type = START_RUNNING,  id = 1, status = Status.NEW),
-            Event.Impl(time = Timestamp( 80), type = START_IN_VEHICLE,  id = 2, status = Status.NEW)
+            Event.Impl(time = Timestamp( 10), type = ON_FOOT_START,  id = 0, status = Status.NEW),
+            Event.Impl(time = Timestamp( 70), type = RUNNING_START,  id = 1, status = Status.NEW),
+            Event.Impl(time = Timestamp( 80), type = IN_VEHICLE_START,  id = 2, status = Status.NEW)
           ),
           /* expected */
           listOf(
-            UserActivity(START_ON_FOOT, start = Timestamp( 10), duration = 60),
-            UserActivity(START_RUNNING, start = Timestamp( 70), duration = 10),
-            UserActivity(START_IN_VEHICLE, start = Timestamp( 80), duration = 100)
+            UserActivity(ON_FOOT_START, start = Timestamp( 10), duration = 60),
+            UserActivity(RUNNING_START, start = Timestamp( 70), duration = 10),
+            UserActivity(IN_VEHICLE_START, start = Timestamp( 80), duration = 100)
           )
         ),
 
@@ -273,14 +273,14 @@ class EventRepositoryTest {
           /* now */ Timestamp(139),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 10), type = START_STILL,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 39), type = START_RUNNING,  id = 1, status = Status.NEW),
-            Event.Impl(time = Timestamp( 40), type = START_STILL,  id = 2, status = Status.NEW),
-            Event.Impl(time = Timestamp( 69), type = START_RUNNING,  id = 3, status = Status.NEW)
+            Event.Impl(time = Timestamp( 10), type = STILL_START,  id = 0, status = Status.NEW),
+            Event.Impl(time = Timestamp( 39), type = RUNNING_START,  id = 1, status = Status.NEW),
+            Event.Impl(time = Timestamp( 40), type = STILL_START,  id = 2, status = Status.NEW),
+            Event.Impl(time = Timestamp( 69), type = RUNNING_START,  id = 3, status = Status.NEW)
           ),
           /* expected */
           listOf(
-            UserActivity(START_RUNNING, start = Timestamp( 39), duration = 100)
+            UserActivity(RUNNING_START, start = Timestamp( 39), duration = 100)
           )
         ),
         //   case 13: (x1, SS1, x2, SS2) -> (x1 + SS1 + x2 + SS2), when x1, x2 in { SA, LA }
@@ -290,14 +290,14 @@ class EventRepositoryTest {
           /* now */ Timestamp(89),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 10), type = START_WALKING,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 30), type = START_STILL,  id = 1, status = Status.NEW),
-            Event.Impl(time = Timestamp( 59), type = START_WALKING,  id = 2, status = Status.NEW),
-            Event.Impl(time = Timestamp( 60), type = START_STILL,  id = 3, status = Status.NEW)
+            Event.Impl(time = Timestamp( 10), type = WALKING_START,  id = 0, status = Status.NEW),
+            Event.Impl(time = Timestamp( 30), type = STILL_START,  id = 1, status = Status.NEW),
+            Event.Impl(time = Timestamp( 59), type = WALKING_START,  id = 2, status = Status.NEW),
+            Event.Impl(time = Timestamp( 60), type = STILL_START,  id = 3, status = Status.NEW)
           ),
           /* expected */
           listOf(
-            UserActivity(START_WALKING, start = Timestamp( 10), duration = 79)
+            UserActivity(WALKING_START, start = Timestamp( 10), duration = 79)
           )
         ),
         //   case 14: (x1, LS, x2, SS) -> (x1, LS, x2 + SS), when x1, x2 in { SA, LA }
@@ -307,16 +307,16 @@ class EventRepositoryTest {
           /* now */ Timestamp(89),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 10), type = START_RUNNING,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 20), type = START_STILL,  id = 1, status = Status.NEW),
-            Event.Impl(time = Timestamp( 50), type = START_RUNNING,  id = 2, status = Status.NEW),
-            Event.Impl(time = Timestamp( 79), type = START_STILL,  id = 3, status = Status.NEW)
+            Event.Impl(time = Timestamp( 10), type = RUNNING_START,  id = 0, status = Status.NEW),
+            Event.Impl(time = Timestamp( 20), type = STILL_START,  id = 1, status = Status.NEW),
+            Event.Impl(time = Timestamp( 50), type = RUNNING_START,  id = 2, status = Status.NEW),
+            Event.Impl(time = Timestamp( 79), type = STILL_START,  id = 3, status = Status.NEW)
           ),
           /* expected */
           listOf(
-            UserActivity(START_RUNNING, start = Timestamp( 10), duration = 10),
-            UserActivity(START_STILL, start = Timestamp( 20), duration = 30),
-            UserActivity(START_RUNNING, start = Timestamp( 50), duration = 39)
+            UserActivity(RUNNING_START, start = Timestamp( 10), duration = 10),
+            UserActivity(STILL_START, start = Timestamp( 20), duration = 30),
+            UserActivity(RUNNING_START, start = Timestamp( 50), duration = 39)
           )
         ),
         //   case 15: (x1, SS, x2, LS) -> (x1 + SS + x2, LS), when x1, x2 in { SA, LA }
@@ -326,15 +326,15 @@ class EventRepositoryTest {
           /* now */ Timestamp(109),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 10), type = START_IN_VEHICLE,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 20), type = START_STILL,  id = 1, status = Status.NEW),
-            Event.Impl(time = Timestamp( 49), type = START_IN_VEHICLE,  id = 2, status = Status.NEW),
-            Event.Impl(time = Timestamp( 79), type = START_STILL,  id = 3, status = Status.NEW)
+            Event.Impl(time = Timestamp( 10), type = IN_VEHICLE_START,  id = 0, status = Status.NEW),
+            Event.Impl(time = Timestamp( 20), type = STILL_START,  id = 1, status = Status.NEW),
+            Event.Impl(time = Timestamp( 49), type = IN_VEHICLE_START,  id = 2, status = Status.NEW),
+            Event.Impl(time = Timestamp( 79), type = STILL_START,  id = 3, status = Status.NEW)
           ),
           /* expected */
           listOf(
-            UserActivity(START_IN_VEHICLE, start = Timestamp( 10), duration = 69),
-            UserActivity(START_STILL, start = Timestamp( 79), duration = 30)
+            UserActivity(IN_VEHICLE_START, start = Timestamp( 10), duration = 69),
+            UserActivity(STILL_START, start = Timestamp( 79), duration = 30)
           )
         )
       )

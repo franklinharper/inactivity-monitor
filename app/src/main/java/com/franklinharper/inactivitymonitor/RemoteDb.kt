@@ -2,18 +2,18 @@ package com.franklinharper.inactivitymonitor
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import timber.log.Timber
-import java.lang.IllegalArgumentException
 import java.time.temporal.IsoFields
 
-class EventsKey private constructor(
+data class EventsKey private constructor(
   val year: Int,
   val weekOfYear: Int
-){
+) {
 
   companion object {
 
-    fun from(timestamp: Timestamp) : EventsKey {
+    fun from(timestamp: Timestamp): EventsKey {
       val zonedDateTime = timestamp.toZonedDateTime()
 
       val year = zonedDateTime.get(IsoFields.WEEK_BASED_YEAR)
@@ -34,24 +34,24 @@ class EventsKey private constructor(
 // validates the data written to and read from the DB.
 //
 class RemoteDb(
-  val db:FirebaseFirestore = FirebaseFirestore.getInstance()
+  val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) {
 
-  fun writeEvents(key:EventsKey, events: Collection<Event>) {
+  fun writeEvents(key: EventsKey, events: Collection<Event>, onSuccess: () -> Unit, onFailure: (e: Exception) -> Unit) {
     Timber.d("key:$key events: $events")
     val user = FirebaseAuth.getInstance().currentUser
     if (user == null) {
       throw IllegalStateException("The Firebase user is null")
     }
 
-    val data = hashMapOf( "events" to events )
+    val data = hashMapOf("events" to events)
     db.collection("users")
       .document(user.uid)
       .collection("eventsByWeek")
       .document("${key.year}-${key.weekOfYear}")
-      .set(data)
-      .addOnSuccessListener { Timber.d("DocumentSnapshot successfully written!") }
-      .addOnFailureListener { e -> Timber.e(e, "Error adding document") }
+      .set(data, SetOptions.merge())
+      .addOnSuccessListener { onSuccess() }
+      .addOnFailureListener { exception -> onFailure(exception) }
   }
 
 }

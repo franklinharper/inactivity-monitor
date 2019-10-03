@@ -1,6 +1,6 @@
 package com.franklinharper.inactivitymonitor
 
-import com.franklinharper.inactivitymonitor.EventType.START_STILL
+import com.franklinharper.inactivitymonitor.EventType.STILL_START
 import timber.log.Timber
 import java.time.ZonedDateTime
 
@@ -65,6 +65,12 @@ class EventRepository(
   }
 
   fun insert(activityType: EventType, status: Status) {
+    // TODO Prevent inserting an EventType that is equivalent to thelatest activity recorded in
+    //      the DB.
+    //
+    //      What should the UX for this error be?
+    //      Should the user be alerted?
+    //      Or should the invalid insertion be ignored?
     Timber.d("localDb insert: $activityType, $status")
     localDb.queries.insert(activityType, status)
   }
@@ -75,12 +81,28 @@ class EventRepository(
     // TODO Handle the case where it hasn't been possible to sync for more than 24 hours,
     //  and more than one day of activites needs to be written.
     val newEvents = localDb.queries.selectByStatus(Status.NEW).executeAsList()
+
     newEvents
       .groupBy { event ->
         EventsKey.from(event.time)
       }
       .forEach { eventKey, eventList ->
-        remoteDb.writeEvents(eventKey, eventList)
+        localDb.transaction {
+          // TODO make writeEvents be synchronous to avoid having to think about what would happen when data is
+          //      written to more than one week in the same transaction.
+          remoteDb.writeEvents(
+            eventKey,
+            eventList,
+            onSuccess = {
+              Timber.d("DocumentSnapshot successfully written!")
+              val ids = eventList.map { it.id }
+              localDb.queries.setStatus(status = Status.UPLOADED, eventKeys = ids)
+            },
+            onFailure = { e -> Timber.e(e, "Error adding document")
+              rollback()
+            }
+          )
+        }
       }
   }
 
@@ -101,7 +123,7 @@ class EventRepository(
       if (events.size == 1) {
         val first = events.first()
         val firstDuration = now.unixTime - first.time.unixTime
-        if (first.type == START_STILL && firstDuration < shortLimit) {
+        if (first.type == STILL_START && firstDuration < shortLimit) {
           return emptyList()
         } else {
           return listOf(UserActivity(first.type, first.time, firstDuration))
@@ -116,7 +138,7 @@ class EventRepository(
       // we add an *end* event to the end of the list.
       val endTransition = Event.Impl(
         time = now,
-        type = EventType.END_ACTIVITY,
+        type = EventType.ACTIVITY_END,
         id = Long.MAX_VALUE,
         status = Status.DUMMY
       )
@@ -131,7 +153,7 @@ class EventRepository(
       for (nextIndex in 1 until events.size) {
         val next = events[nextIndex]
         when {
-          previous.type == START_STILL -> {
+          previous.type == STILL_START -> {
 //            val stillDuration = next.time - previous.time
 //            val stillDuration = previous.time.unixTime - next.time.unixTime
             val stillDuration = previous.timeUntil(next)
@@ -146,12 +168,12 @@ class EventRepository(
                 )
                 waitingToAdd = null
               }
-              activities.add(UserActivity(START_STILL, previous.time, stillDuration))
+              activities.add(UserActivity(STILL_START, previous.time, stillDuration))
             }
           }
 
           else -> {
-            if (next.type == START_STILL && waitingToAdd == null) {
+            if (next.type == STILL_START && waitingToAdd == null) {
               waitingToAdd = previous
             } else {
               if (waitingToAdd != null && waitingToAdd.type != previous.type) {

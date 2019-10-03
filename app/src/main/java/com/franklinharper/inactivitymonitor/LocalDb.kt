@@ -2,8 +2,8 @@ package com.franklinharper.inactivitymonitor
 
 import android.content.Context
 import com.squareup.sqldelight.ColumnAdapter
+import com.squareup.sqldelight.Transacter
 import com.squareup.sqldelight.android.AndroidSqliteDriver
-import java.time.ZonedDateTime
 
 class LocalDb(application: Context) {
 
@@ -19,8 +19,13 @@ class LocalDb(application: Context) {
     private val enumValues: Array<out T>
   ) : ColumnAdapter<T, String> {
 
-    override fun decode(databaseValue: String): T = enumValues.first { it.name == databaseValue }
-    override fun encode(value: T) = value.name
+    override fun decode(databaseValue: String): T {
+      return enumValues.first { it.name == databaseValue }
+    }
+
+    override fun encode(value: T): String {
+      return value.name
+    }
 
   }
 
@@ -35,5 +40,9 @@ class LocalDb(application: Context) {
   )
 
   val queries = database.localdbQueries
+
+  fun transaction(noEnclosing: Boolean = false, body: Transacter.Transaction.() -> Unit) {
+    database.transaction(noEnclosing, body)
+  }
 
 }

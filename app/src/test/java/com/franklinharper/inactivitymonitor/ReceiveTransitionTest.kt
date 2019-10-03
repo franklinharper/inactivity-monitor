@@ -126,10 +126,10 @@ internal class ReceiveTransitionTest {
 
     // Assert
     verify(exactly = 1) {
-      emptyRepository.insert(EventType.START_STILL, Status.NEW)
+      emptyRepository.insert(EventType.STILL_START, Status.NEW)
       myAlarmManager.createNextAlarm(TransitionProcessor.ALARM_INTERVAL)
       myVibrationManager.vibrate(TransitionProcessor.INFORMATION_VIBRATION_LENGTH)
-      myNotificationManager.sendCurrentActivityNotification(EventType.START_STILL)
+      myNotificationManager.sendCurrentActivityNotification(EventType.STILL_START)
     }
   }
 

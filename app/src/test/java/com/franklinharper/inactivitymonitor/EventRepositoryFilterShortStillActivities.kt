@@ -1,7 +1,7 @@
 package com.franklinharper.inactivitymonitor
 
-import com.franklinharper.inactivitymonitor.EventType.START_STILL
-import com.franklinharper.inactivitymonitor.EventType.START_WALKING
+import com.franklinharper.inactivitymonitor.EventType.STILL_START
+import com.franklinharper.inactivitymonitor.EventType.WALKING_START
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -33,7 +33,7 @@ class EventRepositoryFilterShortStillActivities {
       shortLimit = 60,
       now = Timestamp(59),
       events = listOf(
-        Event.Impl(time = Timestamp(0), type = START_STILL, id = 1, status = Status.NEW)
+        Event.Impl(time = Timestamp(0), type = STILL_START, id = 1, status = Status.NEW)
       )
     )
 
@@ -51,15 +51,15 @@ class EventRepositoryFilterShortStillActivities {
       shortLimit = 60,
       now = Timestamp(61),
       events = listOf(
-        Event.Impl(id = 1, time = Timestamp(0), type = START_STILL, status = Status.NEW),
-        Event.Impl(id = 2, time = Timestamp(60), type = START_WALKING, status = Status.NEW)
+        Event.Impl(id = 1, time = Timestamp(0), type = STILL_START, status = Status.NEW),
+        Event.Impl(id = 2, time = Timestamp(60), type = WALKING_START, status = Status.NEW)
       )
     )
 
     // Assert
     val expected = listOf(
-      UserActivity(START_STILL, start = Timestamp(0), duration = 60),
-      UserActivity(START_WALKING, start = Timestamp(60), duration = 1)
+      UserActivity(STILL_START, start = Timestamp(0), duration = 60),
+      UserActivity(WALKING_START, start = Timestamp(60), duration = 1)
     )
     assertEquals(expected, actual)
   }
@@ -74,14 +74,14 @@ class EventRepositoryFilterShortStillActivities {
       shortLimit = 60,
       now = Timestamp(120),
       events = listOf(
-        Event.Impl(id = 1, time = Timestamp(0), type = START_STILL, status = Status.NEW),
-        Event.Impl(id = 2, time = Timestamp(59), type = START_WALKING, status = Status.NEW)
+        Event.Impl(id = 1, time = Timestamp(0), type = STILL_START, status = Status.NEW),
+        Event.Impl(id = 2, time = Timestamp(59), type = WALKING_START, status = Status.NEW)
       )
     )
 
     // Assert
     val expected = listOf(
-      UserActivity(START_WALKING, start = Timestamp(59), duration = 61)
+      UserActivity(WALKING_START, start = Timestamp(59), duration = 61)
     )
     assertEquals(expected, actual)
   }
@@ -96,15 +96,15 @@ class EventRepositoryFilterShortStillActivities {
       now = Timestamp(120),
       shortLimit = 60,
       events = listOf(
-        Event.Impl(time = Timestamp(0), type = START_STILL, id = 1, status = Status.NEW),
-        Event.Impl(time = Timestamp(59), type = START_WALKING, id = 2, status = Status.NEW),
-        Event.Impl(time = Timestamp(118), type = START_STILL, id = 3, status = Status.NEW)
+        Event.Impl(time = Timestamp(0), type = STILL_START, id = 1, status = Status.NEW),
+        Event.Impl(time = Timestamp(59), type = WALKING_START, id = 2, status = Status.NEW),
+        Event.Impl(time = Timestamp(118), type = STILL_START, id = 3, status = Status.NEW)
       )
     )
 
     // Assert
     val expected = listOf(
-      UserActivity(START_WALKING, start = Timestamp(59), duration = 61)
+      UserActivity(WALKING_START, start = Timestamp(59), duration = 61)
     )
 
     assertEquals(expected, result)
@@ -120,16 +120,16 @@ class EventRepositoryFilterShortStillActivities {
       now = Timestamp(62),
       shortLimit = 60,
       events = listOf(
-        Event.Impl(time = Timestamp(0), type = START_STILL, id = 1, status = Status.NEW),
-        Event.Impl(time = Timestamp(1), type = START_WALKING, id = 2, status = Status.NEW),
-        Event.Impl(time = Timestamp(2), type = START_STILL, id = 3, status = Status.NEW)
+        Event.Impl(time = Timestamp(0), type = STILL_START, id = 1, status = Status.NEW),
+        Event.Impl(time = Timestamp(1), type = WALKING_START, id = 2, status = Status.NEW),
+        Event.Impl(time = Timestamp(2), type = STILL_START, id = 3, status = Status.NEW)
       )
     )
 
     // Assert
     val expected = listOf(
-      UserActivity(START_WALKING, start = Timestamp(1), duration = 1),
-      UserActivity(START_STILL, start = Timestamp(2), duration = 60)
+      UserActivity(WALKING_START, start = Timestamp(1), duration = 1),
+      UserActivity(STILL_START, start = Timestamp(2), duration = 60)
     )
 
     assertEquals(expected, result)
