@@ -11,8 +11,8 @@ internal class ReceiveTransitionTest {
 
   data class Dependencies(
     val transitionProcessor: TransitionProcessor,
-    val myAlarmManager: MyAlarmManager,
-    val myVibrationManager: MyVibrationManager,
+    val alarmScheduler: AlarmScheduler,
+    val myVibrator: MyVibrator,
     val myNotificationManager: MyNotificationManager
   )
 
@@ -24,7 +24,7 @@ internal class ReceiveTransitionTest {
     val (
       transitionProcessor,
       myAlarmManager,
-      myVibrationManager,
+      myVibrator,
       myNotificationManager
     ) = createDependencies(emptyRepository)
 
@@ -33,7 +33,7 @@ internal class ReceiveTransitionTest {
 
     // Assert
     verify {
-      listOf(myVibrationManager, myNotificationManager) wasNot Called
+      listOf(myVibrator, myNotificationManager) wasNot Called
     }
     verify(exactly = 0) {
       emptyRepository.insert(any(), any())
@@ -51,7 +51,7 @@ internal class ReceiveTransitionTest {
     val (
       transitionProcessor,
       myAlarmManager,
-      myVibrationManager,
+      myVibrator,
       myNotificationManager
     ) = createDependencies(emptyRepository)
 
@@ -60,7 +60,7 @@ internal class ReceiveTransitionTest {
 
     // Assert
     verify {
-      listOf(myVibrationManager, myNotificationManager) wasNot Called
+      listOf(myVibrator, myNotificationManager) wasNot Called
     }
     verify(exactly = 0) {
       emptyRepository.insert(any(), any())
@@ -78,7 +78,7 @@ internal class ReceiveTransitionTest {
     val (
       transitionProcessor,
       myAlarmManager,
-      myVibrationManager,
+      myVibrator,
       myNotificationManager
     ) = createDependencies(emptyRepository)
 
@@ -93,7 +93,7 @@ internal class ReceiveTransitionTest {
 
     // Assert
     verify {
-      listOf(myVibrationManager, myNotificationManager) wasNot Called
+      listOf(myVibrator, myNotificationManager) wasNot Called
     }
     verify(exactly = 0) {
       emptyRepository.insert(any(), any())
@@ -111,7 +111,7 @@ internal class ReceiveTransitionTest {
     val (
       transitionProcessor,
       myAlarmManager,
-      myVibrationManager,
+      myVibrator,
       myNotificationManager
     ) = createDependencies(emptyRepository)
 
@@ -128,7 +128,7 @@ internal class ReceiveTransitionTest {
     verify(exactly = 1) {
       emptyRepository.insert(EventType.STILL_START, Status.NEW)
       myAlarmManager.createNextAlarm(TransitionProcessor.ALARM_INTERVAL)
-      myVibrationManager.vibrate(TransitionProcessor.INFORMATION_VIBRATION_LENGTH)
+      myVibrator.vibrate(TransitionProcessor.INFORMATION_VIBRATION_LENGTH)
       myNotificationManager.sendCurrentActivityNotification(EventType.STILL_START)
     }
   }
@@ -137,12 +137,12 @@ internal class ReceiveTransitionTest {
 
   private fun createDependencies(
     activityRepository: EventRepository,
-    myAlarmManager: MyAlarmManager = myAlarmManager(),
-    myVibrationManager: MyVibrationManager = myVibrationManager(),
+    alarmScheduler: AlarmScheduler = myAlarmManager(),
+    myVibrator: MyVibrator = myVibrator(),
     myNotificationManager: MyNotificationManager = myNotificationManager()
   ): Dependencies {
-    val tp = TransitionProcessor(activityRepository, myAlarmManager, myVibrationManager, myNotificationManager)
-    return Dependencies(tp, myAlarmManager, myVibrationManager, myNotificationManager)
+    val tp = TransitionProcessor(activityRepository, alarmScheduler, myVibrator, myNotificationManager)
+    return Dependencies(tp, alarmScheduler, myVibrator, myNotificationManager)
   }
 
   private fun createEventRepository(latestActivity:UserActivity?): EventRepository {
@@ -152,14 +152,14 @@ internal class ReceiveTransitionTest {
     }
   }
 
-  private fun myAlarmManager(): MyAlarmManager {
-    return mockk<MyAlarmManager>().apply {
+  private fun myAlarmManager(): AlarmScheduler {
+    return mockk<AlarmScheduler>().apply {
       every { createNextAlarm(any()) } just Runs
     }
   }
 
-  private fun myVibrationManager(): MyVibrationManager {
-    return mockk<MyVibrationManager>().apply {
+  private fun myVibrator(): MyVibrator {
+    return mockk<MyVibrator>().apply {
       every { vibrate(any()) } just Runs
     }
   }

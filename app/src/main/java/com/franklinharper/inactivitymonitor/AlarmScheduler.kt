@@ -6,16 +6,16 @@ import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
 
-class MyAlarmManager(application: Context) {
+class AlarmScheduler(application: Context) {
 
-    private val systemAlarmManager: AlarmManager = application.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    private val alarmManager: AlarmManager = application.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     private val alarmIntent = Intent(application, ActivityTransitionReceiver::class.java).let { intent ->
         PendingIntent.getBroadcast(application, 0, intent, 0)
     }
 
     fun createNextAlarm(whenToTriggerSecs: Int) {
         removeAlarm()
-        systemAlarmManager.set(
+        alarmManager.set(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,
             SystemClock.elapsedRealtime() + whenToTriggerSecs * 1000,
             alarmIntent
@@ -23,7 +23,7 @@ class MyAlarmManager(application: Context) {
     }
 
     private fun removeAlarm() {
-        systemAlarmManager.cancel(alarmIntent)
+        alarmManager.cancel(alarmIntent)
     }
 
 }

@@ -7,7 +7,7 @@ import android.os.VibrationEffect.DEFAULT_AMPLITUDE
 import android.os.Vibrator
 import timber.log.Timber
 
-class MyVibrationManager(context: Context) {
+class MyVibrator(context: Context) {
 
     private val vibrator: Vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 

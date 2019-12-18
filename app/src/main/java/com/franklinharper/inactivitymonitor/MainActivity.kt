@@ -50,8 +50,8 @@ class MainActivity : AppCompatActivity() {
   // So we fall back to injecting dependencies directly into the fields.
   private val activityRepository = app().eventRepository
   private val myNotificationManager = app().myNotificationManager
-  private val myAlarmManager = app().myAlarmManager
-  private val myVibrationManager = app().myVibrationManager
+  private val myAlarmManager = app().alarmScheduler
+  private val myVibrator = app().myVibrator
   private lateinit var auth: FirebaseAuth
 
   @Suppress("SpellCheckingInspection")
@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
     setSupportActionBar(findViewById(R.id.my_toolbar))
     initializeBottomNavView()
     initializeActivityDetection()
-    // Schedule a wake up call. Subsequent wake up calls are scheduled when Transition events are processed.
+    // Schedule an initial wake up call. Subsequent wake up calls are scheduled when Transition events are processed.
     myAlarmManager.createNextAlarm(30)
 
     auth = FirebaseAuth.getInstance()
@@ -134,7 +134,7 @@ class MainActivity : AppCompatActivity() {
         true
       }
       R.id.action_vibrate -> {
-        myVibrationManager.vibrate(2500)
+        myVibrator.vibrate(2500)
         true
       }
       R.id.action_notify -> {

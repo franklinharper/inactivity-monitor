@@ -2,12 +2,13 @@ package com.franklinharper.inactivitymonitor
 
 import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionResult
+import timber.log.Timber
 import java.time.Instant
 
 class TransitionProcessor(
   private val eventRepository: EventRepository = app().eventRepository,
-  private val myAlarmManager: MyAlarmManager = app().myAlarmManager,
-  private val myVibrationManager: MyVibrationManager = app().myVibrationManager,
+  private val alarmScheduler: AlarmScheduler = app().alarmScheduler,
+  private val myVibrator: MyVibrator = app().myVibrator,
   private val myNotificationManager: MyNotificationManager = app().myNotificationManager
 ) {
 
@@ -48,6 +49,7 @@ class TransitionProcessor(
     transitionResult: ActivityTransitionResult,
     latestActivity: UserActivity?
   ) {
+    Timber.d("processTransitions: $transitionResult, $latestActivity")
     var previousType = latestActivity?.type
     for (transition in transitionResult.transitionEvents) {
       val newType = EventType.from(transition.activityType)
@@ -62,13 +64,13 @@ class TransitionProcessor(
   }
 
   private fun informUserOfNewActivity(activityType: EventType) {
-    myVibrationManager.vibrate(INFORMATION_VIBRATION_LENGTH)
+    myVibrator.vibrate(INFORMATION_VIBRATION_LENGTH)
     myNotificationManager.sendCurrentActivityNotification(activityType)
   }
 
   private fun scheduleNextWakeupAlarm() {
     // TODO wake ourselves up much less often, this brute force approach wastes battery!
-    myAlarmManager.createNextAlarm(ALARM_INTERVAL)
+    alarmScheduler.createNextAlarm(ALARM_INTERVAL)
 //        val latestActivity = transitionRepository.previous().executeAsOneOrNull()
 //        if (latestActivity?.activity_type == DetectedActivity.STILL_START) {
 //            myAlarmManager.createNextAlarm(ALARM_INTERVAL)
@@ -83,7 +85,7 @@ class TransitionProcessor(
 
   private fun remindUserToMove(activity: UserActivity) {
     myNotificationManager.sendMoveNotification(activity.type, activity.duration / 60.0)
-    myVibrationManager.vibrate(MOVEMENT_REQUIRED_VIBRATION_LENGTH)
+    myVibrator.vibrate(MOVEMENT_REQUIRED_VIBRATION_LENGTH)
   }
 }
 
