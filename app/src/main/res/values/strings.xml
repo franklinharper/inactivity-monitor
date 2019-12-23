@@ -1,8 +1,8 @@
 <resources>
   <string name="app_name">Activity Monitor</string>
-  <string name="title_activity_log">Log</string>
-  <string name="title_dashboard">Dashboard</string>
-  <string name="title_notifications">Notifications</string>
+  <string name="title_activity">Activity</string>
+  <string name="title_events">Events</string>
+  <string name="title_log">Log</string>
 
   <string name="action_sync_to_cloud">Sync to cloud</string>
   <string name="action_vibrate">Test vibration</string>

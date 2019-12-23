@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-            android:id="@+id/navigation_dashboard"
+            android:id="@+id/navigation_activity"
             android:icon="@drawable/ic_dashboard_black_24dp"
-            android:title="@string/title_dashboard"
+            android:title="@string/title_activity"
     />
     <item
-            android:id="@+id/navigation_notifications"
+            android:id="@+id/navigation_events"
             android:icon="@drawable/ic_notifications_black_24dp"
-            android:title="@string/title_notifications"
+            android:title="@string/title_events"
     />
     <item
         android:id="@+id/navigation_log"
         android:icon="@drawable/ic_list_black_24dp"
-        android:title="@string/title_activity_log"
+        android:title="@string/title_log"
     />
 </menu>

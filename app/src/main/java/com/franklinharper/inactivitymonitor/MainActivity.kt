@@ -215,14 +215,14 @@ class MainActivity : AppCompatActivity() {
 
   private fun updateSelectedNavigationItem(id: Int) {
     when (id) {
-      R.id.navigation_dashboard -> updateDashboard()
+      R.id.navigation_activity -> updateAcivity()
+      R.id.navigation_events -> updateEvents()
       R.id.navigation_log -> updateLog()
-      R.id.navigation_notifications -> updateNotifications()
       else -> throw IllegalStateException()
     }
   }
 
-  private fun updateDashboard() {
+  private fun updateAcivity() {
     val contents = SpannableStringBuilder()
     val latestActivity = activityRepository.mostRecentActivity()
     if (latestActivity == null) {
@@ -243,10 +243,10 @@ class MainActivity : AppCompatActivity() {
       getText(R.string.main_activity_do_not_disturb_off)
 
     contents.append(dndStatus)
-    message.text = contents.toSpannable()
+    eventLog.text = contents.toSpannable()
   }
 
-  private fun updateLog() {
+  private fun updateEvents() {
     val todaysLog = StringBuilder()
     val nowSecs = System.currentTimeMillis() / 1000
     todaysLog.append("Updated ${timeFormatter.format(Instant.ofEpochSecond(nowSecs))}\n\n")
@@ -260,11 +260,11 @@ class MainActivity : AppCompatActivity() {
         val minutes = "%.2f".format(activity.durationSecs / 60.0)
         todaysLog.append("$timestamp => ${activity.type} $minutes minutes\n")
       }
-    message.text = todaysLog.toString()
+    eventLog.text = todaysLog.toString()
   }
 
-  private fun updateNotifications() {
-    message.text = getString(R.string.main_activity_not_yet_implemented)
+  private fun updateLog() {
+    eventLog.text = getString(R.string.main_activity_not_yet_implemented)
   }
 
   private val onNavigationItemSelectedListener =
