@@ -124,7 +124,7 @@ class EventRepositoryTest {
             Event.Impl(time = Timestamp( 0), type = WALKING_START,  id = 0, status = Status.NEW)
           ),
           /* expected */
-          listOf(UserActivity(WALKING_START, start = Timestamp( 0), duration = 59))
+          listOf(UserActivity(WALKING_START, start = Timestamp( 0), durationSecs = 59))
         ),
 
         // Cases when the input contains 2 Events
@@ -141,7 +141,7 @@ class EventRepositoryTest {
             Event.Impl(time = Timestamp( 59), type = ON_BICYCLE_START,  id = 1, status = Status.NEW)
           ),
           /* expected */
-          listOf(UserActivity(ON_BICYCLE_START, start = Timestamp( 59), duration = 0))
+          listOf(UserActivity(ON_BICYCLE_START, start = Timestamp( 59), durationSecs = 0))
         ),
         //   case 5: (x, SS) -> (x + SS), when x in { SA, LA }
         Arguments.of(
@@ -154,7 +154,7 @@ class EventRepositoryTest {
             Event.Impl(time = Timestamp( 100), type = STILL_START,  id = 1, status = Status.NEW)
           ),
           /* expected */
-          listOf(UserActivity(WALKING_START, start = Timestamp( 5), duration = 154))
+          listOf(UserActivity(WALKING_START, start = Timestamp( 5), durationSecs = 154))
         ),
         //   case 6: (x, y) -> (x, y), when x != y AND x,y in { LS, SA, LA }
         Arguments.of(
@@ -168,8 +168,8 @@ class EventRepositoryTest {
           ),
           /* expected */
           listOf(
-            UserActivity(STILL_START, start = Timestamp( 0), duration = 60),
-            UserActivity(RUNNING_START, start = Timestamp( 60), duration = 61)
+            UserActivity(STILL_START, start = Timestamp( 0), durationSecs = 60),
+            UserActivity(RUNNING_START, start = Timestamp( 60), durationSecs = 61)
           )
         ),
 
@@ -189,8 +189,8 @@ class EventRepositoryTest {
           ),
           /* expected */
           listOf(
-            UserActivity(ON_FOOT_START, start = Timestamp( 0), duration = 0),
-            UserActivity(STILL_START, start = Timestamp( 0), duration = 60)
+            UserActivity(ON_FOOT_START, start = Timestamp( 0), durationSecs = 0),
+            UserActivity(STILL_START, start = Timestamp( 0), durationSecs = 60)
           )
         ),
         //
@@ -207,8 +207,8 @@ class EventRepositoryTest {
           ),
           /* expected */
           listOf(
-            UserActivity(ON_FOOT_START, start = Timestamp( 0), duration = 60),
-            UserActivity(ON_BICYCLE_START, start = Timestamp( 60), duration = 0)
+            UserActivity(ON_FOOT_START, start = Timestamp( 0), durationSecs = 60),
+            UserActivity(ON_BICYCLE_START, start = Timestamp( 60), durationSecs = 0)
           )
         ),
         //   case 9: (x1, SS, x2) -> (x1 + SS + x2), when x1 == x2, AND x1, x2 in { SA, LA }
@@ -224,7 +224,7 @@ class EventRepositoryTest {
           ),
           /* expected */
           listOf(
-            UserActivity(ON_FOOT_START, start = Timestamp( 100), duration = 40)
+            UserActivity(ON_FOOT_START, start = Timestamp( 100), durationSecs = 40)
           )
         ),
         //   case 10: (x, y, SS) -> (x, y + SS), when y != x AND x in { LS, SA, LA }, in { LS, SA, LA }
@@ -240,8 +240,8 @@ class EventRepositoryTest {
           ),
           /* expected */
           listOf(
-            UserActivity(ON_FOOT_START, start = Timestamp( 10), duration = 59),
-            UserActivity(RUNNING_START, start = Timestamp( 69), duration = 2)
+            UserActivity(ON_FOOT_START, start = Timestamp( 10), durationSecs = 59),
+            UserActivity(RUNNING_START, start = Timestamp( 69), durationSecs = 2)
           )
         ),
         //   case 11: (x, y, z) -> (x, y, z), when x != y AND y != z AND x,y,z = { LS, SA, LA }
@@ -257,9 +257,9 @@ class EventRepositoryTest {
           ),
           /* expected */
           listOf(
-            UserActivity(ON_FOOT_START, start = Timestamp( 10), duration = 60),
-            UserActivity(RUNNING_START, start = Timestamp( 70), duration = 10),
-            UserActivity(IN_VEHICLE_START, start = Timestamp( 80), duration = 100)
+            UserActivity(ON_FOOT_START, start = Timestamp( 10), durationSecs = 60),
+            UserActivity(RUNNING_START, start = Timestamp( 70), durationSecs = 10),
+            UserActivity(IN_VEHICLE_START, start = Timestamp( 80), durationSecs = 100)
           )
         ),
 
@@ -280,7 +280,7 @@ class EventRepositoryTest {
           ),
           /* expected */
           listOf(
-            UserActivity(RUNNING_START, start = Timestamp( 39), duration = 100)
+            UserActivity(RUNNING_START, start = Timestamp( 39), durationSecs = 100)
           )
         ),
         //   case 13: (x1, SS1, x2, SS2) -> (x1 + SS1 + x2 + SS2), when x1, x2 in { SA, LA }
@@ -297,7 +297,7 @@ class EventRepositoryTest {
           ),
           /* expected */
           listOf(
-            UserActivity(WALKING_START, start = Timestamp( 10), duration = 79)
+            UserActivity(WALKING_START, start = Timestamp( 10), durationSecs = 79)
           )
         ),
         //   case 14: (x1, LS, x2, SS) -> (x1, LS, x2 + SS), when x1, x2 in { SA, LA }
@@ -314,9 +314,9 @@ class EventRepositoryTest {
           ),
           /* expected */
           listOf(
-            UserActivity(RUNNING_START, start = Timestamp( 10), duration = 10),
-            UserActivity(STILL_START, start = Timestamp( 20), duration = 30),
-            UserActivity(RUNNING_START, start = Timestamp( 50), duration = 39)
+            UserActivity(RUNNING_START, start = Timestamp( 10), durationSecs = 10),
+            UserActivity(STILL_START, start = Timestamp( 20), durationSecs = 30),
+            UserActivity(RUNNING_START, start = Timestamp( 50), durationSecs = 39)
           )
         ),
         //   case 15: (x1, SS, x2, LS) -> (x1 + SS + x2, LS), when x1, x2 in { SA, LA }
@@ -333,8 +333,8 @@ class EventRepositoryTest {
           ),
           /* expected */
           listOf(
-            UserActivity(IN_VEHICLE_START, start = Timestamp( 10), duration = 69),
-            UserActivity(STILL_START, start = Timestamp( 79), duration = 30)
+            UserActivity(IN_VEHICLE_START, start = Timestamp( 10), durationSecs = 69),
+            UserActivity(STILL_START, start = Timestamp( 79), durationSecs = 30)
           )
         )
       )

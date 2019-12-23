@@ -3,7 +3,6 @@ package com.franklinharper.inactivitymonitor
 import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionResult
 import timber.log.Timber
-import java.time.Instant
 
 class TransitionProcessor(
   private val eventRepository: EventRepository = app().eventRepository,
@@ -13,24 +12,28 @@ class TransitionProcessor(
 ) {
 
   companion object {
-    const val ALARM_INTERVAL = 30
-    const val INFORMATION_VIBRATION_LENGTH = 1000
-    const val MOVEMENT_REQUIRED_VIBRATION_LENGTH = 3000
-    private const val STILL_TIME_LIMIT_SECS = 30 * 60 // 30 minutes
+    const val DEFAULT_MAX_WAIT_SECS = 30L
+    const val STILL_MAX_TIMEOUT_SECS = 30 * 60L // 30 minutes
+    const val INFO_VIBRATION_MILLIS = 1000
+    const val MOVE_VIBRATION_MILLIS = 3000
   }
 
   fun processTransitionResult(transitionResult: ActivityTransitionResult?) {
-    val latestActivity = eventRepository.latestActivity(Instant.now().epochSecond)
-    if (transitionResult != null) {
-      processTransitions(transitionResult, latestActivity)
+    val previousActivity = eventRepository.mostRecentActivity()
+    processTransitions(transitionResult, previousActivity)
+    val mostRecemtActivity = eventRepository.mostRecentActivity()
+    val waitSecs = timeoutSecs(mostRecemtActivity)
+    if (waitSecs == null) {
+      alarmScheduler.removePreviousAlarm()
+    } else {
+      alarmScheduler.replacePreviousAlarm(waitSecs)
     }
-    scheduleNextWakeupAlarm()
     if (
-      latestActivity != null
-      && userIsStillForTooLong(latestActivity)
+      mostRecemtActivity != null
+      && userIsStillForTooLong(mostRecemtActivity)
       && myNotificationManager.doNotDisturbOff
     ) {
-      remindUserToMove(latestActivity)
+      remindUserToMove(mostRecemtActivity)
     }
   }
 
@@ -46,14 +49,19 @@ class TransitionProcessor(
   //
   // If the Transition events weren't deduped the same calculation would require looping over multiple Transition events.
   private fun processTransitions(
-    transitionResult: ActivityTransitionResult,
-    latestActivity: UserActivity?
+    transitionResult: ActivityTransitionResult?,
+    previousActivity: UserActivity?
   ) {
-    Timber.d("processTransitions: $transitionResult, $latestActivity")
-    var previousType = latestActivity?.type
+    Timber.d("processTransitions previousActivity:$previousActivity")
+    if (transitionResult == null) {
+      Timber.d("transitionResult: $transitionResult")
+      return
+    }
+
+    var previousType = previousActivity?.type
     for (transition in transitionResult.transitionEvents) {
       val newType = EventType.from(transition.activityType)
-      if (newType != previousType &&  transition.transitionType == ActivityTransition.ACTIVITY_TRANSITION_ENTER) {
+      if (newType != previousType && transition.transitionType == ActivityTransition.ACTIVITY_TRANSITION_ENTER) {
         if (myNotificationManager.doNotDisturbOff) {
           informUserOfNewActivity(newType)
         }
@@ -64,28 +72,26 @@ class TransitionProcessor(
   }
 
   private fun informUserOfNewActivity(activityType: EventType) {
-    myVibrator.vibrate(INFORMATION_VIBRATION_LENGTH)
+    myVibrator.vibrate(INFO_VIBRATION_MILLIS)
     myNotificationManager.sendCurrentActivityNotification(activityType)
   }
 
-  private fun scheduleNextWakeupAlarm() {
-    // TODO wake ourselves up much less often, this brute force approach wastes battery!
-    alarmScheduler.createNextAlarm(ALARM_INTERVAL)
-//        val latestActivity = transitionRepository.previous().executeAsOneOrNull()
-//        if (latestActivity?.activity_type == DetectedActivity.STILL_START) {
-//            myAlarmManager.createNextAlarm(ALARM_INTERVAL)
-//        } else {
-//            myAlarmManager.removeAlarm()
-//        }
+  private fun timeoutSecs(activity: UserActivity?): Long? {
+    return when (activity?.type) {
+      // Wait 1 extra second to ensure that the timeout has elapsed when the
+      // app is woken up.
+      EventType.STILL_START -> STILL_MAX_TIMEOUT_SECS - activity.durationSecs + 1
+      else -> null
+    }
   }
 
   private fun userIsStillForTooLong(latestActivity: UserActivity): Boolean =
-// TODO Decide how to handle ActivityType.IN_VEHICLE_START? Is it the same as being STILL_START?
-    latestActivity.type == EventType.STILL_START && latestActivity.duration > STILL_TIME_LIMIT_SECS
+// TODO Decide how to handle ActivityType.IN_VEHICLE_START? Is it the same as STILL_START?
+    latestActivity.type == EventType.STILL_START && latestActivity.durationSecs > STILL_MAX_TIMEOUT_SECS
 
   private fun remindUserToMove(activity: UserActivity) {
-    myNotificationManager.sendMoveNotification(activity.type, activity.duration / 60.0)
-    myVibrator.vibrate(MOVEMENT_REQUIRED_VIBRATION_LENGTH)
+    myNotificationManager.sendMoveNotification(activity.type, activity.durationSecs / 60.0)
+    myVibrator.vibrate(MOVE_VIBRATION_MILLIS)
   }
 }
 

@@ -2,6 +2,7 @@ package com.franklinharper.inactivitymonitor
 
 import com.franklinharper.inactivitymonitor.EventType.STILL_START
 import timber.log.Timber
+import java.time.Instant
 import java.time.ZonedDateTime
 
 // The repository
@@ -14,7 +15,7 @@ import java.time.ZonedDateTime
 data class UserActivity(
   val type: EventType,
   val start: Timestamp,
-  val duration: Long
+  val durationSecs: Long
 ) {
 
   companion object {
@@ -26,7 +27,7 @@ data class UserActivity(
       return UserActivity(
         event.type,
         event.time,
-        end - event.time.unixTime
+        end - event.time.epochSecond
       )
     }
 
@@ -39,7 +40,7 @@ class EventRepository(
   val remoteDb: RemoteDb = app().remoteDb
 ) {
 
-  fun latestActivity(end: Long): UserActivity? {
+  fun mostRecentActivity(end: Long = Instant.now().epochSecond): UserActivity? {
     return UserActivity.toActivity(localDb.queries.selectLatest().executeAsOneOrNull(), end)
   }
 
@@ -114,7 +115,7 @@ class EventRepository(
       events: List<Event>
     ): List<UserActivity> {
 
-      validateArguments(shortLimit, now.unixTime, events)
+      validateArguments(shortLimit, now.epochSecond, events)
 
       if (events.isEmpty()) {
         return emptyList()
@@ -122,7 +123,7 @@ class EventRepository(
 
       if (events.size == 1) {
         val first = events.first()
-        val firstDuration = now.unixTime - first.time.unixTime
+        val firstDuration = now.epochSecond - first.time.epochSecond
         if (first.type == STILL_START && firstDuration < shortLimit) {
           return emptyList()
         } else {
@@ -228,7 +229,7 @@ class EventRepository(
       if (events.isEmpty()) return
 
       val last = events.last()
-      if (events.isNotEmpty() && now < last.time.unixTime) {
+      if (events.isNotEmpty() && now < last.time.epochSecond) {
         throw IllegalArgumentException("The 'now' timestamp must NOT be before the latest Transition, now: $now, last:  $last")
       }
 
@@ -239,7 +240,7 @@ class EventRepository(
       // Validate ascending order
       var previous = events[0]
       events.drop(1).forEach { next ->
-        if (next.time.unixTime < previous.time.unixTime) {
+        if (next.time.epochSecond < previous.time.epochSecond) {
           throw IllegalArgumentException(
             "The next transition must NOT be before the previous Transition, previous: $previous, next: $next"
           )
@@ -264,7 +265,7 @@ class EventRepository(
       }
       val latestTransition = events.last()
       val latestActivity = UserActivity(
-        latestTransition.type, latestTransition.time, now - latestTransition.time.unixTime
+        latestTransition.type, latestTransition.time, now - latestTransition.time.epochSecond
       )
       activities.add(latestActivity)
       return activities

@@ -58,8 +58,8 @@ class EventRepositoryFilterShortStillActivities {
 
     // Assert
     val expected = listOf(
-      UserActivity(STILL_START, start = Timestamp(0), duration = 60),
-      UserActivity(WALKING_START, start = Timestamp(60), duration = 1)
+      UserActivity(STILL_START, start = Timestamp(0), durationSecs = 60),
+      UserActivity(WALKING_START, start = Timestamp(60), durationSecs = 1)
     )
     assertEquals(expected, actual)
   }
@@ -81,7 +81,7 @@ class EventRepositoryFilterShortStillActivities {
 
     // Assert
     val expected = listOf(
-      UserActivity(WALKING_START, start = Timestamp(59), duration = 61)
+      UserActivity(WALKING_START, start = Timestamp(59), durationSecs = 61)
     )
     assertEquals(expected, actual)
   }
@@ -104,7 +104,7 @@ class EventRepositoryFilterShortStillActivities {
 
     // Assert
     val expected = listOf(
-      UserActivity(WALKING_START, start = Timestamp(59), duration = 61)
+      UserActivity(WALKING_START, start = Timestamp(59), durationSecs = 61)
     )
 
     assertEquals(expected, result)
@@ -128,8 +128,8 @@ class EventRepositoryFilterShortStillActivities {
 
     // Assert
     val expected = listOf(
-      UserActivity(WALKING_START, start = Timestamp(1), duration = 1),
-      UserActivity(STILL_START, start = Timestamp(2), duration = 60)
+      UserActivity(WALKING_START, start = Timestamp(1), durationSecs = 1),
+      UserActivity(STILL_START, start = Timestamp(2), durationSecs = 60)
     )
 
     assertEquals(expected, result)

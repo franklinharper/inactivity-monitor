@@ -8,7 +8,7 @@ import com.squareup.sqldelight.android.AndroidSqliteDriver
 class LocalDb(application: Context) {
 
   private class TimestampColunmAdapter() : ColumnAdapter<Timestamp, Long> {
-    override fun encode(value: Timestamp) = value.unixTime
+    override fun encode(value: Timestamp) = value.epochSecond
     override fun decode(databaseValue: Long) = Timestamp(databaseValue)
   }
 

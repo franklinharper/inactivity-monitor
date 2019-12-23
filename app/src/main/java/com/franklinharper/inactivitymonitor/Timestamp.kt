@@ -4,10 +4,10 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
-data class Timestamp(val unixTime: Long) {
+data class Timestamp(val epochSecond: Long) {
 
   fun toZonedDateTime(): ZonedDateTime {
-    val instant = Instant.ofEpochSecond(unixTime)
+    val instant = Instant.ofEpochSecond(epochSecond)
     return ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())
   }
 

@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
     initializeBottomNavView()
     initializeActivityDetection()
     // Schedule an initial wake up call. Subsequent wake up calls are scheduled when Transition events are processed.
-    myAlarmManager.createNextAlarm(30)
+    myAlarmManager.replacePreviousAlarm(30)
 
     auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
@@ -224,11 +224,11 @@ class MainActivity : AppCompatActivity() {
 
   private fun updateDashboard() {
     val contents = SpannableStringBuilder()
-    val latestActivity = activityRepository.latestActivity(end = Instant.now().epochSecond)
+    val latestActivity = activityRepository.mostRecentActivity()
     if (latestActivity == null) {
       contents.append(getString(R.string.main_activity_no_activies_detectd))
     } else {
-      val minutes = latestActivity.duration / 60.0
+      val minutes = latestActivity.durationSecs / 60.0
       contents.append(
         getString(
           R.string.main_activity_current_status,
@@ -257,7 +257,7 @@ class MainActivity : AppCompatActivity() {
       .forEach { activity ->
         // Go backwards in time displaying the duration of each successive activity
         val timestamp = timeFormatter.format(activity.start.toZonedDateTime())
-        val minutes = "%.2f".format(activity.duration / 60.0)
+        val minutes = "%.2f".format(activity.durationSecs / 60.0)
         todaysLog.append("$timestamp => ${activity.type} $minutes minutes\n")
       }
     message.text = todaysLog.toString()

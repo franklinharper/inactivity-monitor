@@ -39,7 +39,7 @@ internal class ReceiveTransitionTest {
       emptyRepository.insert(any(), any())
     }
     verify(exactly = 1) {
-      myAlarmManager.createNextAlarm(TransitionProcessor.ALARM_INTERVAL)
+      myAlarmManager.replacePreviousAlarm(TransitionProcessor.DEFAULT_MAX_WAIT_SECS)
     }
   }
 
@@ -66,7 +66,7 @@ internal class ReceiveTransitionTest {
       emptyRepository.insert(any(), any())
     }
     verify(exactly = 1) {
-      myAlarmManager.createNextAlarm(TransitionProcessor.ALARM_INTERVAL)
+      myAlarmManager.replacePreviousAlarm(TransitionProcessor.DEFAULT_MAX_WAIT_SECS)
     }
   }
 
@@ -99,7 +99,7 @@ internal class ReceiveTransitionTest {
       emptyRepository.insert(any(), any())
     }
     verify(exactly = 1) {
-      myAlarmManager.createNextAlarm(TransitionProcessor.ALARM_INTERVAL)
+      myAlarmManager.replacePreviousAlarm(TransitionProcessor.DEFAULT_MAX_WAIT_SECS)
     }
   }
 
@@ -127,8 +127,8 @@ internal class ReceiveTransitionTest {
     // Assert
     verify(exactly = 1) {
       emptyRepository.insert(EventType.STILL_START, Status.NEW)
-      myAlarmManager.createNextAlarm(TransitionProcessor.ALARM_INTERVAL)
-      myVibrator.vibrate(TransitionProcessor.INFORMATION_VIBRATION_LENGTH)
+      myAlarmManager.replacePreviousAlarm(TransitionProcessor.DEFAULT_MAX_WAIT_SECS)
+      myVibrator.vibrate(TransitionProcessor.INFO_VIBRATION_MILLIS)
       myNotificationManager.sendCurrentActivityNotification(EventType.STILL_START)
     }
   }
@@ -147,14 +147,14 @@ internal class ReceiveTransitionTest {
 
   private fun createEventRepository(latestActivity:UserActivity?): EventRepository {
     return mockk<EventRepository>().apply {
-      every { latestActivity(any()) } returns latestActivity
+      every { mostRecentActivity(any()) } returns latestActivity
       every { insert(any(), any()) } just Runs
     }
   }
 
   private fun myAlarmManager(): AlarmScheduler {
     return mockk<AlarmScheduler>().apply {
-      every { createNextAlarm(any()) } just Runs
+      every { replacePreviousAlarm(any()) } just Runs
     }
   }
 
