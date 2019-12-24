@@ -11,6 +11,7 @@ import java.io.File
 @Suppress("unused")
 class MyApplication : Application() {
 
+
   // TODO: Each component should perform its own initialization instead of sub-classing Application.
   override fun onCreate() {
     super.onCreate()
@@ -22,7 +23,7 @@ class MyApplication : Application() {
       // TODO configure production logging
       // Timber.plant(CrashReportingTree ())
     }
-    addFileLogger()
+    startLoggingToFile()
   }
 
   private fun addDebugLogger() {
@@ -30,22 +31,8 @@ class MyApplication : Application() {
   }
 
   @SuppressLint("LogNotTimber")
-  private fun addFileLogger() {
-    val logDir = File(filesDir, "logs")
-    Log.i("LOGGER", "logDir: $logDir")
-    if (!logDir.exists()) {
-      Log.i("LOGGER", "created logDir")
-      logDir.mkdir()
-    }
-    val fileLogger = FileLoggerTree.Builder()
-      .withFileName("file%g.log")
-      .withDir(logDir)
-      .withSizeLimit(1_000_000)
-      .withFileLimit(3)
-      .withMinPriority(Log.DEBUG)
-      .appendToFile(true)
-      .build()
-    Timber.plant(fileLogger)
+  private fun startLoggingToFile() {
+    Timber.plant(AppComponent.instance.fileLogger)
     Timber.d("========================")
     Timber.d("Logging to files enabled")
   }

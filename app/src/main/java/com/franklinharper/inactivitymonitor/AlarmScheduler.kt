@@ -18,7 +18,7 @@ class AlarmScheduler(application: Context) {
     }
 
   fun replacePreviousAlarm(waitSecs: Long) {
-    Timber.d("replacePreviousAlarm waitSecs:$waitSecs")
+    Timber.d("replacePreviousAlarm waitSecs $waitSecs")
     alarmManager.cancel(alarmIntent)
     alarmManager.set(
       AlarmManager.ELAPSED_REALTIME_WAKEUP,

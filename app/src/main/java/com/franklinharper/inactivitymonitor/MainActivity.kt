@@ -10,6 +10,9 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.toSpannable
+import androidx.core.view.isVisible
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.firebase.ui.auth.AuthUI
 import com.google.android.gms.location.ActivityRecognition
 import com.google.android.gms.location.ActivityTransition
@@ -48,10 +51,11 @@ class MainActivity : AppCompatActivity() {
   // because this class is instantiated by the Android OS.
   //
   // So we fall back to injecting dependencies directly into the fields.
-  private val activityRepository = app().eventRepository
-  private val myNotificationManager = app().myNotificationManager
-  private val myAlarmManager = app().alarmScheduler
-  private val myVibrator = app().myVibrator
+  private val activityRepository = appComponent().eventRepository
+  private val myNotificationManager = appComponent().myNotificationManager
+  private val myAlarmManager = appComponent().alarmScheduler
+  private val myVibrator = appComponent().myVibrator
+  private val logFileAdapter = LogFileAdapter()
   private lateinit var auth: FirebaseAuth
 
   @Suppress("SpellCheckingInspection")
@@ -65,13 +69,29 @@ class MainActivity : AppCompatActivity() {
     setSupportActionBar(findViewById(R.id.my_toolbar))
     initializeBottomNavView()
     initializeActivityDetection()
-    // Schedule an initial wake up call. Subsequent wake up calls are scheduled when Transition events are processed.
+    initializeLogView()
+    showActivity()
+
+    // TODO remove call to myAlarmManager below
+    //  Instead call the TransitionProcessor, and let it schedule the wake up call intelligently.
     myAlarmManager.replacePreviousAlarm(30)
 
     auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
     if (currentUser == null) {
       startUserSignin()
+    }
+  }
+
+  private fun initializeLogView() {
+    developerLog.apply {
+      layoutManager = LinearLayoutManager(
+        applicationContext,
+        LinearLayoutManager.VERTICAL,
+        true
+      )
+      addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+      adapter = logFileAdapter
     }
   }
 
@@ -215,14 +235,16 @@ class MainActivity : AppCompatActivity() {
 
   private fun updateSelectedNavigationItem(id: Int) {
     when (id) {
-      R.id.navigation_activity -> updateAcivity()
-      R.id.navigation_events -> updateEvents()
-      R.id.navigation_log -> updateLog()
+      R.id.navigation_activity -> showActivity()
+      R.id.navigation_events -> showEvents()
+      R.id.navigation_log -> showDeveloperLog()
       else -> throw IllegalStateException()
     }
   }
 
-  private fun updateAcivity() {
+  private fun showActivity() {
+    message.isVisible = true
+    developerLog.isVisible = false
     val contents = SpannableStringBuilder()
     val latestActivity = activityRepository.mostRecentActivity()
     if (latestActivity == null) {
@@ -243,10 +265,12 @@ class MainActivity : AppCompatActivity() {
       getText(R.string.main_activity_do_not_disturb_off)
 
     contents.append(dndStatus)
-    eventLog.text = contents.toSpannable()
+    message.text = contents.toSpannable()
   }
 
-  private fun updateEvents() {
+  private fun showEvents() {
+    message.isVisible = true
+    developerLog.isVisible = false
     val todaysLog = StringBuilder()
     val nowSecs = System.currentTimeMillis() / 1000
     todaysLog.append("Updated ${timeFormatter.format(Instant.ofEpochSecond(nowSecs))}\n\n")
@@ -260,11 +284,13 @@ class MainActivity : AppCompatActivity() {
         val minutes = "%.2f".format(activity.durationSecs / 60.0)
         todaysLog.append("$timestamp => ${activity.type} $minutes minutes\n")
       }
-    eventLog.text = todaysLog.toString()
+    message.text = todaysLog.toString()
   }
 
-  private fun updateLog() {
-    eventLog.text = getString(R.string.main_activity_not_yet_implemented)
+  private fun showDeveloperLog() {
+    developerLog.isVisible = true
+    message.isVisible = false
+    logFileAdapter.updateData(appComponent().fileLogger.files.first())
   }
 
   private val onNavigationItemSelectedListener =

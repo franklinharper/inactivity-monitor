@@ -1,8 +1,12 @@
 package com.franklinharper.inactivitymonitor
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
+import fr.bipi.tressence.file.FileLoggerTree
+import java.io.File
 
-fun app() = AppComponent.instance
+fun appComponent() = AppComponent.instance
 
 interface AppComponent {
   val transitionProcessor: TransitionProcessor
@@ -16,6 +20,8 @@ interface AppComponent {
   companion object {
     lateinit var instance: AppComponent
   }
+
+  val fileLogger: FileLoggerTree
 }
 
 class AppModule(application: Context) : AppComponent {
@@ -33,4 +39,20 @@ class AppModule(application: Context) : AppComponent {
     myVibrator = myVibrator,
     myNotificationManager = myNotificationManager
   )
+  @SuppressLint("LogNotTimber")
+  private val logDir = File(application.filesDir, "logs").also { dir ->
+    if (!dir.exists()) {
+      Log.i("LOGGER", "created logDir")
+      dir.mkdir()
+    }
+  }
+
+  override val fileLogger = FileLoggerTree.Builder()
+    .withFileName("file%g.log")
+    .withDir(logDir)
+    .withSizeLimit(1_000_000)
+    .withFileLimit(3)
+    .withMinPriority(Log.DEBUG)
+    .appendToFile(true)
+    .build()
 }

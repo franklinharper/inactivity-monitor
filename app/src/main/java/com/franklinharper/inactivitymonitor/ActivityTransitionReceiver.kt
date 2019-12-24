@@ -11,19 +11,19 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
   // In this case the constructor of this class can't be used to supply the dependency
   // because this class is instantiated by the Android OS.
   // So we fall back to initializing the field.
-  private val transitionProcessor = app().transitionProcessor
+  private val transitionProcessor = appComponent().transitionProcessor
 
   override fun onReceive(context: Context, intent: Intent?) {
-    logDebugInfo(intent)
+    log(intent)
     val transitionResult = ActivityTransitionResult.extractResult(intent)
     transitionProcessor.processTransitionResult(transitionResult)
   }
 
-  private fun logDebugInfo(intent: Intent?) {
-    Timber.d("intent = $intent")
+  private fun log(intent: Intent?) {
+    Timber.v("intent = $intent")
     val bundle = intent?.extras
     bundle?.keySet()?.forEach { key ->
-      Timber.d("extra $key: ${bundle[key]}")
+      Timber.v("extra $key ${bundle[key]}")
     }
   }
 }

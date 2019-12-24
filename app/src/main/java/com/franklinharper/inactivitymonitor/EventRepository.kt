@@ -36,8 +36,8 @@ data class UserActivity(
 }
 
 class EventRepository(
-  val localDb: LocalDb = app().localDb,
-  val remoteDb: RemoteDb = app().remoteDb
+  val localDb: LocalDb = appComponent().localDb,
+  val remoteDb: RemoteDb = appComponent().remoteDb
 ) {
 
   fun mostRecentActivity(end: Long = Instant.now().epochSecond): UserActivity? {
@@ -72,7 +72,7 @@ class EventRepository(
     //      What should the UX for this error be?
     //      Should the user be alerted?
     //      Or should the invalid insertion be ignored?
-    Timber.d("localDb insert: $activityType, $status")
+    Timber.d("localDb insert, $activityType, $status")
     localDb.queries.insert(activityType, status)
   }
 

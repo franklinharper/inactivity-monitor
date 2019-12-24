@@ -60,7 +60,7 @@ class MyNotificationManager(private val context: Context) {
   }
 
   fun sendMoveNotification(type: EventType, minutes: Double) {
-    Timber.d("Move notification: $type, minutes: $minutes")
+    Timber.d("Move notification '$type', '$minutes'")
     val builder = defaultNotificationBuilder(MOVE_CHANNEL_ID)
     builder
       .setCategory(NotificationCompat.CATEGORY_REMINDER)
@@ -70,7 +70,7 @@ class MyNotificationManager(private val context: Context) {
   }
 
   fun sendCurrentActivityNotification(type: EventType) {
-    Timber.d("Current Activity notification: $type")
+    Timber.d("Current Activity notification '$type'")
     val builder = defaultNotificationBuilder(STATUS_CHANNEL_ID)
     builder
       .setContentTitle(context.getString(R.string.notification_current_activity_title))

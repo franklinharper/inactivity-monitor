@@ -38,7 +38,7 @@ class RemoteDb(
 ) {
 
   fun writeEvents(key: EventsKey, events: Collection<Event>, onSuccess: () -> Unit, onFailure: (e: Exception) -> Unit) {
-    Timber.d("key:$key events: $events")
+    Timber.d("key $key, events $events")
     val user = FirebaseAuth.getInstance().currentUser
     if (user == null) {
       throw IllegalStateException("The Firebase user is null")

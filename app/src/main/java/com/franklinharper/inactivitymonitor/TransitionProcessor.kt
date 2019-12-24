@@ -5,10 +5,10 @@ import com.google.android.gms.location.ActivityTransitionResult
 import timber.log.Timber
 
 class TransitionProcessor(
-  private val eventRepository: EventRepository = app().eventRepository,
-  private val alarmScheduler: AlarmScheduler = app().alarmScheduler,
-  private val myVibrator: MyVibrator = app().myVibrator,
-  private val myNotificationManager: MyNotificationManager = app().myNotificationManager
+  private val eventRepository: EventRepository = appComponent().eventRepository,
+  private val alarmScheduler: AlarmScheduler = appComponent().alarmScheduler,
+  private val myVibrator: MyVibrator = appComponent().myVibrator,
+  private val myNotificationManager: MyNotificationManager = appComponent().myNotificationManager
 ) {
 
   companion object {
@@ -52,9 +52,9 @@ class TransitionProcessor(
     transitionResult: ActivityTransitionResult?,
     previousActivity: UserActivity?
   ) {
-    Timber.d("processTransitions previousActivity:$previousActivity")
+    Timber.d("processTransitions, previous ${previousActivity?.type}")
     if (transitionResult == null) {
-      Timber.d("transitionResult: $transitionResult")
+      Timber.d("transitionResult $transitionResult")
       return
     }
 
