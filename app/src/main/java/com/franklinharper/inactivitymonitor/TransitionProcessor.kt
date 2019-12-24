@@ -19,6 +19,11 @@ class TransitionProcessor(
   }
 
   fun processTransitionResult(transitionResult: ActivityTransitionResult?) {
+    if (eventRepository.mostRecentActivity() == null) {
+      // This will occur when the app is launched for the first time.
+      // We'll pretend the user is STILL
+      eventRepository.insert(EventType.STILL_START, Status.NEW)
+    }
     val previousActivity = eventRepository.mostRecentActivity()
     processTransitions(transitionResult, previousActivity)
     val mostRecemtActivity = eventRepository.mostRecentActivity()
