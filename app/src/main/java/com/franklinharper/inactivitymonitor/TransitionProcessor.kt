@@ -88,15 +88,16 @@ class TransitionProcessor(
       // Wait 1 extra second to ensure that the timeout has expired when the app is woken up.
       // Never wait less than MIN_WAIT_SECS.
       EventType.STILL_START -> {
-        max(MIN_WAIT_SECS, STILL_MAX_TIMEOUT_SECS - activity.durationSecs + 1)
+        max(MIN_WAIT_SECS + 1, STILL_MAX_TIMEOUT_SECS - activity.durationSecs + 1)
       }
       else -> null
     }
   }
 
-  private fun userIsStillForTooLong(latestActivity: UserActivity): Boolean =
-// TODO Decide how to handle ActivityType.IN_VEHICLE_START? Is it the same as STILL_START?
-    latestActivity.type == EventType.STILL_START && latestActivity.durationSecs > STILL_MAX_TIMEOUT_SECS
+  private fun userIsStillForTooLong(latestActivity: UserActivity): Boolean {
+    return latestActivity.type == EventType.STILL_START &&
+        latestActivity.durationSecs > STILL_MAX_TIMEOUT_SECS
+  }
 
   private fun remindUserToMove(activity: UserActivity) {
     myNotificationManager.sendMoveNotification(activity.type, activity.durationSecs / 60.0)

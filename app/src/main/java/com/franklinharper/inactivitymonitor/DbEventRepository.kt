@@ -84,7 +84,6 @@ class DbEventRepository(
 
 
   override fun syncToCloud() {
-    // TODO Add a flag to the local DB schema, and use it to track which Activities have already been uploaded
     // TODO Handle the case where it hasn't been possible to sync for more than 24 hours,
     //  and more than one day of activites needs to be written.
     val newEvents = localDb.queries.selectByStatus(Status.NEW).executeAsList()
