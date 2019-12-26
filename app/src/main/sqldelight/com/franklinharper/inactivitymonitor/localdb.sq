@@ -12,7 +12,7 @@ CREATE TABLE event (
   status TEXT AS Status NOT NULL,
 
   -- The unix Epoch timestamp. See https://en.wikipedia.org/wiki/Unix_time
-  time INTEGER AS Timestamp NOT NULL DEFAULT (strftime('%s','now'))
+  occurred INTEGER AS Timestamp NOT NULL DEFAULT (strftime('%s','now'))
     --
     --- time is NOT used to ensure a strict ordering of transitions, the "id" is used for that purpose.
     --
@@ -26,7 +26,13 @@ CREATE TABLE event (
     -- which is ensured by the "id".
 );
 
-CREATE INDEX event_time ON event(time);
+CREATE INDEX event_time ON event(occurred);
+
+
+-- When the DB is created it is assumed that the user is STILL.
+-- Making this assumption removes all of the conditional code required to handle an unknown
+-- previous activity.
+INSERT INTO event (type, status) VALUES ('STILL_START', 'NEW');
 
 selectAll:
 SELECT *
@@ -40,14 +46,14 @@ ORDER BY id DESC LIMIT 1;
 selectRange:
 SELECT *
 FROM event
-WHERE time >= :startInclusive
-      AND time < :endExclusive
-ORDER BY time ASC;
+WHERE occurred >= :startInclusive
+      AND occurred < :endExclusive
+ORDER BY occurred ASC;
 
 selectStarting:
 SELECT *
 FROM event
-WHERE time >= :startInclusive
+WHERE occurred >= :startInclusive
 ORDER BY id DESC;
 
 selectByStatus:

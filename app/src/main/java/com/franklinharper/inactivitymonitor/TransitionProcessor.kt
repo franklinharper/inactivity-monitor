@@ -3,6 +3,8 @@ package com.franklinharper.inactivitymonitor
 import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionResult
 import timber.log.Timber
+import java.time.Instant
+import kotlin.math.max
 
 class TransitionProcessor(
   private val eventRepository: EventRepository = appComponent().eventRepository,
@@ -12,33 +14,23 @@ class TransitionProcessor(
 ) {
 
   companion object {
-    const val DEFAULT_MAX_WAIT_SECS = 30L
+    const val MIN_WAIT_SECS = 30L
     const val STILL_MAX_TIMEOUT_SECS = 30 * 60L // 30 minutes
     const val INFO_VIBRATION_MILLIS = 1000
     const val MOVE_VIBRATION_MILLIS = 3000
   }
 
   fun processTransitionResult(transitionResult: ActivityTransitionResult?) {
-    if (eventRepository.mostRecentActivity() == null) {
-      // This will occur when the app is launched for the first time.
-      // We'll pretend the user is STILL
-      eventRepository.insert(EventType.STILL_START, Status.NEW)
-    }
     val previousActivity = eventRepository.mostRecentActivity()
-    processTransitions(transitionResult, previousActivity)
-    val mostRecemtActivity = eventRepository.mostRecentActivity()
-    val waitSecs = timeoutSecs(mostRecemtActivity)
+    val mostRecentActivity = insertEvents(transitionResult, previousActivity)
+    val waitSecs = waitSecs(mostRecentActivity)
     if (waitSecs == null) {
       alarmScheduler.removePreviousAlarm()
     } else {
       alarmScheduler.replacePreviousAlarm(waitSecs)
     }
-    if (
-      mostRecemtActivity != null
-      && userIsStillForTooLong(mostRecemtActivity)
-      && myNotificationManager.doNotDisturbOff
-    ) {
-      remindUserToMove(mostRecemtActivity)
+    if (userIsStillForTooLong(mostRecentActivity) && myNotificationManager.doNotDisturbOff) {
+      remindUserToMove(mostRecentActivity)
     }
   }
 
@@ -53,27 +45,37 @@ class TransitionProcessor(
   // successive start times.
   //
   // If the Transition events weren't deduped the same calculation would require looping over multiple Transition events.
-  private fun processTransitions(
+  private fun insertEvents(
     transitionResult: ActivityTransitionResult?,
-    previousActivity: UserActivity?
-  ) {
-    Timber.d("processTransitions, previous ${previousActivity?.type}")
+    previousActivity: UserActivity
+  ): UserActivity {
+    Timber.d("processTransitions, previous ${previousActivity.type}")
     if (transitionResult == null) {
-      Timber.d("transitionResult $transitionResult")
-      return
+      Timber.d("Ignoring null transitionResult")
+      return previousActivity
     }
 
-    var previousType = previousActivity?.type
+    var previousType = previousActivity.type
     for (transition in transitionResult.transitionEvents) {
       val newType = EventType.from(transition.activityType)
-      if (newType != previousType && transition.transitionType == ActivityTransition.ACTIVITY_TRANSITION_ENTER) {
-        if (myNotificationManager.doNotDisturbOff) {
-          informUserOfNewActivity(newType)
-        }
+      if (
+        newType != previousType &&
+        transition.transitionType == ActivityTransition.ACTIVITY_TRANSITION_ENTER
+      ) {
+        // TODO move notification logic into a separate component
+//        if (myNotificationManager.doNotDisturbOff) {
+//          informUserOfNewActivity(newType)
+//        }
         eventRepository.insert(newType, Status.NEW)
         previousType = newType
       }
     }
+    val nowSecs = Instant.now().epochSecond
+    return UserActivity.toActivity(
+      // The Id is set to a fake value, but it isn't used in this case so it should be OK.
+      Event.Impl(id = 0, type = previousType, status = Status.NEW, occurred = Timestamp(nowSecs)),
+      end = nowSecs
+    )
   }
 
   private fun informUserOfNewActivity(activityType: EventType) {
@@ -81,11 +83,13 @@ class TransitionProcessor(
     myNotificationManager.sendCurrentActivityNotification(activityType)
   }
 
-  private fun timeoutSecs(activity: UserActivity?): Long? {
+  private fun waitSecs(activity: UserActivity?): Long? {
     return when (activity?.type) {
-      // Wait 1 extra second to ensure that the timeout has elapsed when the
-      // app is woken up.
-      EventType.STILL_START -> STILL_MAX_TIMEOUT_SECS - activity.durationSecs + 1
+      // Wait 1 extra second to ensure that the timeout has expired when the app is woken up.
+      // Never wait less than MIN_WAIT_SECS.
+      EventType.STILL_START -> {
+        max(MIN_WAIT_SECS, STILL_MAX_TIMEOUT_SECS - activity.durationSecs + 1)
+      }
       else -> null
     }
   }

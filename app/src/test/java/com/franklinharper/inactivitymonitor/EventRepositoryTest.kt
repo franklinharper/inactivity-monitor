@@ -108,7 +108,7 @@ class EventRepositoryTest {
           /* now */ Timestamp(59),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 0), type = STILL_START,  id = 0, status = Status.NEW)
+            Event.Impl(occurred = Timestamp( 0), type = STILL_START,  id = 0, status = Status.NEW)
           ),
           /* expected */
           emptyList<UserActivity>()
@@ -121,7 +121,7 @@ class EventRepositoryTest {
           /* now */ Timestamp(59),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 0), type = WALKING_START,  id = 0, status = Status.NEW)
+            Event.Impl(occurred = Timestamp( 0), type = WALKING_START,  id = 0, status = Status.NEW)
           ),
           /* expected */
           listOf(UserActivity(WALKING_START, start = Timestamp( 0), durationSecs = 59))
@@ -137,8 +137,8 @@ class EventRepositoryTest {
           /* now */ Timestamp(59),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 0), type = STILL_START,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 59), type = ON_BICYCLE_START,  id = 1, status = Status.NEW)
+            Event.Impl(occurred = Timestamp( 0), type = STILL_START,  id = 0, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 59), type = ON_BICYCLE_START,  id = 1, status = Status.NEW)
           ),
           /* expected */
           listOf(UserActivity(ON_BICYCLE_START, start = Timestamp( 59), durationSecs = 0))
@@ -150,8 +150,8 @@ class EventRepositoryTest {
           /* now */ Timestamp(159),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 5), type = WALKING_START,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 100), type = STILL_START,  id = 1, status = Status.NEW)
+            Event.Impl(occurred = Timestamp( 5), type = WALKING_START,  id = 0, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 100), type = STILL_START,  id = 1, status = Status.NEW)
           ),
           /* expected */
           listOf(UserActivity(WALKING_START, start = Timestamp( 5), durationSecs = 154))
@@ -163,8 +163,8 @@ class EventRepositoryTest {
           /* now */ Timestamp(121),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 0), type = STILL_START,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 60), type = RUNNING_START,  id = 1, status = Status.NEW)
+            Event.Impl(occurred = Timestamp( 0), type = STILL_START,  id = 0, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 60), type = RUNNING_START,  id = 1, status = Status.NEW)
           ),
           /* expected */
           listOf(
@@ -183,9 +183,9 @@ class EventRepositoryTest {
           /* now */ Timestamp(60),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 0), type = STILL_START,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 0), type = ON_FOOT_START,  id = 1, status = Status.NEW),
-            Event.Impl(time = Timestamp( 0), type = STILL_START,  id = 2, status = Status.NEW)
+            Event.Impl(occurred = Timestamp( 0), type = STILL_START,  id = 0, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 0), type = ON_FOOT_START,  id = 1, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 0), type = STILL_START,  id = 2, status = Status.NEW)
           ),
           /* expected */
           listOf(
@@ -201,9 +201,9 @@ class EventRepositoryTest {
           /* now */ Timestamp(60),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 0), type = ON_FOOT_START,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 1), type = STILL_START,  id = 1, status = Status.NEW),
-            Event.Impl(time = Timestamp( 60), type = ON_BICYCLE_START,  id = 2, status = Status.NEW)
+            Event.Impl(occurred = Timestamp( 0), type = ON_FOOT_START,  id = 0, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 1), type = STILL_START,  id = 1, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 60), type = ON_BICYCLE_START,  id = 2, status = Status.NEW)
           ),
           /* expected */
           listOf(
@@ -218,9 +218,9 @@ class EventRepositoryTest {
           /* now */ Timestamp(140),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 100), type = ON_FOOT_START,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 101), type = STILL_START,  id = 1, status = Status.NEW),
-            Event.Impl(time = Timestamp( 130), type = ON_FOOT_START,  id = 2, status = Status.NEW)
+            Event.Impl(occurred = Timestamp( 100), type = ON_FOOT_START,  id = 0, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 101), type = STILL_START,  id = 1, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 130), type = ON_FOOT_START,  id = 2, status = Status.NEW)
           ),
           /* expected */
           listOf(
@@ -234,9 +234,9 @@ class EventRepositoryTest {
           /* now */ Timestamp(71),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 10), type = ON_FOOT_START,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 69), type = RUNNING_START,  id = 1, status = Status.NEW),
-            Event.Impl(time = Timestamp( 70), type = STILL_START,  id = 2, status = Status.NEW)
+            Event.Impl(occurred = Timestamp( 10), type = ON_FOOT_START,  id = 0, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 69), type = RUNNING_START,  id = 1, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 70), type = STILL_START,  id = 2, status = Status.NEW)
           ),
           /* expected */
           listOf(
@@ -251,9 +251,9 @@ class EventRepositoryTest {
           /* now */ Timestamp(180),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 10), type = ON_FOOT_START,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 70), type = RUNNING_START,  id = 1, status = Status.NEW),
-            Event.Impl(time = Timestamp( 80), type = IN_VEHICLE_START,  id = 2, status = Status.NEW)
+            Event.Impl(occurred = Timestamp( 10), type = ON_FOOT_START,  id = 0, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 70), type = RUNNING_START,  id = 1, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 80), type = IN_VEHICLE_START,  id = 2, status = Status.NEW)
           ),
           /* expected */
           listOf(
@@ -273,10 +273,10 @@ class EventRepositoryTest {
           /* now */ Timestamp(139),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 10), type = STILL_START,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 39), type = RUNNING_START,  id = 1, status = Status.NEW),
-            Event.Impl(time = Timestamp( 40), type = STILL_START,  id = 2, status = Status.NEW),
-            Event.Impl(time = Timestamp( 69), type = RUNNING_START,  id = 3, status = Status.NEW)
+            Event.Impl(occurred = Timestamp( 10), type = STILL_START,  id = 0, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 39), type = RUNNING_START,  id = 1, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 40), type = STILL_START,  id = 2, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 69), type = RUNNING_START,  id = 3, status = Status.NEW)
           ),
           /* expected */
           listOf(
@@ -290,10 +290,10 @@ class EventRepositoryTest {
           /* now */ Timestamp(89),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 10), type = WALKING_START,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 30), type = STILL_START,  id = 1, status = Status.NEW),
-            Event.Impl(time = Timestamp( 59), type = WALKING_START,  id = 2, status = Status.NEW),
-            Event.Impl(time = Timestamp( 60), type = STILL_START,  id = 3, status = Status.NEW)
+            Event.Impl(occurred = Timestamp( 10), type = WALKING_START,  id = 0, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 30), type = STILL_START,  id = 1, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 59), type = WALKING_START,  id = 2, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 60), type = STILL_START,  id = 3, status = Status.NEW)
           ),
           /* expected */
           listOf(
@@ -307,10 +307,10 @@ class EventRepositoryTest {
           /* now */ Timestamp(89),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 10), type = RUNNING_START,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 20), type = STILL_START,  id = 1, status = Status.NEW),
-            Event.Impl(time = Timestamp( 50), type = RUNNING_START,  id = 2, status = Status.NEW),
-            Event.Impl(time = Timestamp( 79), type = STILL_START,  id = 3, status = Status.NEW)
+            Event.Impl(occurred = Timestamp( 10), type = RUNNING_START,  id = 0, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 20), type = STILL_START,  id = 1, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 50), type = RUNNING_START,  id = 2, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 79), type = STILL_START,  id = 3, status = Status.NEW)
           ),
           /* expected */
           listOf(
@@ -326,10 +326,10 @@ class EventRepositoryTest {
           /* now */ Timestamp(109),
           /* input */
           listOf(
-            Event.Impl(time = Timestamp( 10), type = IN_VEHICLE_START,  id = 0, status = Status.NEW),
-            Event.Impl(time = Timestamp( 20), type = STILL_START,  id = 1, status = Status.NEW),
-            Event.Impl(time = Timestamp( 49), type = IN_VEHICLE_START,  id = 2, status = Status.NEW),
-            Event.Impl(time = Timestamp( 79), type = STILL_START,  id = 3, status = Status.NEW)
+            Event.Impl(occurred = Timestamp( 10), type = IN_VEHICLE_START,  id = 0, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 20), type = STILL_START,  id = 1, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 49), type = IN_VEHICLE_START,  id = 2, status = Status.NEW),
+            Event.Impl(occurred = Timestamp( 79), type = STILL_START,  id = 3, status = Status.NEW)
           ),
           /* expected */
           listOf(
@@ -356,7 +356,7 @@ class EventRepositoryTest {
     // Arrange
 
     // Act
-    val result = EventRepository.filterShortStillActivities(
+    val result = DbEventRepository.filterShortStillActivities(
       shortLimit = shortLimit,
       now = now,
       events = events
@@ -395,7 +395,7 @@ class EventRepositoryTest {
     zoneId
   )
 
-  private fun List<Event>.createRepositoryFromList(): EventRepository {
+  private fun List<Event>.createRepositoryFromList(): DbEventRepository {
 
     return createRepository {
       val query = mockk<Query<Event>>().also { every { it.executeAsList() } returns this }
@@ -408,7 +408,7 @@ class EventRepositoryTest {
     }
   }
 
-  private fun createRepository(init: ((activityDb: LocalDb) -> Unit)?): EventRepository {
+  private fun createRepository(init: ((activityDb: LocalDb) -> Unit)?): DbEventRepository {
     val remoteDb = mockk<RemoteDb>()
     val db = mockk<LocalDb>().also {
       val queries = mockk<LocaldbQueries>()
@@ -422,7 +422,7 @@ class EventRepositoryTest {
         init(it)
       }
     }
-    return EventRepository(db, remoteDb)
+    return DbEventRepository(db, remoteDb)
   }
 
 }

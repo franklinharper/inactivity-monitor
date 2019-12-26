@@ -7,7 +7,7 @@ import com.google.android.gms.location.DetectedActivity
 import io.mockk.*
 import org.junit.jupiter.api.Test
 
-internal class ReceiveTransitionTest {
+internal class TransitionProcessorTest {
 
   data class Dependencies(
     val transitionProcessor: TransitionProcessor,
@@ -17,10 +17,10 @@ internal class ReceiveTransitionTest {
   )
 
   @Test
-  fun `Ignore null input list, and schedule the next alarm`() {
+  fun `Ignore null input list`() {
 
     // Arrange
-    val emptyRepository = createEventRepository(latestActivity = null)
+    val emptyRepository = createEventRepository()
     val (
       transitionProcessor,
       myAlarmManager,
@@ -38,16 +38,13 @@ internal class ReceiveTransitionTest {
     verify(exactly = 0) {
       emptyRepository.insert(any(), any())
     }
-    verify(exactly = 1) {
-      myAlarmManager.replacePreviousAlarm(TransitionProcessor.DEFAULT_MAX_WAIT_SECS)
-    }
   }
 
   @Test
   fun `Ignore empty input list, and schedule the next alarm`() {
 
     // Arrange
-    val emptyRepository = createEventRepository(latestActivity = null)
+    val emptyRepository = createEventRepository()
     val (
       transitionProcessor,
       myAlarmManager,
@@ -65,16 +62,13 @@ internal class ReceiveTransitionTest {
     verify(exactly = 0) {
       emptyRepository.insert(any(), any())
     }
-    verify(exactly = 1) {
-      myAlarmManager.replacePreviousAlarm(TransitionProcessor.DEFAULT_MAX_WAIT_SECS)
-    }
   }
 
   @Test
-  fun `Ignore exit transition, and schedule the next alarm`() {
+  fun `Do not insert exit transition`() {
 
     // Arrange
-    val emptyRepository = createEventRepository(latestActivity = null)
+    val emptyRepository = createEventRepository()
     val (
       transitionProcessor,
       myAlarmManager,
@@ -86,7 +80,11 @@ internal class ReceiveTransitionTest {
     transitionProcessor.processTransitionResult(
       ActivityTransitionResult(
         listOf(
-          ActivityTransitionEvent(DetectedActivity.STILL, ActivityTransition.ACTIVITY_TRANSITION_EXIT, 1)
+          ActivityTransitionEvent(
+            DetectedActivity.STILL,
+            ActivityTransition.ACTIVITY_TRANSITION_EXIT,
+            1
+          )
         )
       )
     )
@@ -98,16 +96,13 @@ internal class ReceiveTransitionTest {
     verify(exactly = 0) {
       emptyRepository.insert(any(), any())
     }
-    verify(exactly = 1) {
-      myAlarmManager.replacePreviousAlarm(TransitionProcessor.DEFAULT_MAX_WAIT_SECS)
-    }
   }
 
   @Test
-  fun `Insert the first ENTER transition, and schedule the next alarm`() {
+  fun `Insert the first Event, and schedule the next alarm`() {
 
     // Arrange
-    val emptyRepository = createEventRepository(latestActivity = null)
+    val emptyRepository = createEventRepository()
     val (
       transitionProcessor,
       myAlarmManager,
@@ -119,17 +114,19 @@ internal class ReceiveTransitionTest {
     transitionProcessor.processTransitionResult(
       ActivityTransitionResult(
         listOf(
-          ActivityTransitionEvent(DetectedActivity.STILL, ActivityTransition.ACTIVITY_TRANSITION_ENTER, 1)
+          ActivityTransitionEvent(
+            DetectedActivity.WALKING,
+            ActivityTransition.ACTIVITY_TRANSITION_ENTER,
+            1
+          )
         )
       )
     )
 
     // Assert
     verify(exactly = 1) {
-      emptyRepository.insert(EventType.STILL_START, Status.NEW)
-      myAlarmManager.replacePreviousAlarm(TransitionProcessor.DEFAULT_MAX_WAIT_SECS)
-      myVibrator.vibrate(TransitionProcessor.INFO_VIBRATION_MILLIS)
-      myNotificationManager.sendCurrentActivityNotification(EventType.STILL_START)
+      emptyRepository.insert(EventType.WALKING_START, Status.NEW)
+      myAlarmManager.removePreviousAlarm()
     }
   }
 
@@ -141,13 +138,20 @@ internal class ReceiveTransitionTest {
     myVibrator: MyVibrator = myVibrator(),
     myNotificationManager: MyNotificationManager = myNotificationManager()
   ): Dependencies {
-    val tp = TransitionProcessor(activityRepository, alarmScheduler, myVibrator, myNotificationManager)
+    val tp =
+      TransitionProcessor(activityRepository, alarmScheduler, myVibrator, myNotificationManager)
     return Dependencies(tp, alarmScheduler, myVibrator, myNotificationManager)
   }
 
-  private fun createEventRepository(latestActivity:UserActivity?): EventRepository {
+  private fun createEventRepository(
+    mostRecentActivity: UserActivity = UserActivity(
+      EventType.STILL_START,
+      Timestamp(0),
+      0
+    )
+  ): EventRepository {
     return mockk<EventRepository>().apply {
-      every { mostRecentActivity(any()) } returns latestActivity
+      every { mostRecentActivity(any()) } returns mostRecentActivity
       every { insert(any(), any()) } just Runs
     }
   }
@@ -155,6 +159,7 @@ internal class ReceiveTransitionTest {
   private fun myAlarmManager(): AlarmScheduler {
     return mockk<AlarmScheduler>().apply {
       every { replacePreviousAlarm(any()) } just Runs
+      every { removePreviousAlarm() } just Runs
     }
   }
 

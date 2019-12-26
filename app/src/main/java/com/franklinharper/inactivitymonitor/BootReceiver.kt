@@ -14,7 +14,7 @@ class BootReceiver : BroadcastReceiver() {
 
   override fun onReceive(context: Context, intent: Intent?) {
     Timber.d("Boot broadcast received")
-    myAlarmManager.replacePreviousAlarm(TransitionProcessor.DEFAULT_MAX_WAIT_SECS)
+    myAlarmManager.replacePreviousAlarm(TransitionProcessor.MIN_WAIT_SECS)
   }
 }
 

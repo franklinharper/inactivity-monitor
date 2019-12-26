@@ -35,7 +35,7 @@ class LocalDb(application: Context) {
       // Store enums as text
       typeAdapter = EnumColumnAdapter(EventType.values()),
       statusAdapter = EnumColumnAdapter(Status.values()),
-      timeAdapter = TimestampColunmAdapter()
+      occurredAdapter = TimestampColunmAdapter()
     )
   )
 

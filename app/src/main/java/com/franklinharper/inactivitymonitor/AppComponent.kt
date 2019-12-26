@@ -15,7 +15,7 @@ interface AppComponent {
   val alarmScheduler: AlarmScheduler
   val localDb: LocalDb
   val remoteDb: RemoteDb
-  val eventRepository: EventRepository
+  val eventRepository: DbEventRepository
 
   companion object {
     lateinit var instance: AppComponent
@@ -30,7 +30,7 @@ class AppModule(application: Context) : AppComponent {
   override val myVibrator = MyVibrator(application)
   override val localDb = LocalDb(application)
   override val remoteDb = RemoteDb()
-  override val eventRepository = EventRepository(localDb, remoteDb)
+  override val eventRepository = DbEventRepository(localDb, remoteDb)
   // We can't use default arguments to provide the dependencies,
   // because the default arguments use "app().instance" which would cause an infinite recursion loop.
   override val transitionProcessor = TransitionProcessor(

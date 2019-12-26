@@ -20,14 +20,11 @@ data class UserActivity(
 
   companion object {
 
-    fun toActivity(event: Event?, end: Long): UserActivity? {
-      if (event == null) {
-        return null
-      }
+    fun toActivity(event: Event, end: Long): UserActivity {
       return UserActivity(
         event.type,
-        event.time,
-        end - event.time.epochSecond
+        event.occurred,
+        end - event.occurred.epochSecond
       )
     }
 
@@ -35,18 +32,29 @@ data class UserActivity(
 
 }
 
-class EventRepository(
-  val localDb: LocalDb = appComponent().localDb,
-  val remoteDb: RemoteDb = appComponent().remoteDb
-) {
-
-  fun mostRecentActivity(end: Long = Instant.now().epochSecond): UserActivity? {
-    return UserActivity.toActivity(localDb.queries.selectLatest().executeAsOneOrNull(), end)
-  }
-
+interface EventRepository {
+  fun mostRecentActivity(end: Long = Instant.now().epochSecond): UserActivity
   fun todaysActivities(
     stillnessThreshold: Long,
     now: ZonedDateTime = ZonedDateTime.now()
+  ): List<UserActivity>
+
+  fun insert(activityType: EventType, status: Status)
+  fun syncToCloud()
+}
+
+class DbEventRepository(
+  val localDb: LocalDb = appComponent().localDb,
+  val remoteDb: RemoteDb = appComponent().remoteDb
+) : EventRepository {
+
+  override fun mostRecentActivity(end: Long): UserActivity {
+    return UserActivity.toActivity(localDb.queries.selectLatest().executeAsOne(), end)
+  }
+
+  override fun todaysActivities(
+    stillnessThreshold: Long,
+    now: ZonedDateTime
   ): List<UserActivity> {
     val todaysEvents = todaysEvents(now)
     return filterShortStillActivities(stillnessThreshold, Timestamp.from(now), todaysEvents)
@@ -65,19 +73,17 @@ class EventRepository(
       .executeAsList()
   }
 
-  fun insert(activityType: EventType, status: Status) {
-    // TODO Prevent inserting an EventType that is equivalent to thelatest activity recorded in
-    //      the DB.
-    //
-    //      What should the UX for this error be?
-    //      Should the user be alerted?
-    //      Or should the invalid insertion be ignored?
-    Timber.d("localDb insert, $activityType, $status")
-    localDb.queries.insert(activityType, status)
+  override fun insert(activityType: EventType, status: Status) {
+    if (mostRecentActivity().type == activityType) {
+      Timber.w("localDb insert ignoring duplicate, $activityType, $status")
+    } else {
+      Timber.d("localDb insert, $activityType, $status")
+      localDb.queries.insert(activityType, status)
+    }
   }
 
 
-  fun syncToCloud() {
+  override fun syncToCloud() {
     // TODO Add a flag to the local DB schema, and use it to track which Activities have already been uploaded
     // TODO Handle the case where it hasn't been possible to sync for more than 24 hours,
     //  and more than one day of activites needs to be written.
@@ -85,7 +91,7 @@ class EventRepository(
 
     newEvents
       .groupBy { event ->
-        EventsKey.from(event.time)
+        EventsKey.from(event.occurred)
       }
       .forEach { eventKey, eventList ->
         localDb.transaction {
@@ -99,7 +105,8 @@ class EventRepository(
               val ids = eventList.map { it.id }
               localDb.queries.setStatus(status = Status.UPLOADED, eventKeys = ids)
             },
-            onFailure = { e -> Timber.e(e, "Error adding document")
+            onFailure = { e ->
+              Timber.e(e, "Error adding document")
               rollback()
             }
           )
@@ -123,11 +130,11 @@ class EventRepository(
 
       if (events.size == 1) {
         val first = events.first()
-        val firstDuration = now.epochSecond - first.time.epochSecond
+        val firstDuration = now.epochSecond - first.occurred.epochSecond
         if (first.type == STILL_START && firstDuration < shortLimit) {
           return emptyList()
         } else {
-          return listOf(UserActivity(first.type, first.time, firstDuration))
+          return listOf(UserActivity(first.type, first.occurred, firstDuration))
         }
       }
       // The duration of the previous Activity is calculated using the time difference between the start times of
@@ -138,7 +145,7 @@ class EventRepository(
       // To avoid adding a special case for calculating the duration of the last Activity
       // we add an *end* event to the end of the list.
       val endTransition = Event.Impl(
-        time = now,
+        occurred = now,
         type = EventType.ACTIVITY_END,
         id = Long.MAX_VALUE,
         status = Status.DUMMY
@@ -163,13 +170,13 @@ class EventRepository(
                 activities.add(
                   UserActivity(
                     waitingToAdd.type,
-                    waitingToAdd.time,
+                    waitingToAdd.occurred,
                     waitingToAdd.timeUntil(previous)
                   )
                 )
                 waitingToAdd = null
               }
-              activities.add(UserActivity(STILL_START, previous.time, stillDuration))
+              activities.add(UserActivity(STILL_START, previous.occurred, stillDuration))
             }
           }
 
@@ -181,14 +188,14 @@ class EventRepository(
                 activities.add(
                   UserActivity(
                     waitingToAdd.type,
-                    waitingToAdd.time,
+                    waitingToAdd.occurred,
                     waitingToAdd.timeUntil(previous)
                   )
                 )
                 activities.add(
                   UserActivity(
                     previous.type,
-                    previous.time,
+                    previous.occurred,
                     previous.timeUntil(next)
                   )
                 )
@@ -199,7 +206,7 @@ class EventRepository(
                 activities.add(
                   UserActivity(
                     previous.type,
-                    previous.time,
+                    previous.occurred,
                     previous.timeUntil(next)
                   )
                 )
@@ -213,7 +220,7 @@ class EventRepository(
         activities.add(
           UserActivity(
             waitingToAdd.type,
-            waitingToAdd.time,
+            waitingToAdd.occurred,
             waitingToAdd.timeUntil(events.last())
           )
         )
@@ -229,7 +236,7 @@ class EventRepository(
       if (events.isEmpty()) return
 
       val last = events.last()
-      if (events.isNotEmpty() && now < last.time.epochSecond) {
+      if (events.isNotEmpty() && now < last.occurred.epochSecond) {
         throw IllegalArgumentException("The 'now' timestamp must NOT be before the latest Transition, now: $now, last:  $last")
       }
 
@@ -240,7 +247,7 @@ class EventRepository(
       // Validate ascending order
       var previous = events[0]
       events.drop(1).forEach { next ->
-        if (next.time.epochSecond < previous.time.epochSecond) {
+        if (next.occurred.epochSecond < previous.occurred.epochSecond) {
           throw IllegalArgumentException(
             "The next transition must NOT be before the previous Transition, previous: $previous, next: $next"
           )
@@ -260,12 +267,12 @@ class EventRepository(
       for (i in 1 until events.size) {
         val next = events[i]
         val duration = previous.timeUntil(next)
-        activities.add(UserActivity(previous.type, previous.time, duration))
+        activities.add(UserActivity(previous.type, previous.occurred, duration))
         previous = next
       }
       val latestTransition = events.last()
       val latestActivity = UserActivity(
-        latestTransition.type, latestTransition.time, now - latestTransition.time.epochSecond
+        latestTransition.type, latestTransition.occurred, now - latestTransition.occurred.epochSecond
       )
       activities.add(latestActivity)
       return activities

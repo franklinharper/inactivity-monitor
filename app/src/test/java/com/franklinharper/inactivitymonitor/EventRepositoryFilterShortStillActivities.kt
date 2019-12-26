@@ -13,7 +13,7 @@ class EventRepositoryFilterShortStillActivities {
     // Arrange
 
     // Act
-    val result = EventRepository.filterShortStillActivities(
+    val result = DbEventRepository.filterShortStillActivities(
       shortLimit = 60,
       now = Timestamp(0),
       events = emptyList()
@@ -29,11 +29,11 @@ class EventRepositoryFilterShortStillActivities {
     // Arrange
 
     // Act
-    val result = EventRepository.filterShortStillActivities(
+    val result = DbEventRepository.filterShortStillActivities(
       shortLimit = 60,
       now = Timestamp(59),
       events = listOf(
-        Event.Impl(time = Timestamp(0), type = STILL_START, id = 1, status = Status.NEW)
+        Event.Impl(occurred = Timestamp(0), type = STILL_START, id = 1, status = Status.NEW)
       )
     )
 
@@ -47,12 +47,12 @@ class EventRepositoryFilterShortStillActivities {
     // Arrange
 
     // Act
-    val actual = EventRepository.filterShortStillActivities(
+    val actual = DbEventRepository.filterShortStillActivities(
       shortLimit = 60,
       now = Timestamp(61),
       events = listOf(
-        Event.Impl(id = 1, time = Timestamp(0), type = STILL_START, status = Status.NEW),
-        Event.Impl(id = 2, time = Timestamp(60), type = WALKING_START, status = Status.NEW)
+        Event.Impl(id = 1, occurred = Timestamp(0), type = STILL_START, status = Status.NEW),
+        Event.Impl(id = 2, occurred = Timestamp(60), type = WALKING_START, status = Status.NEW)
       )
     )
 
@@ -70,12 +70,12 @@ class EventRepositoryFilterShortStillActivities {
     // Arrange
 
     // Act
-    val actual = EventRepository.filterShortStillActivities(
+    val actual = DbEventRepository.filterShortStillActivities(
       shortLimit = 60,
       now = Timestamp(120),
       events = listOf(
-        Event.Impl(id = 1, time = Timestamp(0), type = STILL_START, status = Status.NEW),
-        Event.Impl(id = 2, time = Timestamp(59), type = WALKING_START, status = Status.NEW)
+        Event.Impl(id = 1, occurred = Timestamp(0), type = STILL_START, status = Status.NEW),
+        Event.Impl(id = 2, occurred = Timestamp(59), type = WALKING_START, status = Status.NEW)
       )
     )
 
@@ -92,13 +92,13 @@ class EventRepositoryFilterShortStillActivities {
     // Arrange
 
     // Act
-    val result = EventRepository.filterShortStillActivities(
+    val result = DbEventRepository.filterShortStillActivities(
       now = Timestamp(120),
       shortLimit = 60,
       events = listOf(
-        Event.Impl(time = Timestamp(0), type = STILL_START, id = 1, status = Status.NEW),
-        Event.Impl(time = Timestamp(59), type = WALKING_START, id = 2, status = Status.NEW),
-        Event.Impl(time = Timestamp(118), type = STILL_START, id = 3, status = Status.NEW)
+        Event.Impl(occurred = Timestamp(0), type = STILL_START, id = 1, status = Status.NEW),
+        Event.Impl(occurred = Timestamp(59), type = WALKING_START, id = 2, status = Status.NEW),
+        Event.Impl(occurred = Timestamp(118), type = STILL_START, id = 3, status = Status.NEW)
       )
     )
 
@@ -116,13 +116,13 @@ class EventRepositoryFilterShortStillActivities {
     // Arrange
 
     // Act
-    val result = EventRepository.filterShortStillActivities(
+    val result = DbEventRepository.filterShortStillActivities(
       now = Timestamp(62),
       shortLimit = 60,
       events = listOf(
-        Event.Impl(time = Timestamp(0), type = STILL_START, id = 1, status = Status.NEW),
-        Event.Impl(time = Timestamp(1), type = WALKING_START, id = 2, status = Status.NEW),
-        Event.Impl(time = Timestamp(2), type = STILL_START, id = 3, status = Status.NEW)
+        Event.Impl(occurred = Timestamp(0), type = STILL_START, id = 1, status = Status.NEW),
+        Event.Impl(occurred = Timestamp(1), type = WALKING_START, id = 2, status = Status.NEW),
+        Event.Impl(occurred = Timestamp(2), type = STILL_START, id = 3, status = Status.NEW)
       )
     )
 
