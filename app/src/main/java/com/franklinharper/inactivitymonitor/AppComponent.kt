@@ -50,7 +50,7 @@ class AppModule(application: Context) : AppComponent {
   override val fileLogger = FileLoggerTree.Builder()
     .withFileName("file%g.log")
     .withDir(logDir)
-    .withSizeLimit(1_000_000)
+    .withSizeLimit(50_000)
     .withFileLimit(3)
     .withMinPriority(Log.DEBUG)
     .appendToFile(true)
