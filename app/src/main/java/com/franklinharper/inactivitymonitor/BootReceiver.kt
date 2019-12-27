@@ -7,14 +7,14 @@ import timber.log.Timber
 
 class BootReceiver : BroadcastReceiver() {
 
-  // In this case the constructor of this class can't be used to supply the dependency
-// because this class is instantiated by the Android OS.
-// So we fall back to initializing the field.
-  private val myAlarmManager = appComponent().alarmScheduler
+  // This class is instantiated by the Android OS.
+  // Because of this the constructor of this class can't be used to supply dependencies.
+  // So instead we inject the dependency manually.
+  private val alarmScheduler = appComponent().alarmScheduler
 
   override fun onReceive(context: Context, intent: Intent?) {
     Timber.d("Boot broadcast received")
-    myAlarmManager.replacePreviousAlarm(TransitionProcessor.MIN_WAIT_SECS)
+    alarmScheduler.update()
   }
 }
 

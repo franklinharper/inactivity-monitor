@@ -9,9 +9,9 @@ import java.io.File
 fun appComponent() = AppComponent.instance
 
 interface AppComponent {
-  val transitionProcessor: TransitionProcessor
-  val myNotificationManager: MyNotificationManager
-  val myVibrator: MyVibrator
+  val reminder: Reminder
+  val notificationSender: NotificationSender
+  val vibratorWrapper: VibratorWrapper
   val alarmScheduler: AlarmScheduler
   val localDb: LocalDb
   val remoteDb: RemoteDb
@@ -25,19 +25,18 @@ interface AppComponent {
 }
 
 class AppModule(application: Context) : AppComponent {
-  override val alarmScheduler = AlarmScheduler(application)
-  override val myNotificationManager = MyNotificationManager(application)
-  override val myVibrator = MyVibrator(application)
   override val localDb = LocalDb(application)
   override val remoteDb = RemoteDb()
   override val eventRepository = DbEventRepository(localDb, remoteDb)
+  override val alarmScheduler = AlarmScheduler(eventRepository, application)
+  override val notificationSender = NotificationSender(application)
+  override val vibratorWrapper = VibratorWrapper(application)
   // We can't use default arguments to provide the dependencies,
   // because the default arguments use "app().instance" which would cause an infinite recursion loop.
-  override val transitionProcessor = TransitionProcessor(
+  override val reminder = Reminder(
     eventRepository = eventRepository,
-    alarmScheduler = alarmScheduler,
-    myVibrator = myVibrator,
-    myNotificationManager = myNotificationManager
+    vibratorWrapper = vibratorWrapper,
+    notificationSender = notificationSender
   )
   @SuppressLint("LogNotTimber")
   private val logDir = File(application.filesDir, "logs").also { dir ->

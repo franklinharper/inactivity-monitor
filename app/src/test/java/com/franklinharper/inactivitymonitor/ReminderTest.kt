@@ -1,19 +1,15 @@
 package com.franklinharper.inactivitymonitor
 
-import com.google.android.gms.location.ActivityTransition
-import com.google.android.gms.location.ActivityTransitionEvent
-import com.google.android.gms.location.ActivityTransitionResult
-import com.google.android.gms.location.DetectedActivity
 import io.mockk.*
 import org.junit.jupiter.api.Test
 
-internal class TransitionProcessorTest {
+internal class ReminderTest {
 
   data class Dependencies(
-    val transitionProcessor: TransitionProcessor,
+    val reminder: Reminder,
     val alarmScheduler: AlarmScheduler,
-    val myVibrator: MyVibrator,
-    val myNotificationManager: MyNotificationManager
+    val vibratorWrapper: VibratorWrapper,
+    val notificationSender: NotificationSender
   )
 
   @Test
@@ -23,13 +19,12 @@ internal class TransitionProcessorTest {
     val emptyRepository = createEventRepository()
     val (
       transitionProcessor,
-      myAlarmManager,
       myVibrator,
       myNotificationManager
     ) = createDependencies(emptyRepository)
 
     // Act
-    transitionProcessor.processTransitionResult(null)
+    transitionProcessor.update()
 
     // Assert
     verify {
@@ -47,13 +42,12 @@ internal class TransitionProcessorTest {
     val emptyRepository = createEventRepository()
     val (
       transitionProcessor,
-      myAlarmManager,
       myVibrator,
       myNotificationManager
     ) = createDependencies(emptyRepository)
 
     // Act
-    transitionProcessor.processTransitionResult(ActivityTransitionResult(listOf<ActivityTransitionEvent>()))
+    transitionProcessor.update()
 
     // Assert
     verify {
@@ -71,23 +65,12 @@ internal class TransitionProcessorTest {
     val emptyRepository = createEventRepository()
     val (
       transitionProcessor,
-      myAlarmManager,
       myVibrator,
       myNotificationManager
     ) = createDependencies(emptyRepository)
 
     // Act
-    transitionProcessor.processTransitionResult(
-      ActivityTransitionResult(
-        listOf(
-          ActivityTransitionEvent(
-            DetectedActivity.STILL,
-            ActivityTransition.ACTIVITY_TRANSITION_EXIT,
-            1
-          )
-        )
-      )
-    )
+    transitionProcessor.update()
 
     // Assert
     verify {
@@ -104,43 +87,29 @@ internal class TransitionProcessorTest {
     // Arrange
     val emptyRepository = createEventRepository()
     val (
-      transitionProcessor,
-      myAlarmManager,
-      myVibrator,
-      myNotificationManager
+      transitionProcessor
     ) = createDependencies(emptyRepository)
 
     // Act
-    transitionProcessor.processTransitionResult(
-      ActivityTransitionResult(
-        listOf(
-          ActivityTransitionEvent(
-            DetectedActivity.WALKING,
-            ActivityTransition.ACTIVITY_TRANSITION_ENTER,
-            1
-          )
-        )
-      )
-    )
+    transitionProcessor.update()
 
     // Assert
     verify(exactly = 1) {
       emptyRepository.insert(EventType.WALKING_START, Status.NEW)
-      myAlarmManager.removePreviousAlarm()
     }
   }
 
   // ============================ Only Utility functions below ============================
 
   private fun createDependencies(
-    activityRepository: EventRepository,
+    eventRepository: EventRepository,
     alarmScheduler: AlarmScheduler = myAlarmManager(),
-    myVibrator: MyVibrator = myVibrator(),
-    myNotificationManager: MyNotificationManager = myNotificationManager()
+    vibratorWrapper: VibratorWrapper = myVibrator(),
+    notificationSender: NotificationSender = myNotificationManager()
   ): Dependencies {
     val tp =
-      TransitionProcessor(activityRepository, alarmScheduler, myVibrator, myNotificationManager)
-    return Dependencies(tp, alarmScheduler, myVibrator, myNotificationManager)
+      Reminder(eventRepository, vibratorWrapper, notificationSender)
+    return Dependencies(tp, alarmScheduler, vibratorWrapper, notificationSender)
   }
 
   private fun createEventRepository(
@@ -158,19 +127,18 @@ internal class TransitionProcessorTest {
 
   private fun myAlarmManager(): AlarmScheduler {
     return mockk<AlarmScheduler>().apply {
-      every { replacePreviousAlarm(any()) } just Runs
-      every { removePreviousAlarm() } just Runs
+      every { update() } just Runs
     }
   }
 
-  private fun myVibrator(): MyVibrator {
-    return mockk<MyVibrator>().apply {
+  private fun myVibrator(): VibratorWrapper {
+    return mockk<VibratorWrapper>().apply {
       every { vibrate(any()) } just Runs
     }
   }
 
-  private fun myNotificationManager(): MyNotificationManager {
-    return mockk<MyNotificationManager>().apply {
+  private fun myNotificationManager(): NotificationSender {
+    return mockk<NotificationSender>().apply {
       every { doNotDisturbOff } returns true
       every { sendCurrentActivityNotification(any()) } just Runs
     }

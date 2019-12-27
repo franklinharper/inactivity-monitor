@@ -9,7 +9,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import timber.log.Timber
 
-class MyNotificationManager(private val context: Context) {
+class NotificationSender(private val context: Context) {
 
   companion object {
     private const val MOVE_CHANNEL_ID = "MOVE"
@@ -65,7 +65,6 @@ class MyNotificationManager(private val context: Context) {
     builder
       .setCategory(NotificationCompat.CATEGORY_REMINDER)
       .setContentTitle(context.getString(R.string.notification_time_to_move_title))
-      .setContentText(context.getString(R.string.notification_time_to_move_text, type, minutes))
     notificationManager.notify(NOTIFICATION_ID, builder.build())
   }
 

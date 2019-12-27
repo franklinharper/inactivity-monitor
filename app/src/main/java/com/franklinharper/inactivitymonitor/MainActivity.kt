@@ -42,9 +42,9 @@ class MainActivity : AppCompatActivity() {
   //
   // So we fall back to injecting dependencies directly into the fields.
   private val activityRepository = appComponent().eventRepository
-  private val myNotificationManager = appComponent().myNotificationManager
+  private val myNotificationManager = appComponent().notificationSender
   private val myAlarmManager = appComponent().alarmScheduler
-  private val myVibrator = appComponent().myVibrator
+  private val myVibrator = appComponent().vibratorWrapper
   private val logFileAdapter = LogFileAdapter()
   private lateinit var auth: FirebaseAuth
 
@@ -62,9 +62,7 @@ class MainActivity : AppCompatActivity() {
     initializeLogView()
     showActivity()
 
-    // TODO remove call to myAlarmManager below
-    //  Instead call the TransitionProcessor, and let it schedule the wake up call intelligently.
-    myAlarmManager.replacePreviousAlarm(30)
+    myAlarmManager.update()
 
     auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser

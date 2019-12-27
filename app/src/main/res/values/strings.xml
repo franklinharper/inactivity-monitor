@@ -22,7 +22,6 @@
   <string name="notification_status_channel_name">Current activity</string>
   <string name="notification_status_channel_description">Shows what your activity currently is</string>
   <string name="notification_time_to_move_title">Time to move!</string>
-  <string name="notification_time_to_move_text">%1$s for %2$.2f minutes</string>
   <string name="notification_current_activity_title">Current activity</string>
   <string name="notification_current_activity_text">%1$s</string>
   <string name="action_record_walking">I walked</string>
