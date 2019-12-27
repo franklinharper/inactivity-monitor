@@ -16,21 +16,23 @@ class TransitionProcessor(
   companion object {
     const val MIN_WAIT_SECS = 30L
     const val STILL_MAX_TIMEOUT_SECS = 30 * 60L // 30 minutes
-    const val INFO_VIBRATION_MILLIS = 1000
+    //    const val INFO_VIBRATION_MILLIS = 1000
     const val MOVE_VIBRATION_MILLIS = 3000
+    const val DUMMY_ID = -1L
   }
 
   fun processTransitionResult(transitionResult: ActivityTransitionResult?) {
-    val previousActivity = eventRepository.mostRecentActivity()
-    val mostRecentActivity = insertEvents(transitionResult, previousActivity)
+    val mostRecentActivity = insertEvents(transitionResult)
     val waitSecs = waitSecs(mostRecentActivity)
     if (waitSecs == null) {
       alarmScheduler.removePreviousAlarm()
     } else {
       alarmScheduler.replacePreviousAlarm(waitSecs)
     }
-    if (userIsStillForTooLong(mostRecentActivity) && myNotificationManager.doNotDisturbOff) {
+    if (userIsStillForTooLong(mostRecentActivity)) {
       remindUserToMove(mostRecentActivity)
+    } else {
+      myNotificationManager.cancelNotification()
     }
   }
 
@@ -45,10 +47,8 @@ class TransitionProcessor(
   // successive start times.
   //
   // If the Transition events weren't deduped the same calculation would require looping over multiple Transition events.
-  private fun insertEvents(
-    transitionResult: ActivityTransitionResult?,
-    previousActivity: UserActivity
-  ): UserActivity {
+  private fun insertEvents(transitionResult: ActivityTransitionResult?): UserActivity {
+    val previousActivity = eventRepository.mostRecentActivity()
     Timber.d("processTransitions, previous ${previousActivity.type}")
     if (transitionResult == null) {
       Timber.d("Ignoring null transitionResult")
@@ -62,7 +62,6 @@ class TransitionProcessor(
         newType != previousType &&
         transition.transitionType == ActivityTransition.ACTIVITY_TRANSITION_ENTER
       ) {
-        // TODO move notification logic into a separate component
 //        if (myNotificationManager.doNotDisturbOff) {
 //          informUserOfNewActivity(newType)
 //        }
@@ -72,16 +71,22 @@ class TransitionProcessor(
     }
     val nowSecs = Instant.now().epochSecond
     return UserActivity.toActivity(
-      // The Id is set to a fake value, but it isn't used in this case so it should be OK.
-      Event.Impl(id = 0, type = previousType, status = Status.NEW, occurred = Timestamp(nowSecs)),
+      // The ID is required by the DB schema but it is never used by the app.
+      // Since the ID is never used by the app we can set it to a DUMMY value.
+      Event.Impl(
+        id = DUMMY_ID,
+        type = previousType,
+        status = Status.NEW,
+        occurred = Timestamp(nowSecs)
+      ),
       end = nowSecs
     )
   }
 
-  private fun informUserOfNewActivity(activityType: EventType) {
-    myVibrator.vibrate(INFO_VIBRATION_MILLIS)
-    myNotificationManager.sendCurrentActivityNotification(activityType)
-  }
+//  private fun informUserOfNewActivity(activityType: EventType) {
+//    myVibrator.vibrate(INFO_VIBRATION_MILLIS)
+//    myNotificationManager.sendCurrentActivityNotification(activityType)
+//  }
 
   private fun waitSecs(activity: UserActivity?): Long? {
     return when (activity?.type) {
@@ -99,9 +104,12 @@ class TransitionProcessor(
         latestActivity.durationSecs > STILL_MAX_TIMEOUT_SECS
   }
 
+  // TODO move notification logic into a separate component
   private fun remindUserToMove(activity: UserActivity) {
     myNotificationManager.sendMoveNotification(activity.type, activity.durationSecs / 60.0)
-    myVibrator.vibrate(MOVE_VIBRATION_MILLIS)
+    if (myNotificationManager.doNotDisturbOff) {
+      myVibrator.vibrate(MOVE_VIBRATION_MILLIS)
+    }
   }
 }
 
