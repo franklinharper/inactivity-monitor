@@ -16,6 +16,7 @@ class MyApplication : Application() {
   override fun onCreate() {
     super.onCreate()
     AppComponent.instance = AppModule(this)
+    startLoggingToFile()
 
     if (BuildConfig.DEBUG) {
       addDebugLogger()
@@ -23,7 +24,6 @@ class MyApplication : Application() {
       // TODO configure production logging
       // Timber.plant(CrashReportingTree ())
     }
-    startLoggingToFile()
   }
 
   private fun addDebugLogger() {
@@ -34,6 +34,6 @@ class MyApplication : Application() {
   private fun startLoggingToFile() {
     Timber.plant(AppComponent.instance.fileLogger)
     Timber.d("========================")
-    Timber.d("Logging to files enabled")
+    Timber.d("App Launch, Version ${BuildConfig.VERSION_NAME}")
   }
 }

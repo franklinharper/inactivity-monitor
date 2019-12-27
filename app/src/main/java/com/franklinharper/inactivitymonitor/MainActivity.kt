@@ -4,10 +4,9 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Bundle
 import android.text.SpannableStringBuilder
-import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.toSpannable
 import androidx.core.view.isVisible
@@ -27,8 +26,8 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-// TODO display version info
 // TODO make log files smaller
+// TODO Log exceptions to Timber
 // TODO Handle case where the phone is turned off for a while by receiving shutdown broadcasts, and insert a row into the DB. See https://www.google.com/search?client=firefox-b-1-d&q=android+receive+broadcast+when+shutdown
 // TODO make MainActivity reactive.
 // TODO vibrate on the watch
@@ -154,11 +153,8 @@ class MainActivity : AppCompatActivity() {
         myNotificationManager.sendMoveNotification(EventType.STILL_START, 0.0)
         true
       }
-      R.id.action_settings -> {
-        Toast.makeText(applicationContext, "Not implemented", Toast.LENGTH_SHORT).apply {
-          setGravity(Gravity.TOP or Gravity.END, 0, 200)
-          show()
-        }
+      R.id.action_about -> {
+        showAbout()
         true
       }
       else -> {
@@ -168,6 +164,15 @@ class MainActivity : AppCompatActivity() {
       }
     }
 
+  }
+
+  private fun showAbout() {
+    AlertDialog.Builder(this)
+      .setTitle(R.string.action_about)
+      .setMessage(getString(R.string.main_activity_version) + " ${BuildConfig.VERSION_NAME}")
+      .setPositiveButton(android.R.string.ok, null)
+      .create()
+      .show()
   }
 
   private fun initializeBottomNavView() =
