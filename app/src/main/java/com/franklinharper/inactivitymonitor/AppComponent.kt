@@ -9,6 +9,10 @@ import java.io.File
 fun appComponent() = AppComponent.instance
 
 interface AppComponent {
+  // The activityRecognitionSubscriber is not called anywhere in,the app.
+  // But it must be instantiated so that the app will receive
+  // updates when a new user activity is recognized.
+  val activityRecognitionSubscriber: ActivityRecognitionSubscriber
   val reminder: Reminder
   val notificationSender: NotificationSender
   val vibratorWrapper: VibratorWrapper
@@ -25,6 +29,7 @@ interface AppComponent {
 }
 
 class AppModule(application: Context) : AppComponent {
+  override val activityRecognitionSubscriber = ActivityRecognitionSubscriber(application)
   override val localDb = LocalDb(application)
   override val remoteDb = RemoteDb()
   override val eventRepository = DbEventRepository(localDb, remoteDb)

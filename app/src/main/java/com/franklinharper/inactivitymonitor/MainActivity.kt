@@ -1,38 +1,28 @@
 package com.franklinharper.inactivitymonitor
 
-import android.app.PendingIntent
 import android.content.Intent
 import android.os.Bundle
-import android.text.SpannableStringBuilder
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
-import androidx.core.text.toSpannable
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.firebase.ui.auth.AuthUI
-import com.google.android.gms.location.ActivityRecognition
-import com.google.android.gms.location.ActivityTransition
-import com.google.android.gms.location.ActivityTransitionRequest
-import com.google.android.gms.location.DetectedActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
-import timber.log.Timber
 import java.text.DecimalFormat
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+// TODO snooze vibrations and notifications
 // TODO Handle case where the phone is turned off for a while by receiving shutdown broadcasts, and insert a row into the DB. See https://www.google.com/search?client=firefox-b-1-d&q=android+receive+broadcast+when+shutdown
-// TODO make MainActivity reactive.
-// TODO vibrate on the watch
-// TODO detect activity transitions on the watch
 
 enum class RequestCode {
   SIGN_IN
@@ -45,9 +35,9 @@ class MainActivity : AppCompatActivity() {
   //
   // So we fall back to injecting dependencies directly into the fields.
   private val activityRepository = appComponent().eventRepository
-  private val myNotificationManager = appComponent().notificationSender
-  private val myAlarmManager = appComponent().alarmScheduler
-  private val myVibrator = appComponent().vibratorWrapper
+  private val notificationSender = appComponent().notificationSender
+  private val alarmScheduler = appComponent().alarmScheduler
+  private val vibratorWrapper = appComponent().vibratorWrapper
   private val logFileAdapter = LogFileAdapter()
   private lateinit var auth: FirebaseAuth
 
@@ -62,11 +52,10 @@ class MainActivity : AppCompatActivity() {
     setContentView(R.layout.activity_main)
     setSupportActionBar(findViewById(R.id.my_toolbar))
     initializeBottomNavView()
-    initializeActivityDetection()
     initializeLogView()
     showActivity()
 
-    myAlarmManager.update()
+    alarmScheduler.update()
 
     auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
@@ -146,11 +135,11 @@ class MainActivity : AppCompatActivity() {
         true
       }
       R.id.action_vibrate -> {
-        myVibrator.vibrate(2500)
+        vibratorWrapper.vibrate(2500)
         true
       }
       R.id.action_notify -> {
-        myNotificationManager.sendMoveNotification(EventType.STILL_START, 0.0)
+        notificationSender.sendMoveNotification(EventType.STILL_START, 0.0)
         true
       }
       R.id.action_about -> {
@@ -178,59 +167,6 @@ class MainActivity : AppCompatActivity() {
   private fun initializeBottomNavView() =
     navigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
 
-  private fun initializeActivityDetection() {
-    // Detect when activities start (aka ACTIVITY_TRANSITION_ENTER)
-    val transitions = listOf(
-      createActivityTransition(
-        DetectedActivity.IN_VEHICLE,
-        ActivityTransition.ACTIVITY_TRANSITION_ENTER
-      )
-      ,
-      createActivityTransition(
-        DetectedActivity.ON_BICYCLE,
-        ActivityTransition.ACTIVITY_TRANSITION_ENTER
-      )
-      ,
-      createActivityTransition(
-        DetectedActivity.ON_FOOT,
-        ActivityTransition.ACTIVITY_TRANSITION_ENTER
-      )
-      ,
-      createActivityTransition(DetectedActivity.STILL, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-      ,
-      createActivityTransition(
-        DetectedActivity.WALKING,
-        ActivityTransition.ACTIVITY_TRANSITION_ENTER
-      )
-      ,
-      createActivityTransition(
-        DetectedActivity.RUNNING,
-        ActivityTransition.ACTIVITY_TRANSITION_ENTER
-      )
-      // TILTING is not supported. When it is added to this list,
-      // requestActivityTransitionUpdates throws an exception with this message:
-      //    SecurityException: ActivityTransitionRequest specified an unsupported transition activity type
-      // , createActivityTransition(DetectedActivity.TILTING, ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-    )
-
-    val intent = Intent(this, ActivityTransitionReceiver::class.java)
-
-    val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
-
-    val client = ActivityRecognition.getClient(this)
-
-    val activityTransitionRequest = ActivityTransitionRequest(transitions)
-    val task = client.requestActivityTransitionUpdates(activityTransitionRequest, pendingIntent)
-
-    task.addOnSuccessListener {
-      Timber.d("Success")
-    }
-
-    task.addOnFailureListener { e: Exception ->
-      Timber.e(e, "Fail")
-    }
-  }
-
   private fun updateSelectedNavigationItem(id: Int) {
     when (id) {
       R.id.navigation_activity -> showActivity()
@@ -246,7 +182,7 @@ class MainActivity : AppCompatActivity() {
     val latestActivity = activityRepository.mostRecentActivity()
     val minutes = minutesFormat.format(latestActivity.durationSecs / 60.0)
     val activityType = getString(latestActivity.type.stringId)
-    val dndStatus = if (myNotificationManager.doNotDisturbOn)
+    val dndStatus = if (notificationSender.doNotDisturbOn)
       getText(R.string.main_activity_do_not_disturb_on)
     else
       getText(R.string.main_activity_do_not_disturb_off)
@@ -255,7 +191,7 @@ class MainActivity : AppCompatActivity() {
       append("\nYou have been ")
       bold { append(activityType) }
       append(" for the last ")
-      bold {  append(minutes) }
+      bold { append(minutes) }
       append(" minutes\n")
       append(dndStatus)
     }
@@ -293,11 +229,5 @@ class MainActivity : AppCompatActivity() {
       return@OnNavigationItemSelectedListener true
     }
 
-  private fun createActivityTransition(type: Int, transition: Int): ActivityTransition {
-    return ActivityTransition.Builder()
-      .setActivityType(type)
-      .setActivityTransition(transition)
-      .build()
-  }
 }
 
