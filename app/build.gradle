@@ -23,7 +23,7 @@ android {
         minSdkVersion 26
         // TODO Figure out a way for ActivityTransitionReceiver to receive broadcasts when
         //  targetSdkVersion is set to 29
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 1
         versionName "0.1.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
