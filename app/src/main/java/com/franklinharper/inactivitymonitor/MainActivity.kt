@@ -8,6 +8,8 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.text.bold
+import androidx.core.text.buildSpannedString
 import androidx.core.text.toSpannable
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -22,6 +24,7 @@ import com.google.firebase.auth.FirebaseAuth
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
+import java.text.DecimalFormat
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -52,6 +55,7 @@ class MainActivity : AppCompatActivity() {
   private val zoneId = ZoneId.systemDefault()
   private val timeFormatter = DateTimeFormatter.ofPattern("kk:mm:ss").withZone(zoneId)
   private val compositeDisposable = CompositeDisposable()
+  private val minutesFormat = DecimalFormat("0.0")
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -239,27 +243,22 @@ class MainActivity : AppCompatActivity() {
   private fun showActivity() {
     message.isVisible = true
     developerLog.isVisible = false
-    val contents = SpannableStringBuilder()
     val latestActivity = activityRepository.mostRecentActivity()
-    if (latestActivity == null) {
-      contents.append(getString(R.string.main_activity_no_activies_detectd))
-    } else {
-      val minutes = latestActivity.durationSecs / 60.0
-      contents.append(
-        getString(
-          R.string.main_activity_current_status,
-          latestActivity.type,
-          minutes
-        )
-      )
-    }
+    val minutes = minutesFormat.format(latestActivity.durationSecs / 60.0)
+    val activityType = getString(latestActivity.type.stringId)
     val dndStatus = if (myNotificationManager.doNotDisturbOn)
       getText(R.string.main_activity_do_not_disturb_on)
     else
       getText(R.string.main_activity_do_not_disturb_off)
 
-    contents.append(dndStatus)
-    message.text = contents.toSpannable()
+    message.text = buildSpannedString {
+      append("\nYou have been ")
+      bold { append(activityType) }
+      append(" for the last ")
+      bold {  append(minutes) }
+      append(" minutes\n")
+      append(dndStatus)
+    }
   }
 
   private fun showEvents() {
@@ -275,8 +274,9 @@ class MainActivity : AppCompatActivity() {
       .forEach { activity ->
         // Go backwards in time displaying the duration of each successive activity
         val timestamp = timeFormatter.format(activity.start.toZonedDateTime())
-        val minutes = "%.2f".format(activity.durationSecs / 60.0)
-        todaysLog.append("$timestamp => ${activity.type} $minutes minutes\n")
+        val minutes = "%.1f".format(activity.durationSecs / 60.0)
+        val activityType = getString(activity.type.stringId)
+        todaysLog.append("$timestamp => ${activityType} $minutes minutes\n")
       }
     message.text = todaysLog.toString()
   }

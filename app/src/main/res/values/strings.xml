@@ -9,9 +9,6 @@
   <string name="action_notify">Test notification</string>
   <string name="action_about">About</string>
 
-  <string name="main_activity_not_yet_implemented">Not yet implemented</string>
-  <string name="main_activity_no_activies_detectd">No activities have been detected, try moving around with your phone in your pocket</string>
-  <string name="main_activity_current_status">\nCurrent status\n\n    %1$s for %2$.2f minutes."</string>
   <string name="main_activity_do_not_disturb_on">\n\n<b>Do Not Disturb is ON.</b>\n\nYou will NOT receive reminders to move.</string>
   <string name="main_activity_do_not_disturb_off">\n\nDo Not Disturb mode is <b>OFF</b>.</string>
   <string name="main_activity_version">Version</string>
@@ -25,4 +22,14 @@
   <string name="notification_current_activity_title">Current activity</string>
   <string name="notification_current_activity_text">%1$s</string>
   <string name="action_record_walking">I walked</string>
+
+  <!-- Event types-->
+  <string name="event_type_in_vehicle">IN VEHICLE</string>
+  <string name="event_type_on_bicycle">ON BICYCLE</string>
+  <string name="event_type_on_foot">ON FOOT</string>
+  <string name="event_type_still">STILL</string>
+  <string name="event_type_walking">WALKING</string>
+  <string name="event_type_running">RUNNING</string>
+  <string name="event_type_unknown">UNKNOWN</string>
+  <string name="event_type_end">END</string>
 </resources>
