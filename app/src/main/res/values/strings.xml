@@ -12,6 +12,7 @@
   <string name="main_activity_do_not_disturb_on">\n\n<b>Do Not Disturb is ON.</b>\n\nYou will NOT receive reminders to move.</string>
   <string name="main_activity_do_not_disturb_off">\n\nDo Not Disturb mode is <b>OFF</b>.</string>
   <string name="main_activity_version">Version</string>
+  <string name="main_activity_event_log">"%1$s %2$s for %3$s minutes\n"</string>
 
   <!-- Notifications -->
   <string name="notification_move_channel_name">Reminders to move</string>

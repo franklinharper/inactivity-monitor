@@ -212,7 +212,7 @@ class MainActivity : AppCompatActivity() {
         val timestamp = timeFormatter.format(activity.start.toZonedDateTime())
         val minutes = "%.1f".format(activity.durationSecs / 60.0)
         val activityType = getString(activity.type.stringId)
-        todaysLog.append("$timestamp => ${activityType} $minutes minutes\n")
+        todaysLog.append(getString(R.string.main_activity_event_log, timestamp, activityType, minutes))
       }
     message.text = todaysLog.toString()
   }
