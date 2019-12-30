@@ -20,6 +20,7 @@ interface AppComponent {
   val localDb: LocalDb
   val remoteDb: RemoteDb
   val eventRepository: DbEventRepository
+  val settings: Settings
 
   companion object {
     lateinit var instance: AppComponent
@@ -29,19 +30,21 @@ interface AppComponent {
 }
 
 class AppModule(application: Context) : AppComponent {
+  override val notificationSender = NotificationSender(application)
+  override val vibratorWrapper = VibratorWrapper(application)
+  override val settings = Settings(application)
   override val activityRecognitionSubscriber = ActivityRecognitionSubscriber(application)
   override val localDb = LocalDb(application)
   override val remoteDb = RemoteDb()
   override val eventRepository = DbEventRepository(localDb, remoteDb)
   override val alarmScheduler = AlarmScheduler(eventRepository, application)
-  override val notificationSender = NotificationSender(application)
-  override val vibratorWrapper = VibratorWrapper(application)
   // We can't use default arguments to provide the dependencies,
   // because the default arguments use "app().instance" which would cause an infinite recursion loop.
   override val reminder = Reminder(
     eventRepository = eventRepository,
     vibratorWrapper = vibratorWrapper,
-    notificationSender = notificationSender
+    notificationSender = notificationSender,
+    settings = settings
   )
   @SuppressLint("LogNotTimber")
   private val logDir = File(application.filesDir, "logs").also { dir ->

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <PreferenceCategory app:title="@string/settings_reminders">
+
+    <SwitchPreferenceCompat
+        app:key="@string/pref_key_vibrate"
+        app:title="@string/settings_vibrate" />
+
+    <SwitchPreferenceCompat
+        app:key="notify"
+        app:title="@string/settings_notify" />
+
+  </PreferenceCategory>
+</PreferenceScreen>

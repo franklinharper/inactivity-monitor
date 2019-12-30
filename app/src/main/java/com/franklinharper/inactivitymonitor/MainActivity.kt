@@ -142,6 +142,10 @@ class MainActivity : AppCompatActivity() {
         notificationSender.sendMoveNotification(EventType.STILL_START, 0.0)
         true
       }
+      R.id.action_settings -> {
+        startActivity(SettingsActivity.newIntent(this))
+        true
+      }
       R.id.action_about -> {
         showAbout()
         true

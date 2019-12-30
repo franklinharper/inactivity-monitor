@@ -44,7 +44,7 @@ class AlarmScheduler(
     val maxWaitSecs = 30L * 60L
     return when (activity?.type) {
       EventType.STILL_START -> {
-        // Never wait less than MIN_WAIT_SECS.
+        // Never wait less than minWaitSecs.
         max(minWaitSecs, maxWaitSecs - activity.durationSecs)
       }
       else -> maxWaitSecs

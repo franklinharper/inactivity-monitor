@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:dist="http://schemas.android.com/apk/distribution"
-          package="com.franklinharper.inactivitymonitor">
+    xmlns:dist="http://schemas.android.com/apk/distribution"
+    package="com.franklinharper.inactivitymonitor">
 
-  <dist:module dist:instant="true"/>
+  <dist:module dist:instant="true" />
 
   <!-- ACTIVITY_RECOGNITION permissions changed for API 29 and above -->
   <!--  New permission for API >= 29 -->
-  <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
+  <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
   <!--  Old permission for API <= 28 -->
-  <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION"/>
+  <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
 
-  <uses-permission android:name="android.permission.VIBRATE"/>
-  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+  <uses-permission android:name="android.permission.VIBRATE" />
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
   <application
       android:name=".MyApplication"
@@ -26,21 +26,24 @@
         android:name=".MainActivity"
         android:label="@string/app_name">
       <intent-filter>
-        <action android:name="android.intent.action.MAIN"/>
-
-        <category android:name="android.intent.category.LAUNCHER"/>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
 
+    <activity
+        android:name=".SettingsActivity"
+        android:label="@string/action_settings" />
+
     <receiver android:name="com.franklinharper.inactivitymonitor.BootReceiver">
       <intent-filter>
-        <action android:name="android.intent.action.BOOT_COMPLETED"/>
+        <action android:name="android.intent.action.BOOT_COMPLETED" />
       </intent-filter>
     </receiver>
 
     <receiver android:name=".ActivityTransitionReceiver">
       <intent-filter>
-        <action android:name="com.franklinharper.inactivitymonitor.TRANSITION_RECOGNITION"/>
+        <action android:name="com.franklinharper.inactivitymonitor.TRANSITION_RECOGNITION" />
       </intent-filter>
     </receiver>
 
