@@ -8,25 +8,33 @@ import android.os.Vibrator
 import androidx.core.content.getSystemService
 import timber.log.Timber
 
-class VibratorWrapper(context: Context) {
+class VibratorWrapper(context: Context, val snooze: Snooze) {
 
-    private val vibrator = context.getSystemService<Vibrator>()!!
+  private val vibrator = context.getSystemService<Vibrator>()!!
 
-    fun vibrate(milliseconds: Long) {
-        if (vibrator.hasVibrator()) {
-            Timber.i("Start vibration for $milliseconds milliseconds")
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createOneShot(
-                    milliseconds,
-                    DEFAULT_AMPLITUDE
-                ))
-            } else {
-                // On older platforms fall back to deprecated API
-                @Suppress("DEPRECATION")
-                vibrator.vibrate(milliseconds)
-            }
+  fun vibrate(milliseconds: Long) {
+    when {
+      !vibrator.hasVibrator() -> {
+        Timber.e("No vibrator on this device")
+      }
+      snooze.isActive() -> {
+        Timber.i("Snooze active, ignore vibration for $milliseconds milliseconds")
+      }
+      else -> {
+        Timber.i("Start vibration for $milliseconds milliseconds")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+          vibrator.vibrate(
+            VibrationEffect.createOneShot(
+              milliseconds,
+              DEFAULT_AMPLITUDE
+            )
+          )
         } else {
-            Timber.e("No vibrator on this device")
+          // On older platforms fall back to deprecated API
+          @Suppress("DEPRECATION")
+          vibrator.vibrate(milliseconds)
         }
+      }
     }
+  }
 }

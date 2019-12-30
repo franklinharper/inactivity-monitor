@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-  <string name="pref_key_vibrate">vibrate</string>
+  // In alphabetical key order. This makes duplicate keys much easier to see.
   <string name="pref_key_notify">notify</string>
+  <string name="pref_key_snooze_end_secs">snooze_end_secs</string>
+  <string name="pref_key_vibrate">vibrate</string>
 </resources>

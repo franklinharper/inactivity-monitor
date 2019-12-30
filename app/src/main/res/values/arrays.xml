@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <array name="snooze_durations">
+    <item>900</item>
+  </array>
+</resources>

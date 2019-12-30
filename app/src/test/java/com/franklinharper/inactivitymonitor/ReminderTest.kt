@@ -140,7 +140,6 @@ internal class ReminderTest {
   private fun myNotificationManager(): NotificationSender {
     return mockk<NotificationSender>().apply {
       every { doNotDisturbOff } returns true
-      every { sendCurrentActivityNotification(any()) } just Runs
     }
   }
 }

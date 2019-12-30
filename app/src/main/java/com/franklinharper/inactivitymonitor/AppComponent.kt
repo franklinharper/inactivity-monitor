@@ -21,6 +21,7 @@ interface AppComponent {
   val remoteDb: RemoteDb
   val eventRepository: DbEventRepository
   val settings: Settings
+  val snooze: Snooze
 
   companion object {
     lateinit var instance: AppComponent
@@ -30,14 +31,16 @@ interface AppComponent {
 }
 
 class AppModule(application: Context) : AppComponent {
-  override val notificationSender = NotificationSender(application)
-  override val vibratorWrapper = VibratorWrapper(application)
   override val settings = Settings(application)
+  override val snooze = Snooze(settings)
+  override val notificationSender = NotificationSender(application, snooze)
+  override val vibratorWrapper = VibratorWrapper(application, snooze)
   override val activityRecognitionSubscriber = ActivityRecognitionSubscriber(application)
   override val localDb = LocalDb(application)
   override val remoteDb = RemoteDb()
   override val eventRepository = DbEventRepository(localDb, remoteDb)
   override val alarmScheduler = AlarmScheduler(eventRepository, application)
+
   // We can't use default arguments to provide the dependencies,
   // because the default arguments use "app().instance" which would cause an infinite recursion loop.
   override val reminder = Reminder(

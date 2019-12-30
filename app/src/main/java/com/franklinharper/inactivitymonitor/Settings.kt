@@ -4,25 +4,33 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import androidx.preference.PreferenceFragmentCompat
 
 class Settings(val context: Context) {
 
-  val sharedPreferences = context.getSharedPreferences(
+  private val sharedPreferences = context.getSharedPreferences(
     "com.franklinharper.inactivitymonitor.preferences",
     Context.MODE_PRIVATE
   )
 
-  fun notify() : Boolean = sharedPreferences.getBoolean(
+  fun notify(): Boolean = sharedPreferences.getBoolean(
     context.getString(R.string.pref_key_notify),
     true
   )
 
-  fun vibrate() : Boolean = sharedPreferences.getBoolean(
+  fun vibrate(): Boolean = sharedPreferences.getBoolean(
     context.getString(R.string.pref_key_vibrate),
     true
   )
 
+  private val snoozeEndKey = context.getString(R.string.pref_key_snooze_end_secs)
+  var snoozeEndSecond: Long = -1
+    get() = sharedPreferences.getLong(snoozeEndKey, -1)
+    set(value) {
+      sharedPreferences.edit { putLong(snoozeEndKey, value) }
+      field = value
+    }
 }
 
 class SettingsFragment : PreferenceFragmentCompat() {

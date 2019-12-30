@@ -1,5 +1,6 @@
 package com.franklinharper.inactivitymonitor
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -16,12 +17,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
-import java.text.DecimalFormat
 import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
-// TODO snooze vibrations and notifications
 // TODO Handle case where the phone is turned off for a while by receiving shutdown broadcasts, and insert a row into the DB. See https://www.google.com/search?client=firefox-b-1-d&q=android+receive+broadcast+when+shutdown
 
 enum class RequestCode {
@@ -39,21 +36,21 @@ class MainActivity : AppCompatActivity() {
   private val alarmScheduler = appComponent().alarmScheduler
   private val vibratorWrapper = appComponent().vibratorWrapper
   private val logFileAdapter = LogFileAdapter()
+  private val snooze = appComponent().snooze
+
   private lateinit var auth: FirebaseAuth
 
   @Suppress("SpellCheckingInspection")
-  private val zoneId = ZoneId.systemDefault()
-  private val timeFormatter = DateTimeFormatter.ofPattern("kk:mm:ss").withZone(zoneId)
   private val compositeDisposable = CompositeDisposable()
-  private val minutesFormat = DecimalFormat("0.0")
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
-    setSupportActionBar(findViewById(R.id.my_toolbar))
+    setSupportActionBar(findViewById(R.id.main_toolbar))
     initializeBottomNavView()
+    initializeHomeView()
     initializeLogView()
-    showActivity()
+    showHome()
 
     alarmScheduler.update()
 
@@ -64,8 +61,35 @@ class MainActivity : AppCompatActivity() {
     }
   }
 
+  private fun initializeHomeView() {
+    snoozeButton.setOnClickListener {
+      handleSnoozeClick()
+    }
+  }
+
+  private fun handleSnoozeClick() {
+    if (snooze.isActive()) {
+      snooze.cancel()
+      showHome()
+      snoozeButton.text = getString(R.string.main_activity_start_snooze)
+    } else {
+      val dialogItems = SnoozeDuration.values()
+        .map { getString(it.stringId) }
+        .toTypedArray()
+      AlertDialog.Builder(this)
+        .setTitle(R.string.main_activity_snooze_reminders_for)
+        .setItems(dialogItems) { _: DialogInterface, which: Int ->
+          snooze.start(SnoozeDuration.values()[which])
+          showHome()
+        }
+        .setNegativeButton(android.R.string.cancel, null)
+        .create()
+        .show()
+    }
+  }
+
   private fun initializeLogView() {
-    developerLog.apply {
+    logContainer.apply {
       layoutManager = LinearLayoutManager(
         applicationContext,
         LinearLayoutManager.VERTICAL,
@@ -174,25 +198,26 @@ class MainActivity : AppCompatActivity() {
 
   private fun updateSelectedNavigationItem(id: Int) {
     when (id) {
-      R.id.navigation_activity -> showActivity()
+      R.id.navigation_activity -> showHome()
       R.id.navigation_events -> showTodaysActivities()
       R.id.navigation_log -> showDeveloperLog()
       else -> throw IllegalStateException()
     }
   }
 
-  private fun showActivity() {
-    message.isVisible = true
-    developerLog.isVisible = false
+  private fun showHome() {
+    homeContainer.isVisible = true
+    todayContainer.isVisible = false
+    logContainer.isVisible = false
     val latestActivity = activityRepository.mostRecentActivity()
-    val minutes = minutesFormat.format(latestActivity.durationSecs / 60.0)
+    val minutes = TimeFormatters.minutes.format(latestActivity.durationSecs / 60.0)
     val activityType = getString(latestActivity.type.stringId)
     val dndStatus = if (notificationSender.doNotDisturbOn)
       getText(R.string.main_activity_do_not_disturb_on)
     else
       getText(R.string.main_activity_do_not_disturb_off)
 
-    message.text = buildSpannedString {
+    currentStatus.text = buildSpannedString {
       append("\nYou have been ")
       bold { append(activityType) }
       append(" for the last ")
@@ -200,34 +225,51 @@ class MainActivity : AppCompatActivity() {
       append(" minutes\n")
       append(dndStatus)
     }
+    if (snooze.isActive()) {
+      snoozeStatus.isVisible = true
+      val end = TimeFormatters.time.format(snooze.end())
+      snoozeStatus.text = getString(R.string.main_activity_snooze_status, end)
+      snoozeButton.text = getString(R.string.main_activity_cancel_snooze)
+    } else {
+      snoozeStatus.isVisible = false
+      snoozeButton.text = getString(R.string.main_activity_start_snooze)
+    }
   }
 
   private fun showTodaysActivities() {
-    message.isVisible = true
-    developerLog.isVisible = false
+    homeContainer.isVisible = false
+    todayContainer.isVisible = true
+    logContainer.isVisible = false
     val todaysActivities = StringBuilder()
     val nowSecs = System.currentTimeMillis() / 1000
-    todaysActivities.append("Updated ${timeFormatter.format(Instant.ofEpochSecond(nowSecs))}\n\n")
+    todaysActivities.append(
+      "Updated ${TimeFormatters.time.format(
+        Instant.ofEpochSecond(
+          nowSecs
+        )
+      )}\n\n"
+    )
 
     activityRepository
       .todaysActivities(stillnessThreshold = 60)
       .reversed()
       .forEach { activity ->
         // Go backwards in time displaying the duration of each successive activity
-        val timestamp = timeFormatter.format(activity.start.toZonedDateTime())
+        val timestamp = TimeFormatters.time.format(activity.start.toZonedDateTime())
         val minutes = "%.1f".format(activity.durationSecs / 60.0)
         val activityType = getString(activity.type.stringId)
         todaysActivities.append(
           getString(R.string.main_activity_event_log, timestamp, activityType, minutes)
         )
       }
-    message.text = todaysActivities.toString()
+    activities.text = todaysActivities.toString()
   }
 
   private fun showDeveloperLog() {
-    developerLog.isVisible = true
-    message.isVisible = false
-    logFileAdapter.updateData(appComponent().fileLogger.files.first())
+    homeContainer.isVisible = false
+    todayContainer.isVisible = false
+    logContainer.isVisible = true
+    logFileAdapter.update(appComponent().fileLogger.files.first())
   }
 
   private val onNavigationItemSelectedListener =

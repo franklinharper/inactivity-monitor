@@ -37,7 +37,7 @@ class LogFileAdapter() : RecyclerView.Adapter<LogFileAdapter.ViewHolder>() {
     return data.size
   }
 
-  fun updateData(file: File) {
+  fun update(file: File) {
     data = file.readLines().reversed()
     notifyDataSetChanged()
   }
