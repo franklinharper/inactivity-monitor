@@ -1,8 +1,10 @@
 <resources>
   <string name="app_name">Activity Monitor</string>
-  <string name="title_activity">Activity</string>
-  <string name="title_events">Events</string>
-  <string name="title_log">Log</string>
+
+  Main screen navigation
+  <string name="navigation_title_home">Home</string>
+  <string name="navigation_title_todays_activities">Today</string>
+  <string name="navigation_title_log">Log</string>
 
   <string name="action_sync_to_cloud">Sync to cloud</string>
   <string name="action_vibrate">Test vibration</string>

@@ -7,7 +7,7 @@ class Reminder(
 ) {
 
   private val maxStillSecs = 30 * 60L // 30 minutes
-  private val moveReminderVibrationMillis = 3000
+  private val moveReminderVibrationMillis = 2500L
 
   fun update() {
     val mostRecentActivity = eventRepository.mostRecentActivity()

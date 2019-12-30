@@ -164,13 +164,14 @@ class MainActivity : AppCompatActivity() {
       .show()
   }
 
-  private fun initializeBottomNavView() =
+  private fun initializeBottomNavView() {
     navigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
+  }
 
   private fun updateSelectedNavigationItem(id: Int) {
     when (id) {
       R.id.navigation_activity -> showActivity()
-      R.id.navigation_events -> showEvents()
+      R.id.navigation_events -> showTodaysActivities()
       R.id.navigation_log -> showDeveloperLog()
       else -> throw IllegalStateException()
     }
@@ -197,12 +198,12 @@ class MainActivity : AppCompatActivity() {
     }
   }
 
-  private fun showEvents() {
+  private fun showTodaysActivities() {
     message.isVisible = true
     developerLog.isVisible = false
-    val todaysLog = StringBuilder()
+    val todaysActivities = StringBuilder()
     val nowSecs = System.currentTimeMillis() / 1000
-    todaysLog.append("Updated ${timeFormatter.format(Instant.ofEpochSecond(nowSecs))}\n\n")
+    todaysActivities.append("Updated ${timeFormatter.format(Instant.ofEpochSecond(nowSecs))}\n\n")
 
     activityRepository
       .todaysActivities(stillnessThreshold = 60)
@@ -212,9 +213,11 @@ class MainActivity : AppCompatActivity() {
         val timestamp = timeFormatter.format(activity.start.toZonedDateTime())
         val minutes = "%.1f".format(activity.durationSecs / 60.0)
         val activityType = getString(activity.type.stringId)
-        todaysLog.append(getString(R.string.main_activity_event_log, timestamp, activityType, minutes))
+        todaysActivities.append(
+          getString(R.string.main_activity_event_log, timestamp, activityType, minutes)
+        )
       }
-    message.text = todaysLog.toString()
+    message.text = todaysActivities.toString()
   }
 
   private fun showDeveloperLog() {
