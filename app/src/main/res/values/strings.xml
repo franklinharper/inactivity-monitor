@@ -6,6 +6,7 @@
   <string name="navigation_title_todays_activities">Today</string>
   <string name="navigation_title_log">Log</string>
 
+  <string name="action_record_walking">I walked</string>
   <string name="action_sync_to_cloud">Sync to cloud</string>
   <string name="action_vibrate">Test vibration</string>
   <string name="action_notify">Test notification</string>
@@ -29,7 +30,9 @@
   <string name="notification_time_to_move_title">Time to move!</string>
   <string name="notification_current_activity_title">Current activity</string>
   <string name="notification_current_activity_text">%1$s</string>
-  <string name="action_record_walking">I walked</string>
+  <string name="notification_snooze_15_mins">snooze15</string>
+  <string name="notification_snooze_30_mins">snooze30</string>
+  <string name="notification_snooze_1_hour">snooze1hour</string>
 
   <!-- Event types-->
   <string name="event_type_in_vehicle">IN VEHICLE</string>

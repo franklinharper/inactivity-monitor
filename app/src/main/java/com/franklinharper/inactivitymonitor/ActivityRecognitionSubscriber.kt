@@ -19,7 +19,7 @@ class ActivityRecognitionSubscriber(context: Context) {
   // This class does all of it's work in the init block.
   init {
     val transitions = createTransitions()
-    val intent = Intent(context, ActivityTransitionReceiver::class.java)
+    val intent = Intent(context, AppBroadcastReceiver::class.java)
     val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0)
     val client = ActivityRecognition.getClient(context)
     val activityTransitionRequest = ActivityTransitionRequest(transitions)

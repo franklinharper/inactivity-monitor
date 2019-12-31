@@ -19,7 +19,7 @@ class AlarmScheduler(
   private val alarmManager = context.getSystemService<AlarmManager>()!!
 
   private val alarmIntent =
-    Intent(context, ActivityTransitionReceiver::class.java).let {
+    Intent(context, AppBroadcastReceiver::class.java).let {
       PendingIntent.getBroadcast(context, 0, it, 0)
     }
 

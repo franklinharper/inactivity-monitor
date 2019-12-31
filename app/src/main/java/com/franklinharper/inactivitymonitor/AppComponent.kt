@@ -12,6 +12,7 @@ interface AppComponent {
   // The activityRecognitionSubscriber is not called anywhere in,the app.
   // But it must be instantiated so that the app will receive
   // updates when a new user activity is recognized.
+  val fileLogger: FileLoggerTree
   val activityRecognitionSubscriber: ActivityRecognitionSubscriber
   val reminder: Reminder
   val notificationSender: NotificationSender
@@ -27,7 +28,6 @@ interface AppComponent {
     lateinit var instance: AppComponent
   }
 
-  val fileLogger: FileLoggerTree
 }
 
 class AppModule(application: Context) : AppComponent {

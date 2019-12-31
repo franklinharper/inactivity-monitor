@@ -41,7 +41,7 @@
       </intent-filter>
     </receiver>
 
-    <receiver android:name=".ActivityTransitionReceiver">
+    <receiver android:name=".AppBroadcastReceiver">
       <intent-filter>
         <action android:name="com.franklinharper.inactivitymonitor.TRANSITION_RECOGNITION" />
       </intent-filter>

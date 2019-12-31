@@ -15,9 +15,13 @@ enum class SnoozeDuration(val second: Long, @StringRes val stringId: Int) {
 class Snooze(
   private val settings: Settings = appComponent().settings
 ) {
+  fun start(seconds: Long) {
+    settings.snoozeEndSecond = Instant.now().plusSeconds(seconds).epochSecond
+    Timber.d("Starting snooze, ends at ${TimeFormatters.dateTime.format(end())}")
+  }
+
   fun start(snoozeDuration: SnoozeDuration) {
-    settings.snoozeEndSecond = Instant.now().plusSeconds(snoozeDuration.second).epochSecond
-    Timber.d("Starting snooze, snooze will end at ${TimeFormatters.dateTime.format(end())}")
+    start(snoozeDuration.second)
   }
 
   fun cancel() {

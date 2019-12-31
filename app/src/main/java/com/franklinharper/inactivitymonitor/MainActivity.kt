@@ -19,6 +19,7 @@ import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import java.time.Instant
 
+// TODO Open system settings for advanced notification settings
 // TODO Handle case where the phone is turned off for a while by receiving shutdown broadcasts, and insert a row into the DB. See https://www.google.com/search?client=firefox-b-1-d&q=android+receive+broadcast+when+shutdown
 
 enum class RequestCode {
@@ -212,10 +213,10 @@ class MainActivity : AppCompatActivity() {
     val latestActivity = activityRepository.mostRecentActivity()
     val minutes = TimeFormatters.minutes.format(latestActivity.durationSecs / 60.0)
     val activityType = getString(latestActivity.type.stringId)
-    val dndStatus = if (notificationSender.doNotDisturbOn)
-      getText(R.string.main_activity_do_not_disturb_on)
-    else
-      getText(R.string.main_activity_do_not_disturb_off)
+//    val dndStatus = if (notificationSender.doNotDisturbOn)
+//      getText(R.string.main_activity_do_not_disturb_on)
+//    else
+//      getText(R.string.main_activity_do_not_disturb_off)
 
     currentStatus.text = buildSpannedString {
       append("\nYou have been ")
@@ -223,7 +224,7 @@ class MainActivity : AppCompatActivity() {
       append(" for the last ")
       bold { append(minutes) }
       append(" minutes\n")
-      append(dndStatus)
+//      append(dndStatus)
     }
     if (snooze.isActive()) {
       snoozeStatus.isVisible = true
