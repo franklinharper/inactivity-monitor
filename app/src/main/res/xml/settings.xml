@@ -4,12 +4,17 @@
   <PreferenceCategory app:title="@string/settings_reminders">
 
     <SwitchPreferenceCompat
-        app:key="@string/pref_key_vibrate"
-        app:title="@string/settings_vibrate" />
+        app:key="notify"
+        app:title="@string/settings_notification" />
+
+    <Preference
+        app:key="@string/pref_key_system_notification"
+        app:summary="@string/settings_customize_notification_summary"
+        app:title="@string/settings_customize_notification" />
 
     <SwitchPreferenceCompat
-        app:key="notify"
-        app:title="@string/settings_notify" />
+        app:key="@string/pref_key_vibrate"
+        app:title="@string/settings_vibrate" />
 
   </PreferenceCategory>
 </PreferenceScreen>

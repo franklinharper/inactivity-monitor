@@ -1,6 +1,7 @@
 package com.franklinharper.inactivitymonitor
 
 import androidx.annotation.StringRes
+import com.franklinharper.inactivitymonitor.settings.AppSettings
 import timber.log.Timber
 import java.time.Instant
 
@@ -13,10 +14,10 @@ enum class SnoozeDuration(val second: Long, @StringRes val stringId: Int) {
 }
 
 class Snooze(
-  private val settings: Settings = appComponent().settings
+  private val appSettings: AppSettings = appComponent().appSettings
 ) {
   fun start(seconds: Long) {
-    settings.snoozeEndSecond = Instant.now().plusSeconds(seconds).epochSecond
+    appSettings.snoozeEndSecond = Instant.now().plusSeconds(seconds).epochSecond
     Timber.d("Starting snooze, ends at ${TimeFormatters.dateTime.format(end())}")
   }
 
@@ -26,15 +27,15 @@ class Snooze(
 
   fun cancel() {
     Timber.d("Snooze cancelled")
-    settings.snoozeEndSecond = -1
+    appSettings.snoozeEndSecond = -1
   }
 
   fun isActive(): Boolean {
-    return settings.snoozeEndSecond > Instant.now().epochSecond
+    return appSettings.snoozeEndSecond > Instant.now().epochSecond
   }
 
   fun end(): Instant? {
-    val end = settings.snoozeEndSecond
+    val end = appSettings.snoozeEndSecond
     return if (end == -1L) null else Instant.ofEpochSecond(end)
   }
 }

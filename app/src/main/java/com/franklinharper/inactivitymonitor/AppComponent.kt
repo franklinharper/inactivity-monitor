@@ -3,6 +3,8 @@ package com.franklinharper.inactivitymonitor
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
+import com.franklinharper.inactivitymonitor.settings.AppSettings
+import com.franklinharper.inactivitymonitor.settings.SystemSettings
 import fr.bipi.tressence.file.FileLoggerTree
 import java.io.File
 
@@ -12,8 +14,9 @@ interface AppComponent {
   // The activityRecognitionSubscriber is not called anywhere in,the app.
   // But it must be instantiated so that the app will receive
   // updates when a new user activity is recognized.
-  val fileLogger: FileLoggerTree
   val activityRecognitionSubscriber: ActivityRecognitionSubscriber
+  val systemSettings: SystemSettings
+  val fileLogger: FileLoggerTree
   val reminder: Reminder
   val notificationSender: NotificationSender
   val vibratorWrapper: VibratorWrapper
@@ -21,7 +24,7 @@ interface AppComponent {
   val localDb: LocalDb
   val remoteDb: RemoteDb
   val eventRepository: DbEventRepository
-  val settings: Settings
+  val appSettings: AppSettings
   val snooze: Snooze
 
   companion object {
@@ -31,11 +34,12 @@ interface AppComponent {
 }
 
 class AppModule(application: Context) : AppComponent {
-  override val settings = Settings(application)
-  override val snooze = Snooze(settings)
+  override val activityRecognitionSubscriber = ActivityRecognitionSubscriber(application)
+  override val systemSettings = SystemSettings()
+  override val appSettings = AppSettings(application)
+  override val snooze = Snooze(appSettings)
   override val notificationSender = NotificationSender(application, snooze)
   override val vibratorWrapper = VibratorWrapper(application, snooze)
-  override val activityRecognitionSubscriber = ActivityRecognitionSubscriber(application)
   override val localDb = LocalDb(application)
   override val remoteDb = RemoteDb()
   override val eventRepository = DbEventRepository(localDb, remoteDb)
@@ -47,7 +51,7 @@ class AppModule(application: Context) : AppComponent {
     eventRepository = eventRepository,
     vibratorWrapper = vibratorWrapper,
     notificationSender = notificationSender,
-    settings = settings
+    appSettings = appSettings
   )
   @SuppressLint("LogNotTimber")
   private val logDir = File(application.filesDir, "logs").also { dir ->

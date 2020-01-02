@@ -4,4 +4,5 @@
   <string name="pref_key_notify">notify</string>
   <string name="pref_key_snooze_end_secs">snooze_end_secs</string>
   <string name="pref_key_vibrate">vibrate</string>
+  <string name="pref_key_system_notification">system_notification</string>
 </resources>

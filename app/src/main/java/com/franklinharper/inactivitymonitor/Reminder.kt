@@ -1,12 +1,13 @@
 package com.franklinharper.inactivitymonitor
 
+import com.franklinharper.inactivitymonitor.settings.AppSettings
 import timber.log.Timber
 
 class Reminder(
   private val eventRepository: EventRepository,
   private val vibratorWrapper: VibratorWrapper = appComponent().vibratorWrapper,
   private val notificationSender: NotificationSender = appComponent().notificationSender,
-  private val settings: Settings = appComponent().settings
+  private val appSettings: AppSettings = appComponent().appSettings
 ) {
 
   private val maxStillSecs = 30 * 60L // 30 minutes
@@ -27,12 +28,12 @@ class Reminder(
   }
 
   private fun remindToMove(activity: UserActivity) {
-    if (settings.notify()) {
+    if (appSettings.notify()) {
       notificationSender.sendMoveNotification(activity.type, activity.durationSecs / 60.0)
     } else {
       Timber.d("notification off")
     }
-    if (settings.vibrate()) {
+    if (appSettings.vibrate()) {
       vibratorWrapper.vibrate(moveReminderVibrationMillis)
     } else {
       Timber.d("vibration off")

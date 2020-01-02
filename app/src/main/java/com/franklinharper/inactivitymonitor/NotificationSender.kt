@@ -15,8 +15,8 @@ class NotificationSender(
 ) {
 
   companion object {
-    private const val MOVE_CHANNEL_ID = "MOVE"
-    private const val ACTIVITY_STATUS_UPDATE_CHANNEL_ID = "STATUS"
+    const val MOVE_CHANNEL_ID = "MOVE"
+    const val ACTIVITY_STATUS_UPDATE_CHANNEL_ID = "STATUS"
     private const val NOTIFICATION_ID = 1
   }
 

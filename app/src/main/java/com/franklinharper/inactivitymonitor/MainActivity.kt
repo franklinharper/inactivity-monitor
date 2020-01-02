@@ -13,13 +13,22 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.firebase.ui.auth.AuthUI
+import com.franklinharper.inactivitymonitor.settings.SettingsActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import java.time.Instant
 
-// TODO Open system settings for advanced notification settings
+// TODO add extend snooze feature
+// TODO add setting for nag interval
+// TODO add max still time setting
+// TODO add start of day setting (never remind before this time)
+// TODO add end of day setting (never remind after this time)
+// TODO For API < 26, Provide alternative to opening notification CHANNEL system settings
+// TODO add custom icon for launcher + notification
+// TODO add optional "smart" smart snooze feature: no reminders until first movement of the day
+// TODO investigate if it is possible be notified when Do Not Disturb is turned on/off
 // TODO Handle case where the phone is turned off for a while by receiving shutdown broadcasts, and insert a row into the DB. See https://www.google.com/search?client=firefox-b-1-d&q=android+receive+broadcast+when+shutdown
 
 enum class RequestCode {

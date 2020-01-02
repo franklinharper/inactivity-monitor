@@ -45,9 +45,12 @@
   <string name="event_type_end">END</string>
 
   <!--  Settings-->
-  <string name="settings_reminders">Reminders</string>
-  <string name="settings_vibrate">Vibrate</string>
-  <string name="settings_notify">Notify</string>
+  <string name="settings_reminders">Reminders to Move</string>
+  <string name="settings_notification">Notification</string>
+  <string name="settings_customize_notification">Customize Notification</string>
+  <string name="settings_customize_notification_summary">Sound, Behavior, etc.</string>
+  <string name="settings_vibrate">Always vibrate</string>
+  <string name="settings_vibrate_summmary">Remind with Vibrations</string>
 
   <!--  Snooze-->
   <string name="snooze_15_minutes">15 mins</string>
