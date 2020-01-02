@@ -20,13 +20,17 @@ import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import java.time.Instant
 
-// TODO add extend snooze feature
 // TODO add setting for nag interval
 // TODO add max still time setting
 // TODO add start of day setting (never remind before this time)
 // TODO add end of day setting (never remind after this time)
-// TODO For API < 26, Provide alternative to opening notification CHANNEL system settings
+// TODO For API < 26, Provide alternative to opening notification CHANNEL system settings directly
 // TODO add custom icon for launcher + notification
+// TODO Fix bug: Screen Title is not displayed on Settings screen
+// TODO Polish UI: Colors, Home screen, etc.
+// TODO Consider making the "I walked option" more prominent
+// == Nice to haves, can be done after the first release ==
+// TODO add extend snooze feature
 // TODO add optional "smart" smart snooze feature: no reminders until first movement of the day
 // TODO investigate if it is possible be notified when Do Not Disturb is turned on/off
 // TODO Handle case where the phone is turned off for a while by receiving shutdown broadcasts, and insert a row into the DB. See https://www.google.com/search?client=firefox-b-1-d&q=android+receive+broadcast+when+shutdown
