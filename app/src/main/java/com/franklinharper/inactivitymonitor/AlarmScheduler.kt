@@ -6,15 +6,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
 import androidx.core.content.getSystemService
+import com.franklinharper.inactivitymonitor.settings.AppSettings
 import timber.log.Timber
 import kotlin.math.max
 
 class AlarmScheduler(
+  context: Context,
   private val eventRepository: EventRepository,
-  context: Context
+  private val appSettings: AppSettings
 ) {
-
-  private val minWaitSecs = 30L
 
   private val alarmManager = context.getSystemService<AlarmManager>()!!
 
@@ -40,8 +40,8 @@ class AlarmScheduler(
   }
 
   private fun timeoutSecs(activity: UserActivity?): Long {
-    // TODO read 30 * 60 from SharedPrefs instead of hard coding it here
-    val maxWaitSecs = 30L * 60L
+    val minWaitSecs = appSettings.reminderInterval()
+    val maxWaitSecs = appSettings.maxStillMinutes() * 60L
     return when (activity?.type) {
       EventType.STILL_START -> {
         // Never wait less than minWaitSecs.

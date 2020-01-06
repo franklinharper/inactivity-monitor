@@ -16,8 +16,18 @@
 
     <SwitchPreferenceCompat
         app:defaultValue="true"
+        app:key="@string/pref_key_vibrate"
+        app:title="@string/settings_vibrate" />
+
+    <SwitchPreferenceCompat
+        app:defaultValue="true"
         app:key="@string/pref_key_notify"
         app:title="@string/settings_notification" />
+
+    <EditTextPreference
+        app:defaultValue="30"
+        app:key="@string/pref_key_reminder_max_still_minutes"
+        app:title="@string/settings_reminder_max_still_minutes" />
 
     <EditTextPreference
       app:defaultValue="6"
@@ -29,15 +39,15 @@
         app:key="@string/pref_key_reminder_end"
         app:title="@string/settings_reminder_end" />
 
+    <EditTextPreference
+        app:defaultValue="30"
+        app:key="@string/pref_key_reminder_interval"
+        app:title="@string/settings_reminder_interval_seconds" />
+
     <Preference
         app:key="@string/pref_key_system_notification"
         app:summary="@string/settings_customize_notification_summary"
         app:title="@string/settings_customize_notification" />
-
-    <SwitchPreferenceCompat
-        app:defaultValue="true"
-        app:key="@string/pref_key_vibrate"
-        app:title="@string/settings_vibrate" />
 
   </PreferenceCategory>
 </PreferenceScreen>

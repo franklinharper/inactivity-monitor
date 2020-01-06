@@ -46,13 +46,15 @@
 
   <!--  Settings-->
   <string name="settings_move_reminders">Move Reminders</string>
-  <string name="settings_notification">Notification</string>
+  <string name="settings_notification">Notifiy</string>
   <string name="settings_customize_notification">Customize Notification</string>
   <string name="settings_customize_notification_summary">Sound, Behavior, etc.</string>
-  <string name="settings_vibrate">Always vibrate</string>
+  <string name="settings_vibrate">Vibrate</string>
   <string name="settings_vibrate_summmary">Remind with Vibrations</string>
   <string name="settings_reminder_start">Start time</string>
   <string name="settings_reminder_end">End time</string>
+  <string name="settings_reminder_interval_seconds">Seconds between reminders</string>
+  <string name="settings_reminder_max_still_minutes">Minutes still before reminder</string>
 
   <!--  Snooze-->
   <string name="snooze_15_minutes">15 mins</string>

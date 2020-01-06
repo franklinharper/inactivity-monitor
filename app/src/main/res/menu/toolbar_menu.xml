@@ -2,6 +2,18 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
   <item
+      android:id="@+id/action_settings"
+      android:title="@string/action_settings"
+      app:showAsAction="never"
+      />
+
+  <item
+      android:id="@+id/action_about"
+      android:title="@string/action_about"
+      app:showAsAction="never"
+      />
+
+  <item
       android:id="@+id/action_record_walking"
       android:title="@string/action_record_walking"
       app:showAsAction="never"
@@ -28,17 +40,6 @@
   <item
       android:id="@+id/action_notify"
       android:title="@string/action_notify"
-      app:showAsAction="never"
-  />
-
-  <item
-      android:id="@+id/action_settings"
-      android:title="@string/action_settings"
-      app:showAsAction="never"
-      />
-  <item
-      android:id="@+id/action_about"
-      android:title="@string/action_about"
       app:showAsAction="never"
   />
 

@@ -7,7 +7,9 @@
   <string name="pref_key_notify">pref_key_notify</string>
   <string name="pref_key_reminder_start">pref_key_reminder_start</string>
   <string name="pref_key_reminder_end">pref_key_reminder_end</string>
+  <string name="pref_key_reminder_interval">pref_key_reminder_interval</string>
   <string name="pref_key_snooze_end_secs">pref_key_snooze_end_secs</string>
+  <string name="pref_key_reminder_max_still_minutes">pref_key_reminder_max_still_minutes</string>
   <string name="pref_key_system_notification">pref_key_system_notification</string>
   <string name="pref_key_vibrate">pref_key_vibrate</string>
 </resources>

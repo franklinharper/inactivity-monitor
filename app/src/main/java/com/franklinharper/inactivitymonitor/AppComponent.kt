@@ -47,7 +47,7 @@ class AppModule(application: Context) : AppComponent {
   override val localDb = LocalDb(application)
   override val remoteDb = RemoteDb()
   override val eventRepository = DbEventRepository(localDb, remoteDb)
-  override val alarmScheduler = AlarmScheduler(eventRepository, application)
+  override val alarmScheduler = AlarmScheduler(application, eventRepository, appSettings)
 
   // We can't use default arguments to provide the dependencies,
   // because the default arguments use "app().instance" which would cause an infinite recursion loop.

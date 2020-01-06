@@ -12,7 +12,6 @@ class Reminder(
   private val appSettings: AppSettings = appComponent().appSettings
 ) {
 
-  private val maxStillSecs = 30 * 60L // 30 minutes
   private val moveReminderVibrationMillis = 2500L
 
   fun update() {
@@ -30,7 +29,7 @@ class Reminder(
     val tooLate = hour >= appSettings.reminderEnd()
     val snoozed = snooze.isActive()
     val still = latestActivity.type == EventType.STILL_START
-    val tooLong = latestActivity.durationSecs > maxStillSecs
+    val tooLong = latestActivity.durationSecs > appSettings.maxStillMinutes() * 60
     return still && tooLong && !tooEarly && !tooLate && !snoozed
   }
 

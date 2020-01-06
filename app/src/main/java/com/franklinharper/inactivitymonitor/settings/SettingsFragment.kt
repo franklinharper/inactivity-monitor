@@ -20,14 +20,17 @@ class SettingsFragment(val systemSettings: SystemSettings) : PreferenceFragmentC
         true
       }
 
-    val reminderStartPref = findPreference<EditTextPreference>(
-      getString(R.string.pref_key_reminder_start)
-    )
-    reminderStartPref!!.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
 
-    val reminderEndPref = findPreference<EditTextPreference>(
-      getString(R.string.pref_key_reminder_end)
-    )
-    reminderEndPref!!.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+    findPreference<EditTextPreference>(getString(R.string.pref_key_reminder_max_still_minutes))!!
+      .summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+
+    findPreference<EditTextPreference>(getString(R.string.pref_key_reminder_start))!!
+      .summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+
+    findPreference<EditTextPreference>(getString(R.string.pref_key_reminder_end))!!
+      .summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+
+    findPreference<EditTextPreference>(getString(R.string.pref_key_reminder_interval))!!
+      .summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
   }
 }

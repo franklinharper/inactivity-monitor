@@ -22,18 +22,16 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.time.Instant
 import java.time.ZonedDateTime
 
-// TODO add setting for nag interval
-// TODO add max still time setting
+// TODO Change "I moved" action to insert different activity type, so that it is see when it has been used.
 // TODO For API < 26, Provide alternative to opening notification CHANNEL system settings directly
 // TODO add custom icon for launcher + notification
 // TODO Fix bug: Screen Title is not displayed on Settings screen
 // TODO Polish UI: Colors, Home screen, etc.
-// TODO Change "I moved" action to insert different activity type, so that it is see when it has been used.
 // TODO Add picker to define reminder start/stop times
 // == Nice to haves, can be done after the first release ==
+// TODO Don't set alarms all night long, instead sleep until the reminders start next morning, requires listening to Settings changes so that alarms can be re-scheduled
 // TODO add extend snooze feature
 // TODO add optional "smart" smart snooze feature: no reminders until first movement of the day
-// TODO investigate if it is possible be notified when Do Not Disturb is turned on/off
 // TODO Handle case where the phone is turned off for a while by receiving shutdown broadcasts, and insert a row into the DB. See https://www.google.com/search?client=firefox-b-1-d&q=android+receive+broadcast+when+shutdown
 
 enum class RequestCode {
