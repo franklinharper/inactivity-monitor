@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.bold
@@ -19,16 +20,16 @@ import com.google.firebase.auth.FirebaseAuth
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import java.time.Instant
+import java.time.ZonedDateTime
 
 // TODO add setting for nag interval
 // TODO add max still time setting
-// TODO add start of day setting (never remind before this time)
-// TODO add end of day setting (never remind after this time)
 // TODO For API < 26, Provide alternative to opening notification CHANNEL system settings directly
 // TODO add custom icon for launcher + notification
 // TODO Fix bug: Screen Title is not displayed on Settings screen
 // TODO Polish UI: Colors, Home screen, etc.
-// TODO Consider making the "I walked option" more prominent
+// TODO Change "I moved" action to insert different activity type, so that it is see when it has been used.
+// TODO Add picker to define reminder start/stop times
 // == Nice to haves, can be done after the first release ==
 // TODO add extend snooze feature
 // TODO add optional "smart" smart snooze feature: no reminders until first movement of the day
@@ -48,9 +49,10 @@ class MainActivity : AppCompatActivity() {
   private val activityRepository = appComponent().eventRepository
   private val notificationSender = appComponent().notificationSender
   private val alarmScheduler = appComponent().alarmScheduler
-  private val vibratorWrapper = appComponent().vibratorWrapper
+  private val vibratorWrapper = appComponent().vibratorCompat
   private val logFileAdapter = LogFileAdapter()
   private val snooze = appComponent().snooze
+  private val reminder = appComponent().reminder
 
   private lateinit var auth: FirebaseAuth
 
@@ -170,6 +172,17 @@ class MainActivity : AppCompatActivity() {
       }
       R.id.action_sync_to_cloud -> {
         activityRepository.syncToCloud()
+        true
+      }
+      R.id.action_test_reminder -> {
+        val start = Timestamp(ZonedDateTime.now().toEpochSecond())
+        val testActtivity = UserActivity(EventType.STILL_START, start, 30 * 60 + 1)
+        val shouldRemind = reminder.shouldRemind(testActtivity)
+        Toast.makeText(
+          this,
+          "shouldRemind ${shouldRemind.toString().toUpperCase()}",
+          Toast.LENGTH_LONG
+        ).show()
         true
       }
       R.id.action_vibrate -> {

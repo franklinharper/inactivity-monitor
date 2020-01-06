@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-  // In alphabetical key order. This makes duplicate keys much easier to see.
-  <string name="pref_key_notify">notify</string>
-  <string name="pref_key_snooze_end_secs">snooze_end_secs</string>
-  <string name="pref_key_vibrate">vibrate</string>
-  <string name="pref_key_system_notification">system_notification</string>
+  // Storing these strings here allows referencing them from the app code, and from
+  // settings.xml
+  //
+  // The keys are listed in alphabetical key order, which makes duplicate keys much easier to see.
+  <string name="pref_key_notify">pref_key_notify</string>
+  <string name="pref_key_reminder_start">pref_key_reminder_start</string>
+  <string name="pref_key_reminder_end">pref_key_reminder_end</string>
+  <string name="pref_key_snooze_end_secs">pref_key_snooze_end_secs</string>
+  <string name="pref_key_system_notification">pref_key_system_notification</string>
+  <string name="pref_key_vibrate">pref_key_vibrate</string>
 </resources>

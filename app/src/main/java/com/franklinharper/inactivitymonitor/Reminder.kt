@@ -2,11 +2,13 @@ package com.franklinharper.inactivitymonitor
 
 import com.franklinharper.inactivitymonitor.settings.AppSettings
 import timber.log.Timber
+import java.time.LocalTime
 
 class Reminder(
   private val eventRepository: EventRepository,
-  private val vibratorWrapper: VibratorWrapper = appComponent().vibratorWrapper,
+  private val vibratorCompat: VibratorCompat = appComponent().vibratorCompat,
   private val notificationSender: NotificationSender = appComponent().notificationSender,
+  private val snooze: Snooze,
   private val appSettings: AppSettings = appComponent().appSettings
 ) {
 
@@ -15,28 +17,33 @@ class Reminder(
 
   fun update() {
     val mostRecentActivity = eventRepository.mostRecentActivity()
-    if (stillForTooLong(mostRecentActivity)) {
+    if (shouldRemind(mostRecentActivity)) {
       remindToMove(mostRecentActivity)
     } else {
       notificationSender.cancelNotification()
     }
   }
 
-  private fun stillForTooLong(latestActivity: UserActivity): Boolean {
-    return latestActivity.type == EventType.STILL_START &&
-        latestActivity.durationSecs > maxStillSecs
+  fun shouldRemind(latestActivity: UserActivity): Boolean {
+    val hour = LocalTime.now().hour
+    val tooEarly = hour <  appSettings.reminderStart()
+    val tooLate = hour >= appSettings.reminderEnd()
+    val snoozed = snooze.isActive()
+    val still = latestActivity.type == EventType.STILL_START
+    val tooLong = latestActivity.durationSecs > maxStillSecs
+    return still && tooLong && !tooEarly && !tooLate && !snoozed
   }
 
   private fun remindToMove(activity: UserActivity) {
     if (appSettings.notify()) {
       notificationSender.sendMoveNotification(activity.type, activity.durationSecs / 60.0)
     } else {
-      Timber.d("notification off")
+      Timber.d("notifications off")
     }
     if (appSettings.vibrate()) {
-      vibratorWrapper.vibrate(moveReminderVibrationMillis)
+      vibratorCompat.vibrate(milliseconds = moveReminderVibrationMillis)
     } else {
-      Timber.d("vibration off")
+      Timber.d("vibrations off")
     }
   }
 }

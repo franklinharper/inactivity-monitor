@@ -6,7 +6,7 @@
   <string name="navigation_title_todays_activities">Today</string>
   <string name="navigation_title_log">Log</string>
 
-  <string name="action_record_walking">I walked</string>
+  <string name="action_record_walking">I moved</string>
   <string name="action_sync_to_cloud">Sync to cloud</string>
   <string name="action_vibrate">Test vibration</string>
   <string name="action_notify">Test notification</string>
@@ -23,8 +23,8 @@
   <string name="main_activity_snooze_status">Reminders snoozed until %1$s</string>
 
   <!-- Notifications -->
-  <string name="notification_move_channel_name">Reminders to move</string>
-  <string name="notification_move_channel_description">Reminds you to move when you\'ve been still for too long</string>
+  <string name="notification_move_channel_name">Move Reminders</string>
+  <string name="notification_move_channel_description">Move when you\'ve been still for too long</string>
   <string name="notification_status_channel_name">Current activity</string>
   <string name="notification_status_channel_description">Shows what your activity currently is</string>
   <string name="notification_time_to_move_title">Time to move!</string>
@@ -45,12 +45,14 @@
   <string name="event_type_end">END</string>
 
   <!--  Settings-->
-  <string name="settings_reminders">Reminders to Move</string>
+  <string name="settings_move_reminders">Move Reminders</string>
   <string name="settings_notification">Notification</string>
   <string name="settings_customize_notification">Customize Notification</string>
   <string name="settings_customize_notification_summary">Sound, Behavior, etc.</string>
   <string name="settings_vibrate">Always vibrate</string>
   <string name="settings_vibrate_summmary">Remind with Vibrations</string>
+  <string name="settings_reminder_start">Start time</string>
+  <string name="settings_reminder_end">End time</string>
 
   <!--  Snooze-->
   <string name="snooze_15_minutes">15 mins</string>
@@ -58,4 +60,5 @@
   <string name="snooze_45_minutes">45 mins</string>
   <string name="snooze_1_hour">1 hour</string>
   <string name="snooze_2_hours">2 hours</string>
+  <string name="action_test_reminder">Test reminder</string>
 </resources>

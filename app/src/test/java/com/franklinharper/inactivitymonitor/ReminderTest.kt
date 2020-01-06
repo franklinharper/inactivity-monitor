@@ -8,7 +8,7 @@ internal class ReminderTest {
   data class Dependencies(
     val reminder: Reminder,
     val alarmScheduler: AlarmScheduler,
-    val vibratorWrapper: VibratorWrapper,
+    val vibratorCompat: VibratorCompat,
     val notificationSender: NotificationSender
   )
 
@@ -104,12 +104,12 @@ internal class ReminderTest {
   private fun createDependencies(
     eventRepository: EventRepository,
     alarmScheduler: AlarmScheduler = myAlarmManager(),
-    vibratorWrapper: VibratorWrapper = myVibrator(),
+    vibratorCompat: VibratorCompat = myVibrator(),
     notificationSender: NotificationSender = myNotificationManager()
   ): Dependencies {
     val tp =
-      Reminder(eventRepository, vibratorWrapper, notificationSender)
-    return Dependencies(tp, alarmScheduler, vibratorWrapper, notificationSender)
+      Reminder(eventRepository, vibratorCompat, notificationSender)
+    return Dependencies(tp, alarmScheduler, vibratorCompat, notificationSender)
   }
 
   private fun createEventRepository(
@@ -131,8 +131,8 @@ internal class ReminderTest {
     }
   }
 
-  private fun myVibrator(): VibratorWrapper {
-    return mockk<VibratorWrapper>().apply {
+  private fun myVibrator(): VibratorCompat {
+    return mockk<VibratorCompat>().apply {
       every { vibrate(any()) } just Runs
     }
   }

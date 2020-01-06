@@ -3,6 +3,7 @@ package com.franklinharper.inactivitymonitor
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
+import androidx.preference.PreferenceManager
 import com.franklinharper.inactivitymonitor.settings.AppSettings
 import com.franklinharper.inactivitymonitor.settings.SystemSettings
 import fr.bipi.tressence.file.FileLoggerTree
@@ -19,7 +20,7 @@ interface AppComponent {
   val fileLogger: FileLoggerTree
   val reminder: Reminder
   val notificationSender: NotificationSender
-  val vibratorWrapper: VibratorWrapper
+  val vibratorCompat: VibratorCompat
   val alarmScheduler: AlarmScheduler
   val localDb: LocalDb
   val remoteDb: RemoteDb
@@ -36,10 +37,13 @@ interface AppComponent {
 class AppModule(application: Context) : AppComponent {
   override val activityRecognitionSubscriber = ActivityRecognitionSubscriber(application)
   override val systemSettings = SystemSettings()
-  override val appSettings = AppSettings(application)
+  override val appSettings = AppSettings(
+    application,
+    PreferenceManager.getDefaultSharedPreferences(application)
+  )
   override val snooze = Snooze(appSettings)
-  override val notificationSender = NotificationSender(application, snooze)
-  override val vibratorWrapper = VibratorWrapper(application, snooze)
+  override val notificationSender = NotificationSender(application)
+  override val vibratorCompat = VibratorCompat(application)
   override val localDb = LocalDb(application)
   override val remoteDb = RemoteDb()
   override val eventRepository = DbEventRepository(localDb, remoteDb)
@@ -49,10 +53,12 @@ class AppModule(application: Context) : AppComponent {
   // because the default arguments use "app().instance" which would cause an infinite recursion loop.
   override val reminder = Reminder(
     eventRepository = eventRepository,
-    vibratorWrapper = vibratorWrapper,
+    vibratorCompat = vibratorCompat,
     notificationSender = notificationSender,
-    appSettings = appSettings
+    appSettings = appSettings,
+    snooze = snooze
   )
+
   @SuppressLint("LogNotTimber")
   private val logDir = File(application.filesDir, "logs").also { dir ->
     if (!dir.exists()) {

@@ -1,25 +1,47 @@
 package com.franklinharper.inactivitymonitor.settings
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.franklinharper.inactivitymonitor.R
+import timber.log.Timber
 
-class AppSettings(val context: Context) {
+class AppSettings(
+  val context: Context,
+  val sharedPreferences: SharedPreferences
+) {
 
-  private val sharedPreferences = context.getSharedPreferences(
-    "com.franklinharper.inactivitymonitor.preferences",
-    Context.MODE_PRIVATE
-  )
+  fun notify(): Boolean {
+    return sharedPreferences.getBoolean(
+      context.getString(R.string.pref_key_notify),
+      true
+    )
+  }
 
-  fun notify(): Boolean = sharedPreferences.getBoolean(
-    context.getString(R.string.pref_key_notify),
-    true
-  )
+  fun vibrate(): Boolean {
+    return sharedPreferences.getBoolean(
+      context.getString(R.string.pref_key_vibrate),
+      true
+    )
+  }
 
-  fun vibrate(): Boolean = sharedPreferences.getBoolean(
-    context.getString(R.string.pref_key_vibrate),
-    true
-  )
+  // Storing the start time as a String is a quick hack to save time by not having to implementing
+  // a TimePickerPreference.
+  // TODO Implementing a TimePickerPreference
+  fun reminderStart(): Int {
+    val value = sharedPreferences.getString(
+      context.getString(R.string.pref_key_reminder_start),
+      "6"
+    )
+    return value!!.toInt()
+  }
+
+  // TODO Implementing a TimePickerPreference
+  fun reminderEnd(): Int {
+    val key = context.getString(R.string.pref_key_reminder_end)
+    val value = sharedPreferences.getString(key, "22")
+    return value!!.toInt()
+  }
 
   private val snoozeEndKey = context.getString(R.string.pref_key_snooze_end_secs)
   var snoozeEndSecond: Long = -1

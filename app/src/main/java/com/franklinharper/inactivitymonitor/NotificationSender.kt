@@ -1,5 +1,6 @@
 package com.franklinharper.inactivitymonitor
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.PendingIntent
 import android.content.Context
@@ -10,8 +11,7 @@ import androidx.core.app.NotificationManagerCompat
 import timber.log.Timber
 
 class NotificationSender(
-  private val context: Context,
-  private val snooze: Snooze
+  private val context: Context
 ) {
 
   companion object {
@@ -23,7 +23,7 @@ class NotificationSender(
   private val notificationManager = NotificationManagerCompat.from(context)
 
   init {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    if (Build.VERSION.SDK_INT >= 26) {
       createNotificationChannels()
     }
   }
@@ -64,34 +64,18 @@ class NotificationSender(
 
   fun sendMoveNotification(type: EventType, minutes: Double) {
     val formattedMinutes = TimeFormatters.minutes.format(minutes)
-    if (snooze.isActive()) {
-      Timber.d("Snooze active, ignored Move notification $type, $formattedMinutes minutes")
-    } else {
-      Timber.d("Move notification $type, $formattedMinutes minutes")
-      notificationManager.notify(
-        NOTIFICATION_ID,
-        defaultNotificationBuilder(MOVE_CHANNEL_ID)
-          .setCategory(NotificationCompat.CATEGORY_REMINDER)
-          .setContentTitle(context.getString(R.string.notification_time_to_move_title))
-          .build()
-      )
-    }
+    Timber.d("Move notification $type, $formattedMinutes minutes")
+    val notification = buildMoveNotification()
+    notificationManager.notify(NOTIFICATION_ID, notification)
   }
 
-  private fun defaultNotificationBuilder(channelId: String): NotificationCompat.Builder {
-    val intent = Intent(context, MainActivity::class.java)
-    val pendingIntent: PendingIntent = PendingIntent.getActivity(
-      context,
-      0,
-      intent,
-      0
-    )
-    return NotificationCompat.Builder(context, channelId)
-      .setContentIntent(pendingIntent)
+  private fun buildMoveNotification(): Notification {
+    return defaultNotificationBuilder(MOVE_CHANNEL_ID)
+      .setCategory(NotificationCompat.CATEGORY_REMINDER)
+      .setContentTitle(context.getString(R.string.notification_time_to_move_title))
       .setSmallIcon(R.drawable.ic_notifications_black_24dp)
       .setPriority(NotificationCompat.PRIORITY_HIGH)
       .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-      .setAutoCancel(true)
       .addAction(
         R.drawable.ic_snooze_black_24dp,
         context.getString(R.string.notification_snooze_15_mins),
@@ -116,6 +100,20 @@ class NotificationSender(
           AppBroadcastReceiver.Action.SNOOZE_1_HOUR
         )
       )
+      .build()
+  }
+
+  private fun defaultNotificationBuilder(channelId: String): NotificationCompat.Builder {
+    val intent = Intent(context, MainActivity::class.java)
+    val pendingIntent: PendingIntent = PendingIntent.getActivity(
+      context,
+      0,
+      intent,
+      0
+    )
+    return NotificationCompat.Builder(context, channelId)
+      .setContentIntent(pendingIntent)
+      .setAutoCancel(true)
   }
 
 }
