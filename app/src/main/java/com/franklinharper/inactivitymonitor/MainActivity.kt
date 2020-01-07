@@ -22,6 +22,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.time.Instant
 import java.time.ZonedDateTime
 
+// TODO Distribute app updates through Play Store internal test channel
 // TODO Change "I moved" action to insert different activity type, so that it is see when it has been used.
 // TODO For API < 26, Provide alternative to opening notification CHANNEL system settings directly
 // TODO add custom icon for launcher + notification
