@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.franklinharper.inactivitymonitor.R
-import timber.log.Timber
 
 class AppSettings(
   val context: Context,
@@ -13,14 +12,14 @@ class AppSettings(
 
   fun notify(): Boolean {
     return sharedPreferences.getBoolean(
-      context.getString(R.string.pref_key_notify),
+      context.getString(R.string.pref_key_reminder_notify),
       true
     )
   }
 
   fun vibrate(): Boolean {
     return sharedPreferences.getBoolean(
-      context.getString(R.string.pref_key_vibrate),
+      context.getString(R.string.pref_key_reminder_vibrate),
       true
     )
   }
@@ -37,7 +36,7 @@ class AppSettings(
   // TODO Implementing a TimePickerPreference
   fun reminderStart(): Int {
     val value = sharedPreferences.getString(
-      context.getString(R.string.pref_key_reminder_start),
+      context.getString(R.string.pref_key_reminder_start_hour),
       "6"
     )
     return value!!.toInt()
@@ -45,7 +44,7 @@ class AppSettings(
 
   // TODO Implementing a TimePickerPreference
   fun reminderEnd(): Int {
-    val key = context.getString(R.string.pref_key_reminder_end)
+    val key = context.getString(R.string.pref_key_reminder_end_hour)
     val value = sharedPreferences.getString(key, "22")
     return value!!.toInt()
   }
@@ -57,7 +56,7 @@ class AppSettings(
     return value!!.toLong()
   }
 
-  private val snoozeEndKey = context.getString(R.string.pref_key_snooze_end_secs)
+  private val snoozeEndKey = context.getString(R.string.pref_key_reminder_snooze_end_secs)
   var snoozeEndSecond: Long = -1
     get() = sharedPreferences.getLong(snoozeEndKey, -1)
     set(value) {

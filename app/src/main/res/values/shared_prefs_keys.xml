@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-  // Storing these strings here allows referencing them from the app code, and from
-  // settings.xml
-  //
-  // The keys are listed in alphabetical key order, which makes duplicate keys much easier to see.
-  <string name="pref_key_notify">pref_key_notify</string>
-  <string name="pref_key_reminder_start">pref_key_reminder_start</string>
-  <string name="pref_key_reminder_end">pref_key_reminder_end</string>
+<!--
+  TODO replace these strings by an enum
+  Storing these strings here allows referencing them from the app code, and from
+  settings.xml
+
+  The keys are listed in alphabetical key order, which makes duplicate keys much easier to see.
+-->
+  <string name="pref_key_reminder_end_hour">pref_key_reminder_end_hour</string>
   <string name="pref_key_reminder_interval">pref_key_reminder_interval</string>
-  <string name="pref_key_snooze_end_secs">pref_key_snooze_end_secs</string>
   <string name="pref_key_reminder_max_still_minutes">pref_key_reminder_max_still_minutes</string>
-  <string name="pref_key_system_notification">pref_key_system_notification</string>
-  <string name="pref_key_vibrate">pref_key_vibrate</string>
+  <string name="pref_key_reminder_notify">pref_key_reminder_notify</string>
+  <string name="pref_key_reminder_smart_start">pref_key_reminder_smart_start</string>
+  <string name="pref_key_reminder_snooze_end_secs">pref_key_snooze_end_secs</string>
+  <string name="pref_key_reminder_start_hour">pref_key_reminder_start_hour</string>
+  <string name="pref_key_reminder_system_notification">pref_key_reminder_system_notification</string>
+  <string name="pref_key_reminder_vibrate">pref_key_reminder_vibrate</string>
 </resources>

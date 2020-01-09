@@ -1,28 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-  <PreferenceCategory app:title="@string/settings_move_reminders">
+  <PreferenceCategory app:title="@string/settings_reminder_how_category">
 
-<!--
-    TODO Create single source of truth for the settings default values.
-          Currently default values are set here, but default values are also set
-          in the code when the values are read from SharedPreferences.
-          This could be accomplished by building the Preferences hierarchy in
-          code instead of in XML.
+    <!--
+        TODO Create single source of truth for the settings default values.
+              Currently default values are set here, but default values are also set
+              in the code when the values are read from SharedPreferences.
+              This could be accomplished by building the Preferences hierarchy in
+              code instead of in XML.
 
-          For more info. see:
-          https://developer.android.com/guide/topics/ui/settings/programmatic-hierarchy
--->
-
-    <SwitchPreferenceCompat
-        app:defaultValue="true"
-        app:key="@string/pref_key_vibrate"
-        app:title="@string/settings_vibrate" />
+              For more info. see:
+              https://developer.android.com/guide/topics/ui/settings/programmatic-hierarchy
+    -->
 
     <SwitchPreferenceCompat
         app:defaultValue="true"
-        app:key="@string/pref_key_notify"
-        app:title="@string/settings_notification" />
+        app:key="@string/pref_key_reminder_notify"
+        app:title="@string/settings_reminder_notification" />
+
+    <Preference
+        app:key="@string/pref_key_reminder_system_notification"
+        app:summary="@string/settings_reminder_customize_notification_summary"
+        app:title="@string/settings_reminder_customize_notification" />
+
+    <SwitchPreferenceCompat
+        app:defaultValue="true"
+        app:key="@string/pref_key_reminder_vibrate"
+        app:title="@string/settings_reminder_vibrate" />
+  </PreferenceCategory>
+
+  <PreferenceCategory app:title="@string/settings_reminder_when_category">
+    <SwitchPreferenceCompat
+        app:defaultValue="true"
+        app:key="@string/pref_key_reminder_smart_start"
+        app:title="@string/settings_reminder_smart_start" />
 
     <EditTextPreference
         app:defaultValue="30"
@@ -30,24 +42,19 @@
         app:title="@string/settings_reminder_max_still_minutes" />
 
     <EditTextPreference
-      app:defaultValue="6"
-      app:key="@string/pref_key_reminder_start"
-      app:title="@string/settings_reminder_start" />
+        app:defaultValue="6"
+        app:key="@string/pref_key_reminder_start_hour"
+        app:title="@string/settings_reminder_start" />
 
     <EditTextPreference
         app:defaultValue="22"
-        app:key="@string/pref_key_reminder_end"
+        app:key="@string/pref_key_reminder_end_hour"
         app:title="@string/settings_reminder_end" />
 
     <EditTextPreference
         app:defaultValue="30"
         app:key="@string/pref_key_reminder_interval"
         app:title="@string/settings_reminder_interval_seconds" />
-
-    <Preference
-        app:key="@string/pref_key_system_notification"
-        app:summary="@string/settings_customize_notification_summary"
-        app:title="@string/settings_customize_notification" />
 
   </PreferenceCategory>
 </PreferenceScreen>

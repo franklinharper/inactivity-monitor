@@ -45,12 +45,19 @@
   <string name="event_type_end">END</string>
 
   <!--  Settings-->
-  <string name="settings_move_reminders">Move Reminders</string>
-  <string name="settings_notification">Notifiy</string>
-  <string name="settings_customize_notification">Customize Notification</string>
-  <string name="settings_customize_notification_summary">Sound, Behavior, etc.</string>
-  <string name="settings_vibrate">Vibrate</string>
-  <string name="settings_vibrate_summmary">Remind with Vibrations</string>
+  <string name="settings_reminder_when_category">When to remind</string>
+  <string name="settings_reminder_how_category">How to remind</string>
+  <string name="settings_reminder_smart_start">Smart start</string>
+  <string name="settings_reminder_smart_start_summary_on">Start reminders the first time you move after %1$d</string>
+  <string name="settings_reminder_smart_start_summary_off">Always start at %1$d</string>
+  <string name="settings_reminder_notification">Notify</string>
+  <string name="settings_reminder_notification_summary_on">ON, Remind using notifications</string>
+  <string name="settings_reminder_notification_summary_off">OFF, Don\'t use notifications to remind</string>
+  <string name="settings_reminder_customize_notification">Notification behavior</string>
+  <string name="settings_reminder_customize_notification_summary">Customize sound, and other behaviors</string>
+  <string name="settings_reminder_vibrate">Vibrate</string>
+  <string name="settings_reminder_vibrate_summary_on">ON, Remind using vibrations</string>
+  <string name="settings_reminder_vibrate_summary_off">OFF, Don\'t use vibrations to remind</string>
   <string name="settings_reminder_start">Start time</string>
   <string name="settings_reminder_end">End time</string>
   <string name="settings_reminder_interval_seconds">Seconds between reminders</string>

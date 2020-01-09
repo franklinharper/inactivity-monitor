@@ -15,7 +15,7 @@ class SettingsActivity : AppCompatActivity() {
       .beginTransaction()
       .replace(
         R.id.settings_container,
-        SettingsFragment(appComponent().systemSettings)
+        SettingsFragment(appComponent().appSettings, appComponent().systemSettings)
       )
       .commit()
   }
