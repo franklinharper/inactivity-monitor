@@ -16,9 +16,9 @@ class SettingsFragment(val appSettings: AppSettings, val systemSettings: SystemS
     findPref<SwitchPreferenceCompat>(getString(R.string.pref_key_reminder_smart_start))
       .summaryProvider = Preference.SummaryProvider<SwitchPreferenceCompat> { pref ->
       if (pref.isChecked) {
-        getString(R.string.settings_reminder_smart_start_summary_on, appSettings.reminderStart())
+        getString(R.string.settings_reminder_smart_start_summary_on)
       } else {
-        getString(R.string.settings_reminder_smart_start_summary_off, appSettings.reminderStart())
+        getString(R.string.settings_reminder_smart_start_summary_off)
       }
     }
 

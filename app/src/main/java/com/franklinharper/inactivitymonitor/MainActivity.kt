@@ -22,6 +22,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.time.Instant
 import java.time.ZonedDateTime
 
+// TODO Optimize alarms so that the app doesn't run as often (e.g. every 30 secs during the night)
 // TODO Distribute app updates through Play Store internal test channel
 // TODO Change "I moved" action to insert different activity type, so that it is see when it has been used.
 // TODO For API < 26, Provide alternative to opening notification CHANNEL system settings directly
@@ -32,7 +33,6 @@ import java.time.ZonedDateTime
 // == Nice to haves, can be done after the first release ==
 // TODO Don't set alarms all night long, instead sleep until the reminders start next morning, requires listening to Settings changes so that alarms can be re-scheduled
 // TODO add extend snooze feature
-// TODO add optional "smart" smart snooze feature: no reminders until first movement of the day
 // TODO Handle case where the phone is turned off for a while by receiving shutdown broadcasts, and insert a row into the DB. See https://www.google.com/search?client=firefox-b-1-d&q=android+receive+broadcast+when+shutdown
 
 enum class RequestCode {
@@ -174,14 +174,7 @@ class MainActivity : AppCompatActivity() {
         true
       }
       R.id.action_test_reminder -> {
-        val start = Timestamp(ZonedDateTime.now().toEpochSecond())
-        val testActtivity = UserActivity(EventType.STILL_START, start, 30 * 60 + 1)
-        val shouldRemind = reminder.shouldRemind(testActtivity)
-        Toast.makeText(
-          this,
-          "shouldRemind ${shouldRemind.toString().toUpperCase()}",
-          Toast.LENGTH_LONG
-        ).show()
+        reminder.update()
         true
       }
       R.id.action_vibrate -> {

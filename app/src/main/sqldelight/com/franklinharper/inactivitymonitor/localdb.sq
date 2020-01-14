@@ -41,14 +41,25 @@ FROM event;
 selectLatest:
 SELECT *
 FROM event
-ORDER BY id DESC LIMIT 1;
+ORDER BY id DESC
+LIMIT 1;
 
 selectRange:
 SELECT *
 FROM event
 WHERE occurred >= :startInclusive
       AND occurred < :endExclusive
-ORDER BY occurred ASC;
+ORDER BY occurred ASC
+LIMIT :limit;
+
+selectRangeExcluding:
+SELECT *
+FROM event
+WHERE occurred >= :startInclusive
+      AND occurred < :endExclusive
+      AND type != :type
+ORDER BY occurred ASC
+LIMIT :limit;
 
 selectStarting:
 SELECT *

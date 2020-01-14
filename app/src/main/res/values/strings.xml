@@ -48,8 +48,8 @@
   <string name="settings_reminder_when_category">When to remind</string>
   <string name="settings_reminder_how_category">How to remind</string>
   <string name="settings_reminder_smart_start">Smart start</string>
-  <string name="settings_reminder_smart_start_summary_on">Start reminders the first time you move after %1$d</string>
-  <string name="settings_reminder_smart_start_summary_off">Always start at %1$d</string>
+  <string name="settings_reminder_smart_start_summary_on">Start reminding the first time you move after the Start time (see below)</string>
+  <string name="settings_reminder_smart_start_summary_off">Start reminding at Start time (see below)</string>
   <string name="settings_reminder_notification">Notify</string>
   <string name="settings_reminder_notification_summary_on">ON, Remind using notifications</string>
   <string name="settings_reminder_notification_summary_off">OFF, Don\'t use notifications to remind</string>

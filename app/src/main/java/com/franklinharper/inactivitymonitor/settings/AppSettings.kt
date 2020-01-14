@@ -24,6 +24,13 @@ class AppSettings(
     )
   }
 
+  fun smartStart(): Boolean {
+    return sharedPreferences.getBoolean(
+      context.getString(R.string.pref_key_reminder_smart_start),
+      true
+    )
+  }
+
   // TODO Implement an IntegerPickerPreference
   fun maxStillMinutes(): Int {
     val key = context.getString(R.string.pref_key_reminder_max_still_minutes)
@@ -34,19 +41,19 @@ class AppSettings(
   // Storing the start time as a String is a quick hack to save time by not having to implementing
   // a TimePickerPreference.
   // TODO Implementing a TimePickerPreference
-  fun reminderStart(): Int {
+  fun reminderStart(): Long {
     val value = sharedPreferences.getString(
       context.getString(R.string.pref_key_reminder_start_hour),
       "6"
     )
-    return value!!.toInt()
+    return value!!.toLong()
   }
 
   // TODO Implementing a TimePickerPreference
-  fun reminderEnd(): Int {
+  fun reminderEnd(): Long {
     val key = context.getString(R.string.pref_key_reminder_end_hour)
     val value = sharedPreferences.getString(key, "22")
-    return value!!.toInt()
+    return value!!.toLong()
   }
 
   // TODO Implementing a TimePickerPreference

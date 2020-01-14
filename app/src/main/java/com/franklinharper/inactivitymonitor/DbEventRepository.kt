@@ -34,18 +34,18 @@ data class UserActivity(
 
 interface EventRepository {
   fun mostRecentActivity(end: Long = Instant.now().epochSecond): UserActivity
+  fun insert(activityType: EventType, status: Status)
+  fun syncToCloud()
+  fun firstMovementAfter(start: ZonedDateTime): EventType?
   fun todaysActivities(
     stillnessThreshold: Long,
     now: ZonedDateTime = ZonedDateTime.now()
   ): List<UserActivity>
-
-  fun insert(activityType: EventType, status: Status)
-  fun syncToCloud()
 }
 
 class DbEventRepository(
-  val localDb: LocalDb = appComponent().localDb,
-  val remoteDb: RemoteDb = appComponent().remoteDb
+  private val localDb: LocalDb = appComponent().localDb,
+  private val remoteDb: RemoteDb = appComponent().remoteDb
 ) : EventRepository {
 
   override fun mostRecentActivity(end: Long): UserActivity {
@@ -60,15 +60,11 @@ class DbEventRepository(
     return filterShortStillActivities(stillnessThreshold, Timestamp.from(now), todaysEvents)
   }
 
-  private fun todaysEvents(now: ZonedDateTime): List<Event> {
-    val todayMidnight = now.startOfDay
-    // Due to daylight saving time changes; the time between the successive midnights can be more or less than 24 hours,
-    // that's why it is important to NOT naively add one day to todayMidnight!
-    val tomorrowMidnight = now.plusDays(1).startOfDay
-
+  private fun todaysEvents(now: ZonedDateTime, limit: Long = UNLIMITED): List<Event> {
     return localDb.queries.selectRange(
-      startInclusive = todayMidnight.timestamp,
-      endExclusive = tomorrowMidnight.timestamp
+      startInclusive = now.startOfDay.timestamp,
+      endExclusive = startOfTomorrow(now).timestamp,
+      limit = limit
     )
       .executeAsList()
   }
@@ -82,6 +78,24 @@ class DbEventRepository(
     }
   }
 
+  override fun firstMovementAfter(start: ZonedDateTime): EventType? {
+    return localDb.queries.selectRangeExcluding(
+      type = STILL_START,
+      startInclusive = start.timestamp,
+      endExclusive = ZonedDateTime.now().timestamp,
+      limit = 1
+    )
+      .executeAsOneOrNull()
+      ?.type
+  }
+
+  // Due to daylight saving time changes; the time between the successive days can be more or less
+  // than 24 hours!
+  // That is why it is important to use the "startOfDay" function instead of naively adding 24 hours to
+  // the start of today.
+  private fun startOfTomorrow(now: ZonedDateTime): ZonedDateTime {
+    return now.plusDays(1).startOfDay
+  }
 
   override fun syncToCloud() {
     // TODO Handle the case where it hasn't been possible to sync for more than 24 hours,
@@ -114,6 +128,11 @@ class DbEventRepository(
   }
 
   companion object {
+
+    // In SQLite if the LIMIT expression evaluates to a negative value, then there is no
+    // upper bound on the number of rows returned.
+    // Arbitrarily the value -1 is used for queries that don't set a limit.
+    const val UNLIMITED = -1L
 
     fun filterShortStillActivities(
       shortLimit: Long,
@@ -271,7 +290,9 @@ class DbEventRepository(
       }
       val latestTransition = events.last()
       val latestActivity = UserActivity(
-        latestTransition.type, latestTransition.occurred, now - latestTransition.occurred.epochSecond
+        latestTransition.type,
+        latestTransition.occurred,
+        now - latestTransition.occurred.epochSecond
       )
       activities.add(latestActivity)
       return activities
