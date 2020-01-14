@@ -17,6 +17,7 @@
       android:id="@+id/action_record_walking"
       android:title="@string/action_record_walking"
       app:showAsAction="never"
+      android:visible="false"
       />
 
   <item

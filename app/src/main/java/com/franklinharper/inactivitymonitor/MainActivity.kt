@@ -24,7 +24,6 @@ import java.time.ZonedDateTime
 
 // TODO Optimize alarms so that the app doesn't run as often (e.g. every 30 secs during the night)
 // TODO Distribute app updates through Play Store internal test channel
-// TODO Change "I moved" action to insert different activity type, so that it is see when it has been used.
 // TODO For API < 26, Provide alternative to opening notification CHANNEL system settings directly
 // TODO add custom icon for launcher + notification
 // TODO Fix bug: Screen Title is not displayed on Settings screen
