@@ -37,6 +37,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
   private val reminder = appComponent().reminder
   private val snooze = appComponent().snooze
   private val notificationSender = appComponent().notificationSender
+  private val movementAcknowledger = appComponent().movementAcknowledger
 
   override fun onReceive(context: Context, intent: Intent?) {
     log(intent)
@@ -51,6 +52,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
           recordEvents(transitionResult)
           alarmScheduler.update()
           reminder.update()
+          movementAcknowledger.update()
         }
       }
     }

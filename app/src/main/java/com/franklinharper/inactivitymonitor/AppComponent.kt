@@ -19,8 +19,9 @@ interface AppComponent {
   val systemSettings: SystemSettings
   val fileLogger: FileLoggerTree
   val reminder: Reminder
+  val movementAcknowledger: MovementAcknowledger
   val notificationSender: NotificationSender
-  val vibratorCompat: VibratorCompat
+  val appVibrator: AppVibrator
   val alarmScheduler: AlarmScheduler
   val localDb: LocalDb
   val remoteDb: RemoteDb
@@ -43,7 +44,7 @@ class AppModule(application: Context) : AppComponent {
   )
   override val snooze = Snooze(appSettings)
   override val notificationSender = NotificationSender(application)
-  override val vibratorCompat = VibratorCompat(application)
+  override val appVibrator = AppVibrator(application)
   override val localDb = LocalDb(application)
   override val remoteDb = RemoteDb()
   override val eventRepository = DbEventRepository(localDb, remoteDb)
@@ -51,9 +52,10 @@ class AppModule(application: Context) : AppComponent {
 
   // We can't use default arguments to provide the dependencies,
   // because the default arguments use "app().instance" which would cause an infinite recursion loop.
+  override val movementAcknowledger = MovementAcknowledger(eventRepository, appVibrator)
   override val reminder = Reminder(
     eventRepository = eventRepository,
-    vibratorCompat = vibratorCompat,
+    appVibrator = appVibrator,
     notificationSender = notificationSender,
     appSettings = appSettings,
     snooze = snooze

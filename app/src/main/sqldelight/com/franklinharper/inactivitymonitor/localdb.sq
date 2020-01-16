@@ -42,7 +42,7 @@ selectLatest:
 SELECT *
 FROM event
 ORDER BY id DESC
-LIMIT 1;
+LIMIT :limit;
 
 selectRange:
 SELECT *

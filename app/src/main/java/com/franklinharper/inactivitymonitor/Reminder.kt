@@ -6,7 +6,7 @@ import java.time.ZonedDateTime
 
 class Reminder(
   private val eventRepository: EventRepository,
-  private val vibratorCompat: VibratorCompat = appComponent().vibratorCompat,
+  private val appVibrator: AppVibrator = appComponent().appVibrator,
   private val notificationSender: NotificationSender = appComponent().notificationSender,
   private val snooze: Snooze,
   private val appSettings: AppSettings = appComponent().appSettings
@@ -60,7 +60,7 @@ class Reminder(
       Timber.d("notifications off")
     }
     if (appSettings.vibrate()) {
-      vibratorCompat.vibrate(milliseconds = moveReminderVibrationMillis)
+      appVibrator.moveReminder()
     } else {
       Timber.d("vibrations off")
     }

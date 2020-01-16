@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.bold
@@ -20,7 +19,6 @@ import com.google.firebase.auth.FirebaseAuth
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import java.time.Instant
-import java.time.ZonedDateTime
 
 // TODO Optimize alarms so that the app doesn't run as often (e.g. every 30 secs during the night)
 // TODO Distribute app updates through Play Store internal test channel
@@ -47,7 +45,7 @@ class MainActivity : AppCompatActivity() {
   private val activityRepository = appComponent().eventRepository
   private val notificationSender = appComponent().notificationSender
   private val alarmScheduler = appComponent().alarmScheduler
-  private val vibratorWrapper = appComponent().vibratorCompat
+  private val appVibrator = appComponent().appVibrator
   private val logFileAdapter = LogFileAdapter()
   private val snooze = appComponent().snooze
   private val reminder = appComponent().reminder
@@ -177,7 +175,7 @@ class MainActivity : AppCompatActivity() {
         true
       }
       R.id.action_vibrate -> {
-        vibratorWrapper.vibrate(2500)
+        appVibrator.moveReminder()
         true
       }
       R.id.action_notify -> {

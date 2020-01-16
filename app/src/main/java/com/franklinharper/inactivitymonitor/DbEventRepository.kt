@@ -20,12 +20,22 @@ data class UserActivity(
 
   companion object {
 
-    fun toActivity(event: Event, end: Long): UserActivity {
+    fun fromEvent(event: Event, end: Long): UserActivity {
       return UserActivity(
         event.type,
         event.occurred,
         end - event.occurred.epochSecond
       )
+    }
+
+    fun fromEvents(events: List<Event>, end: Long): List<UserActivity> {
+      var nextEnd = end
+      val activities = mutableListOf<UserActivity>()
+      events.forEach { event ->
+        activities.add(fromEvent(event, nextEnd))
+        nextEnd = event.occurred.epochSecond
+      }
+      return activities
     }
 
   }
@@ -34,6 +44,7 @@ data class UserActivity(
 
 interface EventRepository {
   fun mostRecentActivity(end: Long = Instant.now().epochSecond): UserActivity
+  fun mostRecentActivities(count: Long, end: Long = Instant.now().epochSecond): List<UserActivity>
   fun insert(activityType: EventType, status: Status)
   fun syncToCloud()
   fun firstMovementAfter(start: ZonedDateTime): EventType?
@@ -49,7 +60,17 @@ class DbEventRepository(
 ) : EventRepository {
 
   override fun mostRecentActivity(end: Long): UserActivity {
-    return UserActivity.toActivity(localDb.queries.selectLatest().executeAsOne(), end)
+    return UserActivity.fromEvent(
+      localDb.queries.selectLatest(limit = 1).executeAsOne(),
+      end
+    )
+  }
+
+  override fun mostRecentActivities(limit: Long, end: Long): List<UserActivity> {
+    return UserActivity.fromEvents(
+      localDb.queries.selectLatest(limit = limit).executeAsList(),
+      end
+    )
   }
 
   override fun todaysActivities(
