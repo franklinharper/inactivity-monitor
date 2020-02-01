@@ -1,0 +1,21 @@
+           123456789112345678921234567893
+           MoveMe: Walk Reminder
+           HealthyMe: Health Made Easy
+           Walk a Bit - Health Coach (Not yet tested)
+           HealthyMe Coach:
+           HealthyMe Coach: Easy Health
+           HealthifyMe: Your Health Coach
+           HealthyMe: Health Made Easy
+           MoveMe: Active Pedometer
+           MoveMe: Smart Pedometer (once app has activity metric)
+2014-10-23 MoveMe - Activity Reminder
+2014-10-22 Healthify - Health Coach
+2014-10-22 Move a Bit-Health Bracelet App
+2014-10-21 Movebit - Health Bracelet App
+2014-10-19 Move A Bit - Health & Wellness (on 20 Oct. downloads dropped to 3)
+2014-10-15 Health Bracelet = Phone + App
+2014-10-15 Health Bracelet = Phone + App
+2014-10-15 Phone + App = Health Bracelet
+2014-10-14 Health Bracelet App - BeActive
+2014-10-13 Daily Activity Reminder
+2014-10-11 BeActive - Active Reminder
