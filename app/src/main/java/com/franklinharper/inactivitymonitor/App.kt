@@ -6,7 +6,7 @@ import timber.log.Timber
 
 // Suprressing erroneous Lint warning about this class being unused.
 @Suppress("unused")
-class MyApplication : Application() {
+class App : Application() {
 
   init {
     val originalExceptionHandler = Thread.getDefaultUncaughtExceptionHandler()

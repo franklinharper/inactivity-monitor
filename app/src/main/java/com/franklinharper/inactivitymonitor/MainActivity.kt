@@ -20,6 +20,7 @@ import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import java.time.Instant
 
+// TODO Color code the daily activity list
 // TODO Move settings to the Main Screen
 // TODO Fix bug: Screen Title is not displayed on Settings screen
 // TODO Distribute app updates through Play Store internal test channel
