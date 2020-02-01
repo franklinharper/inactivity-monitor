@@ -21,18 +21,28 @@ class AppVibrator(context: Context) {
     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
     .setUsage(AudioAttributes.USAGE_ALARM)
     .build()
-
-  private val ackMovePattern = longArrayOf(0, 400, 400, 400, 400, 400)
-  private val ackMoveAmplitudes = intArrayOf(0, 255, 0, 255, 0, 255)
   private val doNotRepeat = -1
+
+  // 4 vibrations
+  private val ackMovePattern =   longArrayOf(0, 400, 400, 400, 400, 400, 400, 400)
+  private val ackMoveAmplitudes = intArrayOf(0, 255,   0, 255,   0, 255,   0, 255)
   private val acknowledgeMoveEffect: VibrationEffect = VibrationEffect.createWaveform(
     ackMovePattern,
     ackMoveAmplitudes,
     doNotRepeat
   )
 
+  // 3 vibrations
+  private val moveReminderPattern   = longArrayOf(0, 400, 400, 400, 400, 400)
+  private val moveReminderAmplitudes = intArrayOf(0, 255,   0, 255,   0, 255)
+  private val moveReminderEffect: VibrationEffect = VibrationEffect.createWaveform(
+    moveReminderPattern,
+    moveReminderAmplitudes,
+    doNotRepeat
+  )
+
   fun moveReminder() {
-    vibrator.vibrate(acknowledgeMoveEffect, audioAttributes)
+    vibrator.vibrate(moveReminderEffect, audioAttributes)
   }
 
   fun acknowledgeMovement() {
