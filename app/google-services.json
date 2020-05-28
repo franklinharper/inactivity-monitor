@@ -15,11 +15,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "352138018335-8slc0u97qrf79m5lphmg07i4cslqimf9.apps.googleusercontent.com",
+          "client_id": "352138018335-koqvb117r4o2u5n81bqmvcn6hbvipv9d.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.franklinharper.inactivitymonitor",
-            "certificate_hash": "af029d6684ef98c57219bead71402c9c0e912fa9"
+            "certificate_hash": "71dee07b6baabc405f987badc5e08dd13ce41f02"
           }
         },
         {
