@@ -36,7 +36,7 @@ interface AppComponent {
 }
 
 class AppModule(application: Context) : AppComponent {
-  override val activityRecognitionSubscriber = ActivityRecognitionSubscriber(application)
+  override val activityRecognitionSubscriber = ActivityRecognitionSubscriber()
   override val systemSettings = SystemSettings()
   override val appSettings = AppSettings(
     application,

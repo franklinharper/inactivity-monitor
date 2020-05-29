@@ -14,10 +14,9 @@ import timber.log.Timber
  * This subscription must be performed every time the app launches.
  */
 
-class ActivityRecognitionSubscriber(context: Context) {
+class ActivityRecognitionSubscriber {
 
-  // This class does all of it's work in the init block.
-  init {
+  fun subscribe(context: Context) {
     val transitions = createTransitions()
     val intent = Intent(context, AppBroadcastReceiver::class.java)
     val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0)

@@ -13,9 +13,13 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.firebase.ui.auth.AuthUI
+import com.franklinharper.inactivitymonitor.permission.Permission
+import com.franklinharper.inactivitymonitor.permission.PermissionListener
+import com.franklinharper.inactivitymonitor.permission.PermissionManager
 import com.franklinharper.inactivitymonitor.settings.SettingsActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import java.time.Instant
@@ -51,8 +55,8 @@ class MainActivity : AppCompatActivity() {
   private val logFileAdapter = LogFileAdapter()
   private val snooze = appComponent().snooze
   private val reminder = appComponent().reminder
-
-  private lateinit var auth: FirebaseAuth
+  private val permissionManager = PermissionManager(this)
+  private val activityRecognitionSubscriber = appComponent().activityRecognitionSubscriber
 
   @Suppress("SpellCheckingInspection")
   private val compositeDisposable = CompositeDisposable()
@@ -64,15 +68,28 @@ class MainActivity : AppCompatActivity() {
     initializeBottomNavView()
     initializeHomeView()
     initializeLogView()
+    startActivityRecognition()
     showHome()
 
     alarmScheduler.update()
 
-    auth = FirebaseAuth.getInstance()
-    val currentUser = auth.currentUser
+    val currentUser = Firebase.auth.currentUser
     if (currentUser == null) {
       startUserSignin()
     }
+  }
+
+  private fun startActivityRecognition() {
+    permissionManager.request(Permission.ACTIVITY_RECOGNITION, object : PermissionListener {
+
+      override fun onGranted(permission: Permission) {
+        activityRecognitionSubscriber.subscribe((this@MainActivity).applicationContext)
+      }
+
+      override fun onDenied(permission: Permission) {
+//        ui.showLocationPermissionDenied()
+      }
+    })
   }
 
   private fun initializeHomeView() {
@@ -125,6 +142,14 @@ class MainActivity : AppCompatActivity() {
         .build(),
       RequestCode.SIGN_IN.ordinal
     )
+  }
+
+  override fun onRequestPermissionsResult(
+    requestCode: Int,
+    permissions: Array<String>,
+    grantResults: IntArray
+  ) {
+    permissionManager.onRequestPermissionsResult(requestCode, grantResults)
   }
 
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
