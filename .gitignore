@@ -8,6 +8,8 @@
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
 /.idea/sqldelight/app/.sqldelight
+/.idea/markdown-navigator
+/.idea/markdown*
 .DS_Store
 /build
 /captures
