@@ -32,7 +32,7 @@ class AlarmScheduler(
   private fun replacePreviousAlarm(alarmSecs: Long) {
     Timber.d("replacePreviousAlarm, alarmSecs $alarmSecs")
     alarmManager.cancel(alarmIntent)
-    alarmManager.set(
+    alarmManager.setAndAllowWhileIdle(
       AlarmManager.ELAPSED_REALTIME_WAKEUP,
       SystemClock.elapsedRealtime() + alarmSecs * 1000,
       alarmIntent
