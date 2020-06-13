@@ -61,7 +61,7 @@
       tools:visibility="gone">
 
     <TextView
-        android:id="@+id/activities"
+        android:id="@+id/movements"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textIsSelectable="true" />

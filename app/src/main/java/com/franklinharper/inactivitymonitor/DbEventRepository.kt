@@ -1,6 +1,6 @@
 package com.franklinharper.inactivitymonitor
 
-import com.franklinharper.inactivitymonitor.EventType.STILL_START
+import com.franklinharper.inactivitymonitor.MovementType.STILL_START
 import timber.log.Timber
 import java.time.Instant
 import java.time.ZonedDateTime
@@ -12,30 +12,30 @@ import java.time.ZonedDateTime
 //
 // The repository should not leak to higher layers ANY implementation details of the underlying layers.
 
-data class UserActivity(
-  val type: EventType,
+data class UserMovement(
+  val type:MovementType,
   val start: Timestamp,
   val durationSecs: Long
 ) {
 
   companion object {
 
-    fun fromEvent(event: Event, end: Long): UserActivity {
-      return UserActivity(
+    fun fromEvent(event: Event, end: Long): UserMovement {
+      return UserMovement(
         event.type,
         event.occurred,
         end - event.occurred.epochSecond
       )
     }
 
-    fun fromEvents(events: List<Event>, end: Long): List<UserActivity> {
+    fun fromEvents(events: List<Event>, end: Long): List<UserMovement> {
       var nextEnd = end
-      val activities = mutableListOf<UserActivity>()
+      val movements = mutableListOf<UserMovement>()
       events.forEach { event ->
-        activities.add(fromEvent(event, nextEnd))
+        movements.add(fromEvent(event, nextEnd))
         nextEnd = event.occurred.epochSecond
       }
-      return activities
+      return movements
     }
 
   }
@@ -43,15 +43,15 @@ data class UserActivity(
 }
 
 interface EventRepository {
-  fun mostRecentActivity(end: Long = Instant.now().epochSecond): UserActivity
-  fun mostRecentActivities(count: Long, end: Long = Instant.now().epochSecond): List<UserActivity>
-  fun insert(activityType: EventType, status: Status)
+  fun mostRecentMovement(end: Long = Instant.now().epochSecond): UserMovement
+  fun mostRecentMovements(count: Long, end: Long = Instant.now().epochSecond): List<UserMovement>
+  fun insert(movementType: MovementType, status: Status)
   fun syncToCloud()
-  fun firstMovementAfter(start: ZonedDateTime): EventType?
-  fun todaysActivities(
+  fun firstMovementAfter(start: ZonedDateTime): MovementType?
+  fun todaysMovements(
     stillnessThreshold: Long,
     now: ZonedDateTime = ZonedDateTime.now()
-  ): List<UserActivity>
+  ): List<UserMovement>
 }
 
 class DbEventRepository(
@@ -59,26 +59,26 @@ class DbEventRepository(
   private val remoteDb: RemoteDb = appComponent().remoteDb
 ) : EventRepository {
 
-  override fun mostRecentActivity(end: Long): UserActivity {
-    return UserActivity.fromEvent(
+  override fun mostRecentMovement(end: Long): UserMovement {
+    return UserMovement.fromEvent(
       localDb.queries.selectLatest(limit = 1).executeAsOne(),
       end
     )
   }
 
-  override fun mostRecentActivities(limit: Long, end: Long): List<UserActivity> {
-    return UserActivity.fromEvents(
+  override fun mostRecentMovements(limit: Long, end: Long): List<UserMovement> {
+    return UserMovement.fromEvents(
       localDb.queries.selectLatest(limit = limit).executeAsList(),
       end
     )
   }
 
-  override fun todaysActivities(
+  override fun todaysMovements(
     stillnessThreshold: Long,
     now: ZonedDateTime
-  ): List<UserActivity> {
+  ): List<UserMovement> {
     val todaysEvents = todaysEvents(now)
-    return filterShortStillActivities(stillnessThreshold, Timestamp.from(now), todaysEvents)
+    return filterShortStillMovements(stillnessThreshold, Timestamp.from(now), todaysEvents)
   }
 
   private fun todaysEvents(now: ZonedDateTime, limit: Long = UNLIMITED): List<Event> {
@@ -90,16 +90,16 @@ class DbEventRepository(
       .executeAsList()
   }
 
-  override fun insert(activityType: EventType, status: Status) {
-    if (mostRecentActivity().type == activityType) {
-      Timber.w("localDb insert ignoring duplicate, $activityType, $status")
+  override fun insert(movementType: MovementType, status: Status) {
+    if (mostRecentMovement().type == movementType) {
+      Timber.w("localDb insert ignoring duplicate, $movementType, $status")
     } else {
-      Timber.d("localDb insert, $activityType, $status")
-      localDb.queries.insert(activityType, status)
+      Timber.d("localDb insert, $movementType, $status")
+      localDb.queries.insert(movementType, status)
     }
   }
 
-  override fun firstMovementAfter(start: ZonedDateTime): EventType? {
+  override fun firstMovementAfter(start: ZonedDateTime): MovementType? {
     return localDb.queries.selectRangeExcluding(
       type = STILL_START,
       startInclusive = start.timestamp,
@@ -120,7 +120,7 @@ class DbEventRepository(
 
   override fun syncToCloud() {
     // TODO Handle the case where it hasn't been possible to sync for more than 24 hours,
-    //  and more than one day of activites needs to be written.
+    //  and more than one day of movements needs to be written.
     val newEvents = localDb.queries.selectByStatus(Status.NEW).executeAsList()
 
     newEvents
@@ -155,11 +155,11 @@ class DbEventRepository(
     // Arbitrarily the value -1 is used for queries that don't set a limit.
     const val UNLIMITED = -1L
 
-    fun filterShortStillActivities(
+    fun filterShortStillMovements(
       shortLimit: Long,
       now: Timestamp,
       events: List<Event>
-    ): List<UserActivity> {
+    ): List<UserMovement> {
 
       validateArguments(shortLimit, now.epochSecond, events)
 
@@ -173,30 +173,30 @@ class DbEventRepository(
         if (first.type == STILL_START && firstDuration < shortLimit) {
           return emptyList()
         } else {
-          return listOf(UserActivity(first.type, first.occurred, firstDuration))
+          return listOf(UserMovement(first.type, first.occurred, firstDuration))
         }
       }
-      // The duration of the previous Activity is calculated using the time difference between the start times of
+      // The duration of the previous movement is calculated using the time difference between the start times of
       // 2 successive events.
       //
       // For the last event the next event doesn't exist!
       //
-      // To avoid adding a special case for calculating the duration of the last Activity
+      // To avoid adding a special case for calculating the duration of the last movement
       // we add an *end* event to the end of the list.
       val endTransition = Event.Impl(
         occurred = now,
-        type = EventType.ACTIVITY_END,
+        type = MovementType.ACTIVITY_END,
         id = Long.MAX_VALUE,
         status = Status.DUMMY
       )
       return filter(shortLimit, events.toMutableList().also { it.add(endTransition) })
     }
 
-    private fun filter(shortLimit: Long, events: List<Event>): List<UserActivity> {
+    private fun filter(shortLimit: Long, events: List<Event>): List<UserMovement> {
 
       var waitingToAdd: Event? = null
       var previous: Event = events[0]
-      val activities = mutableListOf<UserActivity>()
+      val movements = mutableListOf<UserMovement>()
       for (nextIndex in 1 until events.size) {
         val next = events[nextIndex]
         when {
@@ -206,8 +206,8 @@ class DbEventRepository(
             val stillDuration = previous.timeUntil(next)
             if (stillDuration >= shortLimit) {
               if (waitingToAdd != null) {
-                activities.add(
-                  UserActivity(
+                movements.add(
+                  UserMovement(
                     waitingToAdd.type,
                     waitingToAdd.occurred,
                     waitingToAdd.timeUntil(previous)
@@ -215,7 +215,7 @@ class DbEventRepository(
                 )
                 waitingToAdd = null
               }
-              activities.add(UserActivity(STILL_START, previous.occurred, stillDuration))
+              movements.add(UserMovement(STILL_START, previous.occurred, stillDuration))
             }
           }
 
@@ -224,15 +224,15 @@ class DbEventRepository(
               waitingToAdd = previous
             } else {
               if (waitingToAdd != null && waitingToAdd.type != previous.type) {
-                activities.add(
-                  UserActivity(
+                movements.add(
+                  UserMovement(
                     waitingToAdd.type,
                     waitingToAdd.occurred,
                     waitingToAdd.timeUntil(previous)
                   )
                 )
-                activities.add(
-                  UserActivity(
+                movements.add(
+                  UserMovement(
                     previous.type,
                     previous.occurred,
                     previous.timeUntil(next)
@@ -242,8 +242,8 @@ class DbEventRepository(
               } else if (waitingToAdd != null && waitingToAdd.type == previous.type) {
                 // DO NOTHING
               } else {
-                activities.add(
-                  UserActivity(
+                movements.add(
+                  UserMovement(
                     previous.type,
                     previous.occurred,
                     previous.timeUntil(next)
@@ -256,15 +256,15 @@ class DbEventRepository(
         previous = next
       }
       if (waitingToAdd != null) {
-        activities.add(
-          UserActivity(
+        movements.add(
+          UserMovement(
             waitingToAdd.type,
             waitingToAdd.occurred,
             waitingToAdd.timeUntil(events.last())
           )
         )
       }
-      return activities
+      return movements
     }
 
     private fun validateArguments(shortLimit: Long, now: Long, events: List<Event>) {
@@ -295,28 +295,28 @@ class DbEventRepository(
       }
     }
 
-    private fun List<Event>.toActivities(now: Long): List<UserActivity> {
+    private fun List<Event>.toMovements(now: Long): List<UserMovement> {
       val events = this
       if (events.isEmpty()) {
         return emptyList()
       }
 
-      val activities = mutableListOf<UserActivity>()
+      val movements = mutableListOf<UserMovement>()
       var previous = events[0]
       for (i in 1 until events.size) {
         val next = events[i]
         val duration = previous.timeUntil(next)
-        activities.add(UserActivity(previous.type, previous.occurred, duration))
+        movements.add(UserMovement(previous.type, previous.occurred, duration))
         previous = next
       }
       val latestTransition = events.last()
-      val latestActivity = UserActivity(
+      val latestMovement = UserMovement(
         latestTransition.type,
         latestTransition.occurred,
         now - latestTransition.occurred.epochSecond
       )
-      activities.add(latestActivity)
-      return activities
+      movements.add(latestMovement)
+      return movements
     }
   }
 }

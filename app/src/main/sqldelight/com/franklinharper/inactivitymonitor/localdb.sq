@@ -1,12 +1,12 @@
-import com.franklinharper.inactivitymonitor.EventType;
+import com.franklinharper.inactivitymonitor.MovementType;
 import com.franklinharper.inactivitymonitor.Status;
 import com.franklinharper.inactivitymonitor.Timestamp;
 
 CREATE TABLE event (
   id INTEGER PRIMARY KEY,
 
-  -- ActivityType enum: e.g. STILL, WALKING, etc.
-  type TEXT AS EventType NOT NULL,
+  -- MovementType enum: e.g. STILL, WALKING, etc.
+  type TEXT AS MovementType NOT NULL,
 
   -- Status enum
   status TEXT AS Status NOT NULL,

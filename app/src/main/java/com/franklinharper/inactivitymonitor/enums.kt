@@ -3,7 +3,7 @@ package com.franklinharper.inactivitymonitor
 import androidx.annotation.StringRes
 import com.google.android.gms.location.DetectedActivity
 
-enum class EventType(@StringRes val stringId: Int) {
+enum class MovementType(@StringRes val stringId: Int) {
 
   // The names of these enum constants is written to the DB.
   // WARNING: changing the name of one of the enum constants will break compatibility
@@ -20,7 +20,7 @@ enum class EventType(@StringRes val stringId: Int) {
 
   companion object {
     // Map the Int provided by the Google API to an enum which is under our control
-    fun from(detectedActivityType: Int): EventType {
+    fun from(detectedActivityType: Int): MovementType {
       return when (detectedActivityType) {
         DetectedActivity.IN_VEHICLE -> IN_VEHICLE_START
         DetectedActivity.ON_BICYCLE -> ON_BICYCLE_START

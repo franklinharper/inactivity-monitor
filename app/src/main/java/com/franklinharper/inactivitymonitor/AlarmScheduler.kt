@@ -25,7 +25,7 @@ class AlarmScheduler(
 
   fun update() {
     // Wait 1 extra second to ensure that the timeout has expired when the app is woken up.
-    val alarmSecs = timeoutSecs(eventRepository.mostRecentActivity()) + 1
+    val alarmSecs = timeoutSecs(eventRepository.mostRecentMovement()) + 1
     replacePreviousAlarm(alarmSecs)
   }
 
@@ -39,13 +39,13 @@ class AlarmScheduler(
     )
   }
 
-  private fun timeoutSecs(activity: UserActivity?): Long {
+  private fun timeoutSecs(movement: UserMovement?): Long {
     val minWaitSecs = appSettings.reminderInterval()
     val maxWaitSecs = appSettings.maxStillMinutes() * 60L
-    return when (activity?.type) {
-      EventType.STILL_START -> {
+    return when (movement?.type) {
+      MovementType.STILL_START -> {
         // Never wait less than minWaitSecs.
-        max(minWaitSecs, maxWaitSecs - activity.durationSecs)
+        max(minWaitSecs, maxWaitSecs - movement.durationSecs)
       }
       else -> maxWaitSecs
     }

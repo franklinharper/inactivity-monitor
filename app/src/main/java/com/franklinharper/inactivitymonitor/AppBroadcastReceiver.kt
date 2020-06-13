@@ -78,16 +78,16 @@ class AppBroadcastReceiver : BroadcastReceiver() {
   // If the Transition events weren't deduped the same calculation would require looping over
   // multiple Transition events.
   private fun recordEvents(transitionResult: ActivityTransitionResult?) {
-    val previousActivity = eventRepository.mostRecentActivity()
-    Timber.d("processTransitions, previous ${previousActivity.type}")
+    val previousMovement = eventRepository.mostRecentMovement()
+    Timber.d("processTransitions, previous ${previousMovement.type}")
     if (transitionResult == null) {
       Timber.d("Ignoring null transitionResult")
       return
     }
 
-    var previousType = previousActivity.type
+    var previousType = previousMovement.type
     for (transition in transitionResult.transitionEvents) {
-      val newType = EventType.from(transition.activityType)
+      val newType = MovementType.from(transition.activityType)
       if (
         newType != previousType &&
         transition.transitionType == ActivityTransition.ACTIVITY_TRANSITION_ENTER

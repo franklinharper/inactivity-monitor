@@ -24,7 +24,7 @@ import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import java.time.Instant
 
-// TODO Color code the daily activity list
+// TODO Color code the daily movement list
 // TODO Move settings to the Main Screen
 // TODO Fix bug: Screen Title is not displayed on Settings screen
 // TODO Distribute app updates through Play Store internal test channel
@@ -42,13 +42,14 @@ enum class RequestCode {
   SIGN_IN
 }
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
   // We can't inject dependencies through the constructor
   // because this class is instantiated by the Android OS.
   //
   // So we fall back to injecting dependencies directly into the fields.
-  private val activityRepository = appComponent().eventRepository
+  private val movementRepository = appComponent().eventRepository
   private val notificationSender = appComponent().notificationSender
   private val alarmScheduler = appComponent().alarmScheduler
   private val appVibrator = appComponent().appVibrator
@@ -56,7 +57,7 @@ class MainActivity : AppCompatActivity() {
   private val snooze = appComponent().snooze
   private val reminder = appComponent().reminder
   private val permissionManager = PermissionManager(this)
-  private val activityRecognitionSubscriber = appComponent().activityRecognitionSubscriber
+  private val movementRecognitionSubscriber = appComponent().movementRecognitionSubscriber
 
   @Suppress("SpellCheckingInspection")
   private val compositeDisposable = CompositeDisposable()
@@ -68,7 +69,7 @@ class MainActivity : AppCompatActivity() {
     initializeBottomNavView()
     initializeHomeView()
     initializeLogView()
-    startActivityRecognition()
+    startMovementRecognition()
     showHome()
 
     alarmScheduler.update()
@@ -79,11 +80,11 @@ class MainActivity : AppCompatActivity() {
     }
   }
 
-  private fun startActivityRecognition() {
+  private fun startMovementRecognition() {
     permissionManager.request(Permission.ACTIVITY_RECOGNITION, object : PermissionListener {
 
       override fun onGranted(permission: Permission) {
-        activityRecognitionSubscriber.subscribe((this@MainActivity).applicationContext)
+        movementRecognitionSubscriber.subscribe((this@MainActivity).applicationContext)
       }
 
       override fun onDenied(permission: Permission) {
@@ -190,11 +191,11 @@ class MainActivity : AppCompatActivity() {
 
     return when (item.itemId) {
       R.id.action_record_walking -> {
-        activityRepository.insert(EventType.WALKING_START, Status.NEW)
+        movementRepository.insert(MovementType.WALKING_START, Status.NEW)
         true
       }
       R.id.action_sync_to_cloud -> {
-        activityRepository.syncToCloud()
+        movementRepository.syncToCloud()
         true
       }
       R.id.action_test_reminder -> {
@@ -206,7 +207,7 @@ class MainActivity : AppCompatActivity() {
         true
       }
       R.id.action_notify -> {
-        notificationSender.sendMoveNotification(EventType.STILL_START, 0.0)
+        notificationSender.sendMoveNotification(MovementType.STILL_START, 0.0)
         true
       }
       R.id.action_settings -> {
@@ -242,7 +243,7 @@ class MainActivity : AppCompatActivity() {
   private fun updateSelectedNavigationItem(id: Int) {
     when (id) {
       R.id.navigation_activity -> showHome()
-      R.id.navigation_events -> showTodaysActivities()
+      R.id.navigation_events -> showTodaysMovements()
       R.id.navigation_log -> showDeveloperLog()
       else -> throw IllegalStateException()
     }
@@ -252,9 +253,9 @@ class MainActivity : AppCompatActivity() {
     homeContainer.isVisible = true
     todayContainer.isVisible = false
     logContainer.isVisible = false
-    val latestActivity = activityRepository.mostRecentActivity()
-    val minutes = TimeFormatters.minutes.format(latestActivity.durationSecs / 60.0)
-    val activityType = getString(latestActivity.type.stringId)
+    val latestMovement = movementRepository.mostRecentMovement()
+    val minutes = TimeFormatters.minutes.format(latestMovement.durationSecs / 60.0)
+    val movementType = getString(latestMovement.type.stringId)
 //    val dndStatus = if (notificationSender.doNotDisturbOn)
 //      getText(R.string.main_activity_do_not_disturb_on)
 //    else
@@ -262,7 +263,7 @@ class MainActivity : AppCompatActivity() {
 
     currentStatus.text = buildSpannedString {
       append("\nYou have been ")
-      bold { append(activityType) }
+      bold { append(movementType) }
       append(" for the last ")
       bold { append(minutes) }
       append(" minutes\n")
@@ -279,13 +280,13 @@ class MainActivity : AppCompatActivity() {
     }
   }
 
-  private fun showTodaysActivities() {
+  private fun showTodaysMovements() {
     homeContainer.isVisible = false
     todayContainer.isVisible = true
     logContainer.isVisible = false
-    val todaysActivities = StringBuilder()
+    val todaysMovements = StringBuilder()
     val nowSecs = System.currentTimeMillis() / 1000
-    todaysActivities.append(
+    todaysMovements.append(
       "Updated ${TimeFormatters.time.format(
         Instant.ofEpochSecond(
           nowSecs
@@ -293,19 +294,19 @@ class MainActivity : AppCompatActivity() {
       )}\n\n"
     )
 
-    activityRepository
-      .todaysActivities(stillnessThreshold = 60)
+    movementRepository
+      .todaysMovements(stillnessThreshold = 60)
       .reversed()
-      .forEach { activity ->
-        // Go backwards in time displaying the duration of each successive activity
-        val timestamp = TimeFormatters.time.format(activity.start.toZonedDateTime())
-        val minutes = "%.1f".format(activity.durationSecs / 60.0)
-        val activityType = getString(activity.type.stringId)
-        todaysActivities.append(
-          getString(R.string.main_activity_event_log, timestamp, activityType, minutes)
+      .forEach { movement ->
+        // Go backwards in time displaying the duration of each successive movement
+        val timestamp = TimeFormatters.time.format(movement.start.toZonedDateTime())
+        val minutes = "%.1f".format(movement.durationSecs / 60.0)
+        val movementType = getString(movement.type.stringId)
+        todaysMovements.append(
+          getString(R.string.main_activity_event_log, timestamp, movementType, minutes)
         )
       }
-    activities.text = todaysActivities.toString()
+    movements.text = todaysMovements.toString()
   }
 
   private fun showDeveloperLog() {

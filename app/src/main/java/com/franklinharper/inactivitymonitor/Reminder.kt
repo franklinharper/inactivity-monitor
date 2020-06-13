@@ -15,7 +15,7 @@ class Reminder(
   private val moveReminderVibrationMillis = 2500L
 
   fun update() {
-    val mostRecentActivity = eventRepository.mostRecentActivity()
+    val mostRecentActivity = eventRepository.mostRecentMovement()
     val reminderStart = appSettings.reminderStart()
     val todaysFirstMovementAfterStart = eventRepository.firstMovementAfter(
       ZonedDateTime.now().startOfDay.plusHours(reminderStart)
@@ -34,8 +34,8 @@ class Reminder(
 
   fun shouldRemind(
     now: ZonedDateTime,
-    latestActivity: UserActivity,
-    firstMovementAfterStart: EventType?
+    latestMovement: UserMovement,
+    firstMovementAfterStart: MovementType?
   ): Boolean {
     if (appSettings.smartStart() && firstMovementAfterStart == null) {
       Timber.d("Smart Start is ON, and user hasn't moved yet")
@@ -47,15 +47,15 @@ class Reminder(
     val tooEarly = hour < reminderStart
     val tooLate = hour >= reminderEnd
     val snoozed = snooze.isActive()
-    val still = latestActivity.type == EventType.STILL_START
-    val tooLong = latestActivity.durationSecs > appSettings.maxStillMinutes() * 60
+    val still = latestMovement.type == MovementType.STILL_START
+    val tooLong = latestMovement.durationSecs > appSettings.maxStillMinutes() * 60
     Timber.d("reminderStart $reminderStart, reminderEnd $reminderEnd, snoozed $snoozed, still $still, tooLong $tooLong")
     return still && tooLong && !tooEarly && !tooLate && !snoozed
   }
 
-  private fun remindToMove(activity: UserActivity) {
+  private fun remindToMove(movement: UserMovement) {
     if (appSettings.notify()) {
-      notificationSender.sendMoveNotification(activity.type, activity.durationSecs / 60.0)
+      notificationSender.sendMoveNotification(movement.type, movement.durationSecs / 60.0)
     } else {
       Timber.d("notifications off")
     }

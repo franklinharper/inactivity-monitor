@@ -1,7 +1,7 @@
 package com.franklinharper.inactivitymonitor
 
-import com.franklinharper.inactivitymonitor.EventType.STILL_START
-import com.franklinharper.inactivitymonitor.EventType.WALKING_START
+import com.franklinharper.inactivitymonitor.MovementType.STILL_START
+import com.franklinharper.inactivitymonitor.MovementType.WALKING_START
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -13,7 +13,7 @@ class EventRepositoryFilterShortStillActivities {
     // Arrange
 
     // Act
-    val result = DbEventRepository.filterShortStillActivities(
+    val result = DbEventRepository.filterShortStillMovements(
       shortLimit = 60,
       now = Timestamp(0),
       events = emptyList()
@@ -29,7 +29,7 @@ class EventRepositoryFilterShortStillActivities {
     // Arrange
 
     // Act
-    val result = DbEventRepository.filterShortStillActivities(
+    val result = DbEventRepository.filterShortStillMovements(
       shortLimit = 60,
       now = Timestamp(59),
       events = listOf(
@@ -38,7 +38,7 @@ class EventRepositoryFilterShortStillActivities {
     )
 
     // Assert
-    assertEquals(emptyList<UserActivity>(), result)
+    assertEquals(emptyList<UserMovement>(), result)
   }
 
   @Test
@@ -47,7 +47,7 @@ class EventRepositoryFilterShortStillActivities {
     // Arrange
 
     // Act
-    val actual = DbEventRepository.filterShortStillActivities(
+    val actual = DbEventRepository.filterShortStillMovements(
       shortLimit = 60,
       now = Timestamp(61),
       events = listOf(
@@ -58,8 +58,8 @@ class EventRepositoryFilterShortStillActivities {
 
     // Assert
     val expected = listOf(
-      UserActivity(STILL_START, start = Timestamp(0), durationSecs = 60),
-      UserActivity(WALKING_START, start = Timestamp(60), durationSecs = 1)
+      UserMovement(STILL_START, start = Timestamp(0), durationSecs = 60),
+      UserMovement(WALKING_START, start = Timestamp(60), durationSecs = 1)
     )
     assertEquals(expected, actual)
   }
@@ -70,7 +70,7 @@ class EventRepositoryFilterShortStillActivities {
     // Arrange
 
     // Act
-    val actual = DbEventRepository.filterShortStillActivities(
+    val actual = DbEventRepository.filterShortStillMovements(
       shortLimit = 60,
       now = Timestamp(120),
       events = listOf(
@@ -81,7 +81,7 @@ class EventRepositoryFilterShortStillActivities {
 
     // Assert
     val expected = listOf(
-      UserActivity(WALKING_START, start = Timestamp(59), durationSecs = 61)
+      UserMovement(WALKING_START, start = Timestamp(59), durationSecs = 61)
     )
     assertEquals(expected, actual)
   }
@@ -92,7 +92,7 @@ class EventRepositoryFilterShortStillActivities {
     // Arrange
 
     // Act
-    val result = DbEventRepository.filterShortStillActivities(
+    val result = DbEventRepository.filterShortStillMovements(
       now = Timestamp(120),
       shortLimit = 60,
       events = listOf(
@@ -104,7 +104,7 @@ class EventRepositoryFilterShortStillActivities {
 
     // Assert
     val expected = listOf(
-      UserActivity(WALKING_START, start = Timestamp(59), durationSecs = 61)
+      UserMovement(WALKING_START, start = Timestamp(59), durationSecs = 61)
     )
 
     assertEquals(expected, result)
@@ -116,7 +116,7 @@ class EventRepositoryFilterShortStillActivities {
     // Arrange
 
     // Act
-    val result = DbEventRepository.filterShortStillActivities(
+    val result = DbEventRepository.filterShortStillMovements(
       now = Timestamp(62),
       shortLimit = 60,
       events = listOf(
@@ -128,8 +128,8 @@ class EventRepositoryFilterShortStillActivities {
 
     // Assert
     val expected = listOf(
-      UserActivity(WALKING_START, start = Timestamp(1), durationSecs = 1),
-      UserActivity(STILL_START, start = Timestamp(2), durationSecs = 60)
+      UserMovement(WALKING_START, start = Timestamp(1), durationSecs = 1),
+      UserMovement(STILL_START, start = Timestamp(2), durationSecs = 60)
     )
 
     assertEquals(expected, result)

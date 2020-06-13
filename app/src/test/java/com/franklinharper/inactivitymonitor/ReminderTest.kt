@@ -95,7 +95,7 @@ internal class ReminderTest {
 
     // Assert
     verify(exactly = 1) {
-      emptyRepository.insert(EventType.WALKING_START, Status.NEW)
+      emptyRepository.insert(MovementType.WALKING_START, Status.NEW)
     }
   }
 
@@ -113,14 +113,14 @@ internal class ReminderTest {
   }
 
   private fun createEventRepository(
-    mostRecentActivity: UserActivity = UserActivity(
-      EventType.STILL_START,
+    mostRecentMovement: UserMovement = UserMovement(
+      MovementType.STILL_START,
       Timestamp(0),
       0
     )
   ): EventRepository {
     return mockk<EventRepository>().apply {
-      every { mostRecentActivity(any()) } returns mostRecentActivity
+      every { mostRecentMovement(any()) } returns mostRecentMovement
       every { insert(any(), any()) } just Runs
     }
   }

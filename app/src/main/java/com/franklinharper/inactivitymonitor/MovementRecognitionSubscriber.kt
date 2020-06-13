@@ -14,7 +14,7 @@ import timber.log.Timber
  * This subscription must be performed every time the app launches.
  */
 
-class ActivityRecognitionSubscriber {
+class MovementRecognitionSubscriber {
 
   fun subscribe(context: Context) {
     val transitions = createTransitions()

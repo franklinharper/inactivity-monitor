@@ -62,7 +62,7 @@ class NotificationSender(
     notificationManager.cancel(NOTIFICATION_ID)
   }
 
-  fun sendMoveNotification(type: EventType, minutes: Double) {
+  fun sendMoveNotification(type: MovementType, minutes: Double) {
     val formattedMinutes = TimeFormatters.minutes.format(minutes)
     Timber.d("Move notification $type, $formattedMinutes minutes")
     val notification = buildMoveNotification()

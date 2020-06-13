@@ -15,7 +15,7 @@ interface AppComponent {
   // The activityRecognitionSubscriber is not called anywhere in,the app.
   // But it must be instantiated so that the app will receive
   // updates when a new user activity is recognized.
-  val activityRecognitionSubscriber: ActivityRecognitionSubscriber
+  val movementRecognitionSubscriber: MovementRecognitionSubscriber
   val systemSettings: SystemSettings
   val fileLogger: FileLoggerTree
   val reminder: Reminder
@@ -36,7 +36,7 @@ interface AppComponent {
 }
 
 class AppModule(application: Context) : AppComponent {
-  override val activityRecognitionSubscriber = ActivityRecognitionSubscriber()
+  override val movementRecognitionSubscriber = MovementRecognitionSubscriber()
   override val systemSettings = SystemSettings()
   override val appSettings = AppSettings(
     application,

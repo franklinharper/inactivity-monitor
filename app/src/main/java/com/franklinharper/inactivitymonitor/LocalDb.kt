@@ -33,7 +33,7 @@ class LocalDb(application: Context) {
     driver = AndroidSqliteDriver(Database.Schema, application, "local.db"),
     eventAdapter = Event.Adapter(
       // Store enums as text
-      typeAdapter = EnumColumnAdapter(EventType.values()),
+      typeAdapter = EnumColumnAdapter(MovementType.values()),
       statusAdapter = EnumColumnAdapter(Status.values()),
       occurredAdapter = TimestampColunmAdapter()
     )
