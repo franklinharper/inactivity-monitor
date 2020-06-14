@@ -3,13 +3,14 @@ package com.franklinharper.inactivitymonitor
 import com.franklinharper.inactivitymonitor.settings.AppSettings
 import timber.log.Timber
 import java.time.ZonedDateTime
+import javax.inject.Inject
 
-class Reminder(
+class Reminder @Inject constructor(
   private val eventRepository: EventRepository,
-  private val appVibrator: AppVibrator = appComponent().appVibrator,
-  private val notificationSender: NotificationSender = appComponent().notificationSender,
+  private val appVibrator: AppVibrator,
+  private val notificationSender: NotificationSender,
   private val snooze: Snooze,
-  private val appSettings: AppSettings = appComponent().appSettings
+  private val appSettings: AppSettings
 ) {
 
   private val moveReminderVibrationMillis = 2500L

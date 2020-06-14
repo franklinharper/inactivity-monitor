@@ -4,6 +4,7 @@ import com.franklinharper.inactivitymonitor.MovementType.STILL_START
 import timber.log.Timber
 import java.time.Instant
 import java.time.ZonedDateTime
+import javax.inject.Inject
 
 // The repository
 //
@@ -54,9 +55,9 @@ interface EventRepository {
   ): List<UserMovement>
 }
 
-class DbEventRepository(
-  private val localDb: LocalDb = appComponent().localDb,
-  private val remoteDb: RemoteDb = appComponent().remoteDb
+class DbEventRepository @Inject constructor(
+  private val localDb: LocalDb,
+  private val remoteDb: RemoteDb
 ) : EventRepository {
 
   override fun mostRecentMovement(end: Long): UserMovement {

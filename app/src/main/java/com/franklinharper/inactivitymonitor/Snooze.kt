@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import com.franklinharper.inactivitymonitor.settings.AppSettings
 import timber.log.Timber
 import java.time.Instant
+import javax.inject.Inject
 
 enum class SnoozeDuration(val second: Long, @StringRes val stringId: Int) {
   FIFTEEN_MINUTES(900, R.string.snooze_15_minutes),
@@ -13,8 +14,8 @@ enum class SnoozeDuration(val second: Long, @StringRes val stringId: Int) {
   TWO_HOURS(7200, R.string.snooze_2_hours)
 }
 
-class Snooze(
-  private val appSettings: AppSettings = appComponent().appSettings
+class Snooze @Inject constructor(
+  private val appSettings: AppSettings
 ) {
   fun start(seconds: Long) {
     appSettings.snoozeEndSecond = Instant.now().plusSeconds(seconds).epochSecond

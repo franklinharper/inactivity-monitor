@@ -14,6 +14,9 @@ import timber.log.Timber
  * This subscription must be performed every time the app launches.
  */
 
+// The activityRecognitionSubscriber is not called anywhere in,the app.
+// But it must be instantiated so that the app will receive
+// updates when a new user activity is recognized.
 class MovementRecognitionSubscriber {
 
   fun subscribe(context: Context) {

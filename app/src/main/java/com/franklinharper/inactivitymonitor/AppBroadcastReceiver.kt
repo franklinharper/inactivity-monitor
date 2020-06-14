@@ -6,9 +6,15 @@ import android.content.Context
 import android.content.Intent
 import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionResult
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.internal.managers.BroadcastReceiverComponentManager
+import dagger.hilt.internal.UnsafeCasts
 import timber.log.Timber
+import javax.inject.Inject
+
 
 // Receive all broadcasts sent to the app (e.g. alarms, notification actions, etc.)
+@AndroidEntryPoint
 class AppBroadcastReceiver : BroadcastReceiver() {
 
   // I tried having one SNOOZE action, and using an Extra for the DURATION.
@@ -24,22 +30,32 @@ class AppBroadcastReceiver : BroadcastReceiver() {
   // https://stackoverflow.com/questions/20204284/is-it-possible-to-create-multiple-pendingintents-with-the-same-requestcode-and-d
   //
   enum class Action {
+
     SNOOZE_15_MINUTES,
     SNOOZE_30_MINUTES,
     SNOOZE_1_HOUR,
   }
 
-  // This class is instantiated by the Android OS.
-  // The constructor of this class can't be used to supply the dependencies
-  // So we fall back to manually injecting dependencies.
-  private val eventRepository = appComponent().eventRepository
-  private val alarmScheduler = appComponent().alarmScheduler
-  private val reminder = appComponent().reminder
-  private val snooze = appComponent().snooze
-  private val notificationSender = appComponent().notificationSender
-  private val movementAcknowledger = appComponent().movementAcknowledger
+  @Inject
+  lateinit var eventRepository: EventRepository
+  @Inject
+  lateinit var alarmScheduler: AlarmScheduler
+  @Inject
+  lateinit var reminder: Reminder
+  @Inject
+  lateinit var snooze: Snooze
+  @Inject
+  lateinit var notificationSender: NotificationSender
+  @Inject
+  lateinit var movementAcknowledger: MovementAcknowledger
 
   override fun onReceive(context: Context, intent: Intent?) {
+    // This is a workaround for a Hilt bug. Injection was not working.
+    // See https://github.com/google/dagger/issues/1918
+    val injector =
+      BroadcastReceiverComponentManager.generatedComponent(context) as AppBroadcastReceiver_GeneratedInjector
+    injector.injectAppBroadcastReceiver(UnsafeCasts.unsafeCast(this))
+
     log(intent)
     if (intent != null) {
       val action = intent.action

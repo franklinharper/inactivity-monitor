@@ -4,8 +4,12 @@ import android.content.Context
 import com.squareup.sqldelight.ColumnAdapter
 import com.squareup.sqldelight.Transacter
 import com.squareup.sqldelight.android.AndroidSqliteDriver
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
-class LocalDb(application: Context) {
+class LocalDb @Inject constructor(
+  @ApplicationContext private val application: Context
+) {
 
   private class TimestampColunmAdapter() : ColumnAdapter<Timestamp, Long> {
     override fun encode(value: Timestamp) = value.epochSecond

@@ -7,11 +7,13 @@ import android.content.Intent
 import android.os.SystemClock
 import androidx.core.content.getSystemService
 import com.franklinharper.inactivitymonitor.settings.AppSettings
+import dagger.hilt.android.qualifiers.ApplicationContext
 import timber.log.Timber
+import javax.inject.Inject
 import kotlin.math.max
 
-class AlarmScheduler(
-  context: Context,
+class AlarmScheduler @Inject constructor(
+  @ApplicationContext private val context: Context,
   private val eventRepository: EventRepository,
   private val appSettings: AppSettings
 ) {

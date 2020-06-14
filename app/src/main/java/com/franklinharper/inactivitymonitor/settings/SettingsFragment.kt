@@ -7,8 +7,14 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.franklinharper.inactivitymonitor.NotificationSender
 import com.franklinharper.inactivitymonitor.R
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
-class SettingsFragment(val appSettings: AppSettings, val systemSettings: SystemSettings) : PreferenceFragmentCompat() {
+@AndroidEntryPoint
+class SettingsFragment : PreferenceFragmentCompat() {
+
+  @Inject
+  lateinit var systemSettings: SystemSettings
 
   override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
     setPreferencesFromResource(R.xml.settings, rootKey)

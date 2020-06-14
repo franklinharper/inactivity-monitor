@@ -4,10 +4,12 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.franklinharper.inactivitymonitor.R
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
-class AppSettings(
-  val context: Context,
-  val sharedPreferences: SharedPreferences
+class AppSettings @Inject constructor(
+  @ApplicationContext private val context: Context,
+  private val sharedPreferences: SharedPreferences
 ) {
 
   fun notify(): Boolean {

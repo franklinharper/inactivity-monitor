@@ -20,9 +20,12 @@ import com.franklinharper.inactivitymonitor.settings.SettingsActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import dagger.hilt.android.AndroidEntryPoint
+import fr.bipi.tressence.file.FileLoggerTree
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import java.time.Instant
+import javax.inject.Inject
 
 // TODO Color code the daily movement list
 // TODO Move settings to the Main Screen
@@ -45,19 +48,16 @@ enum class RequestCode {
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-  // We can't inject dependencies through the constructor
-  // because this class is instantiated by the Android OS.
-  //
-  // So we fall back to injecting dependencies directly into the fields.
-  private val movementRepository = appComponent().eventRepository
-  private val notificationSender = appComponent().notificationSender
-  private val alarmScheduler = appComponent().alarmScheduler
-  private val appVibrator = appComponent().appVibrator
-  private val logFileAdapter = LogFileAdapter()
-  private val snooze = appComponent().snooze
-  private val reminder = appComponent().reminder
-  private val permissionManager = PermissionManager(this)
-  private val movementRecognitionSubscriber = appComponent().movementRecognitionSubscriber
+  @Inject lateinit var movementRepository: EventRepository
+  @Inject lateinit var notificationSender: NotificationSender
+  @Inject lateinit var alarmScheduler: AlarmScheduler
+  @Inject lateinit var appVibrator: AppVibrator
+  @Inject lateinit var snooze: Snooze
+  @Inject lateinit var reminder: Reminder
+  @Inject lateinit var movementRecognitionSubscriber: MovementRecognitionSubscriber
+  @Inject lateinit var fileLogger: FileLoggerTree
+  val logFileAdapter = LogFileAdapter()
+  val permissionManager = PermissionManager(this)
 
   @Suppress("SpellCheckingInspection")
   private val compositeDisposable = CompositeDisposable()
@@ -313,7 +313,7 @@ class MainActivity : AppCompatActivity() {
     homeContainer.isVisible = false
     todayContainer.isVisible = false
     logContainer.isVisible = true
-    logFileAdapter.update(appComponent().fileLogger.files.first())
+    logFileAdapter.update(fileLogger.files.first())
   }
 
   private val onNavigationItemSelectedListener =

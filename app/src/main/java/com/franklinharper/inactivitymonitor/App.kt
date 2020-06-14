@@ -2,11 +2,17 @@ package com.franklinharper.inactivitymonitor
 
 import android.annotation.SuppressLint
 import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
+import fr.bipi.tressence.file.FileLoggerTree
 import timber.log.Timber
+import javax.inject.Inject
 
 // Suprressing erroneous Lint warning about this class being unused.
 @Suppress("unused")
+@HiltAndroidApp
 class App : Application() {
+
+  @Inject lateinit var fileLoggerTree: FileLoggerTree
 
   init {
     val originalExceptionHandler = Thread.getDefaultUncaughtExceptionHandler()
@@ -19,7 +25,6 @@ class App : Application() {
   // TODO: Each component should perform its own initialization instead of sub-classing Application.
   override fun onCreate() {
     super.onCreate()
-    AppComponent.instance = AppModule(this)
     if (BuildConfig.DEBUG) {
       logToLogcat()
     } else {
@@ -39,6 +44,6 @@ class App : Application() {
 
   @SuppressLint("LogNotTimber")
   private fun logToLocalFile() {
-    Timber.plant(AppComponent.instance.fileLogger)
+    Timber.plant(fileLoggerTree)
   }
 }

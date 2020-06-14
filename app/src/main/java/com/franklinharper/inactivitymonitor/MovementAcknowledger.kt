@@ -1,10 +1,11 @@
 package com.franklinharper.inactivitymonitor
 
 import timber.log.Timber
+import javax.inject.Inject
 
-class MovementAcknowledger(
+class MovementAcknowledger @Inject constructor(
   private val eventRepository: EventRepository,
-  private val appVibrator: AppVibrator = appComponent().appVibrator
+  private val appVibrator: AppVibrator
 ) {
 
   fun update() {

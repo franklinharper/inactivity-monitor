@@ -5,9 +5,13 @@ import android.media.AudioAttributes
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.core.content.getSystemService
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
 
-class AppVibrator(context: Context) {
+class AppVibrator @Inject constructor(
+  @ApplicationContext private val context: Context
+) {
 
   private val vibrator = context.getSystemService<Vibrator>()!!
 
