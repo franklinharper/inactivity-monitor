@@ -7,8 +7,6 @@ import fr.bipi.tressence.file.FileLoggerTree
 import timber.log.Timber
 import javax.inject.Inject
 
-// Suprressing erroneous Lint warning about this class being unused.
-@Suppress("unused")
 @HiltAndroidApp
 class App : Application() {
 
