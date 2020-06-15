@@ -1,21 +1,18 @@
 package com.franklinharper.inactivitymonitor
 
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionResult
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.internal.managers.BroadcastReceiverComponentManager
-import dagger.hilt.internal.UnsafeCasts
 import timber.log.Timber
 import javax.inject.Inject
 
 
 // Receive all broadcasts sent to the app (e.g. alarms, notification actions, etc.)
 @AndroidEntryPoint
-class AppBroadcastReceiver : BroadcastReceiver() {
+class AppBroadcastReceiver : DaggerBroadcastReceiver() {
 
   // I tried having one SNOOZE action, and using an Extra for the DURATION.
   //
@@ -30,7 +27,6 @@ class AppBroadcastReceiver : BroadcastReceiver() {
   // https://stackoverflow.com/questions/20204284/is-it-possible-to-create-multiple-pendingintents-with-the-same-requestcode-and-d
   //
   enum class Action {
-
     SNOOZE_15_MINUTES,
     SNOOZE_30_MINUTES,
     SNOOZE_1_HOUR,
@@ -38,38 +34,35 @@ class AppBroadcastReceiver : BroadcastReceiver() {
 
   @Inject
   lateinit var eventRepository: EventRepository
+
   @Inject
   lateinit var alarmScheduler: AlarmScheduler
+
   @Inject
   lateinit var reminder: Reminder
+
   @Inject
   lateinit var snooze: Snooze
+
   @Inject
   lateinit var notificationSender: NotificationSender
+
   @Inject
   lateinit var movementAcknowledger: MovementAcknowledger
 
-  override fun onReceive(context: Context, intent: Intent?) {
-    // This is a workaround for a Hilt bug. Injection was not working.
-    // See https://github.com/google/dagger/issues/1918
-    val injector =
-      BroadcastReceiverComponentManager.generatedComponent(context) as AppBroadcastReceiver_GeneratedInjector
-    injector.injectAppBroadcastReceiver(UnsafeCasts.unsafeCast(this))
-
+  override fun onReceive(context: Context, intent: Intent) {
+    super.onReceive(context, intent)
     log(intent)
-    if (intent != null) {
-      val action = intent.action
-      when (action) {
-        Action.SNOOZE_15_MINUTES.name -> snoozeAction(SnoozeDuration.FIFTEEN_MINUTES)
-        Action.SNOOZE_30_MINUTES.name -> snoozeAction(SnoozeDuration.THIRTY_MINUTES)
-        Action.SNOOZE_1_HOUR.name -> snoozeAction(SnoozeDuration.ONE_HOUR)
-        else -> {
-          val transitionResult = ActivityTransitionResult.extractResult(intent)
-          recordEvents(transitionResult)
-          alarmScheduler.update()
-          reminder.update()
-          movementAcknowledger.update()
-        }
+    when (intent.action) {
+      Action.SNOOZE_15_MINUTES.name -> snoozeAction(SnoozeDuration.FIFTEEN_MINUTES)
+      Action.SNOOZE_30_MINUTES.name -> snoozeAction(SnoozeDuration.THIRTY_MINUTES)
+      Action.SNOOZE_1_HOUR.name -> snoozeAction(SnoozeDuration.ONE_HOUR)
+      else -> {
+        val transitionResult = ActivityTransitionResult.extractResult(intent)
+        recordEvents(transitionResult)
+        alarmScheduler.update()
+        reminder.update()
+        movementAcknowledger.update()
       }
     }
   }
