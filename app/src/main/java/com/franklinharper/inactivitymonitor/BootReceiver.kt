@@ -1,6 +1,5 @@
 package com.franklinharper.inactivitymonitor;
 
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import dagger.hilt.android.AndroidEntryPoint
@@ -8,13 +7,16 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class BootReceiver : BroadcastReceiver() {
+class BootReceiver : DaggerBroadcastReceiver() {
 
-  @Inject lateinit var alarmScheduler: AlarmScheduler
+  @Inject
+  lateinit var alarmScheduler: AlarmScheduler
 
-  override fun onReceive(context: Context, intent: Intent?) {
+  override fun onReceive(context: Context, intent: Intent) {
+    super.onReceive(context, intent)
     Timber.d("Boot broadcast received")
-    alarmScheduler.update()
+    if (intent.action == Intent.ACTION_BOOT_COMPLETED)
+      alarmScheduler.update()
   }
 }
 
