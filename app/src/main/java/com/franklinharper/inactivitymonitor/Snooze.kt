@@ -17,26 +17,31 @@ enum class SnoozeDuration(val second: Long, @StringRes val stringId: Int) {
 class Snooze @Inject constructor(
   private val appSettings: AppSettings
 ) {
+
+  private val UNDEFINED_END = -1L
+
   fun start(seconds: Long) {
-    appSettings.snoozeEndSecond = Instant.now().plusSeconds(seconds).epochSecond
-    Timber.d("Starting snooze, ends at ${TimeFormatters.dateTime.format(end())}")
+    val end = Instant.now().plusSeconds(seconds)
+    appSettings.snoozeEndSecond = end.epochSecond
+    Timber.d("Starting snooze which ends at ${TimeFormatters.dateTime.format(end)}")
   }
 
   fun start(snoozeDuration: SnoozeDuration) {
     start(snoozeDuration.second)
   }
 
+
   fun cancel() {
     Timber.d("Snooze cancelled")
-    appSettings.snoozeEndSecond = -1
+    appSettings.snoozeEndSecond = UNDEFINED_END
   }
 
-  fun isActive(): Boolean {
-    return appSettings.snoozeEndSecond > Instant.now().epochSecond
-  }
-
-  fun end(): Instant? {
-    val end = appSettings.snoozeEndSecond
-    return if (end == -1L) null else Instant.ofEpochSecond(end)
-  }
+  val end: Instant?
+    get() {
+      val end = appSettings.snoozeEndSecond
+      return if (end != UNDEFINED_END && end > Instant.now().epochSecond)
+        Instant.ofEpochSecond(appSettings.snoozeEndSecond)
+      else
+        null
+    }
 }

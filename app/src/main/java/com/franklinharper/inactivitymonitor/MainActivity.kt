@@ -100,7 +100,7 @@ class MainActivity : AppCompatActivity() {
   }
 
   private fun handleSnoozeClick() {
-    if (snooze.isActive()) {
+    if (snooze.end != null) {
       snooze.cancel()
       showHome()
       snoozeButton.text = getString(R.string.main_activity_start_snooze)
@@ -256,10 +256,6 @@ class MainActivity : AppCompatActivity() {
     val latestMovement = movementRepository.mostRecentMovement()
     val minutes = TimeFormatters.minutes.format(latestMovement.durationSecs / 60.0)
     val movementType = getString(latestMovement.type.stringId)
-//    val dndStatus = if (notificationSender.doNotDisturbOn)
-//      getText(R.string.main_activity_do_not_disturb_on)
-//    else
-//      getText(R.string.main_activity_do_not_disturb_off)
 
     currentStatus.text = buildSpannedString {
       append("\nYou have been ")
@@ -267,12 +263,12 @@ class MainActivity : AppCompatActivity() {
       append(" for the last ")
       bold { append(minutes) }
       append(" minutes\n")
-//      append(dndStatus)
     }
-    if (snooze.isActive()) {
+    val snoozeEnd = snooze.end
+    if (snoozeEnd != null) {
       snoozeStatus.isVisible = true
-      val end = TimeFormatters.time.format(snooze.end())
-      snoozeStatus.text = getString(R.string.main_activity_snooze_status, end)
+      val endTime = TimeFormatters.time.format(snoozeEnd)
+      snoozeStatus.text = getString(R.string.main_activity_snooze_status, endTime)
       snoozeButton.text = getString(R.string.main_activity_cancel_snooze)
     } else {
       snoozeStatus.isVisible = false

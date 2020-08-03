@@ -51,14 +51,14 @@ class AppSettings @Inject constructor(
     return value!!.toLong()
   }
 
-  // TODO Implementing a TimePickerPreference
+  // TODO Implement a TimePickerPreference
   fun reminderEnd(): Long {
     val key = context.getString(R.string.pref_key_reminder_end_hour)
     val value = sharedPreferences.getString(key, "22")
     return value!!.toLong()
   }
 
-  // TODO Implementing a TimePickerPreference
+  // TODO Implement a TimePickerPreference
   fun reminderInterval(): Long {
     val key = context.getString(R.string.pref_key_reminder_interval)
     val value = sharedPreferences.getString(key, "30")
@@ -66,11 +66,10 @@ class AppSettings @Inject constructor(
   }
 
   private val snoozeEndKey = context.getString(R.string.pref_key_reminder_snooze_end_secs)
-  var snoozeEndSecond: Long = -1
+  var snoozeEndSecond
     get() = sharedPreferences.getLong(snoozeEndKey, -1)
     set(value) {
       sharedPreferences.edit { putLong(snoozeEndKey, value) }
-      field = value
     }
 }
 

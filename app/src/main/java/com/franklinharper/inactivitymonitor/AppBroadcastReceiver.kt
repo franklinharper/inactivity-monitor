@@ -62,7 +62,7 @@ class AppBroadcastReceiver : DaggerBroadcastReceiver() {
         recordEvents(transitionResult)
         alarmScheduler.update()
         reminder.update()
-        movementAcknowledger.update()
+        movementAcknowledger.maybeInformUser()
       }
     }
   }

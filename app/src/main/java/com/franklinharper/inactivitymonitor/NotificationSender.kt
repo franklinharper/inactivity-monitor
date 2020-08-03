@@ -30,15 +30,6 @@ class NotificationSender @Inject constructor(
     }
   }
 
-//  val doNotDisturbOff: Boolean
-//    get() = currentInterruptionFilter == NotificationManagerCompat.INTERRUPTION_FILTER_ALL
-//
-//  val doNotDisturbOn: Boolean
-//    get() = !doNotDisturbOff
-//
-//  private val currentInterruptionFilter: Int
-//    get() = notificationManager.currentInterruptionFilter
-
   private fun createNotificationChannels() {
     createChannel(
       id = MOVE_CHANNEL_ID,

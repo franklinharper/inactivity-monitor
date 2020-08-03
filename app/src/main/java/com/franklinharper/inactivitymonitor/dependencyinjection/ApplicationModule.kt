@@ -1,5 +1,6 @@
 package com.franklinharper.inactivitymonitor.dependencyinjection
 
+import android.app.NotificationManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
@@ -13,25 +14,37 @@ import dagger.hilt.android.components.ApplicationComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import fr.bipi.tressence.file.FileLoggerTree
 import java.io.File
+import javax.inject.Singleton
 
 @Module
 @InstallIn(ApplicationComponent::class)
 object ApplicationModule {
 
+  @Singleton
   @Provides
   fun provideSharedPreferences(@ApplicationContext application: Context): SharedPreferences {
     return PreferenceManager.getDefaultSharedPreferences(application)
   }
 
+  @Singleton
+  @Provides
+  fun provideNotificationManager(@ApplicationContext context: Context): NotificationManager {
+    return context.getSystemService(NotificationManager::class.java)!!
+  }
+
+  @Singleton
   @Provides
   fun provideSystemSettings() = SystemSettings()
 
+  @Singleton
   @Provides
   fun provideMovementRecognitionSubscriber() = MovementRecognitionSubscriber()
 
+  @Singleton
   @Provides
   fun provideRemoteDb() = RemoteDb()
 
+  @Singleton
   @Provides
   fun provideFileLoggerTree(@ApplicationContext application: Context): FileLoggerTree {
     val logDir = File(application.filesDir, "logs")
@@ -48,6 +61,7 @@ object ApplicationModule {
       .build()
   }
 
+  @Singleton
   @Provides
   fun provideEventRepository(localDb: LocalDb, remoteDb: RemoteDb): EventRepository {
     return DbEventRepository(localDb, remoteDb)
