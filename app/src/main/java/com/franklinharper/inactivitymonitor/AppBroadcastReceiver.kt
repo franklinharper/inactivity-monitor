@@ -1,6 +1,7 @@
 package com.franklinharper.inactivitymonitor
 
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.google.android.gms.location.ActivityTransition
@@ -12,7 +13,7 @@ import javax.inject.Inject
 
 // Receive all broadcasts sent to the app (e.g. alarms, notification actions, etc.)
 @AndroidEntryPoint
-class AppBroadcastReceiver : DaggerBroadcastReceiver() {
+class AppBroadcastReceiver : BroadcastReceiver() {
 
   // I tried having one SNOOZE action, and using an Extra for the DURATION.
   //
@@ -51,7 +52,6 @@ class AppBroadcastReceiver : DaggerBroadcastReceiver() {
   lateinit var movementAcknowledger: MovementAcknowledger
 
   override fun onReceive(context: Context, intent: Intent) {
-    super.onReceive(context, intent)
     log(intent)
     when (intent.action) {
       Action.SNOOZE_15_MINUTES.name -> snoozeAction(SnoozeDuration.FIFTEEN_MINUTES)
