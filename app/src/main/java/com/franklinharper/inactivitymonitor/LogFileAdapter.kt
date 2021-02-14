@@ -1,49 +1,47 @@
 package com.franklinharper.inactivitymonitor
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import java.io.File
+import com.franklinharper.inactivitymonitor.databinding.LogItemBinding
 
-class LogFileAdapter() : RecyclerView.Adapter<LogFileAdapter.ViewHolder>() {
+class LogFileAdapter : ListAdapter<String, LogItemViewHolder>(DIFF_CALLBACK) {
 
-  // TODO read file lazily based on the current position
-  private var data: List<String> = emptyList()
-
-  class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-    var textView: TextView = view.findViewById(android.R.id.text1) as TextView
-  }
-
-  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-    return ViewHolder(
-      LayoutInflater.from(parent.context).inflate(
-        android.R.layout.simple_list_item_1,
-        parent,
-        false
-      )
+  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LogItemViewHolder {
+    val binding = LogItemBinding.inflate(
+      LayoutInflater.from(parent.context),
+      parent,
+      false
     )
+    return LogItemViewHolder(binding)
   }
 
-  override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-    val text = data[position]
-      .replaceFirst("/","\n  ")
-      .replaceLast(":", "\n  ")
-    holder.textView.text = text
+  override fun onBindViewHolder(holder: LogItemViewHolder, position: Int) {
+    holder.bind(getItem(position))
   }
 
-  override fun getItemCount(): Int {
-    return data.size
+  companion object {
+
+    val DIFF_CALLBACK = object : DiffUtil.ItemCallback<String>() {
+
+      override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
+        return oldItem == newItem
+      }
+
+      override fun areContentsTheSame(oldItem: String, newItem: String): Boolean {
+        return oldItem == newItem
+      }
+    }
   }
 
-  fun update(file: File) {
-    data = file.readLines().reversed()
-    notifyDataSetChanged()
+}
+
+class LogItemViewHolder(private val binding: LogItemBinding) : RecyclerView.ViewHolder(binding.root) {
+
+  fun bind(item: String) {
+    binding.text1.text = item
   }
 }
 
-private fun String.replaceLast(old: String, new: String): CharSequence? {
-  val index = lastIndexOf(old)
-  return if (index < 0) this else this.replaceRange(index, index + 1, new)
-}

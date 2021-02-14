@@ -24,6 +24,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import fr.bipi.tressence.file.FileLoggerTree
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.File
 import java.time.Instant
 import javax.inject.Inject
 
@@ -56,8 +57,8 @@ class MainActivity : AppCompatActivity() {
   @Inject lateinit var reminder: Reminder
   @Inject lateinit var movementRecognitionSubscriber: MovementRecognitionSubscriber
   @Inject lateinit var fileLogger: FileLoggerTree
-  val logFileAdapter = LogFileAdapter()
-  val permissionManager = PermissionManager(this)
+  private val logFileAdapter = LogFileAdapter()
+  private val permissionManager = PermissionManager(this)
 
   @Suppress("SpellCheckingInspection")
   private val compositeDisposable = CompositeDisposable()
@@ -309,7 +310,18 @@ class MainActivity : AppCompatActivity() {
     homeContainer.isVisible = false
     todayContainer.isVisible = false
     logContainer.isVisible = true
-    logFileAdapter.update(fileLogger.files.first())
+    val file = fileLogger.files.first()
+    val items = file.readLines().reversed().map {
+      it
+        .replaceFirst("/", "\n  ")
+        .replaceLast(":", "\n  ")
+    }
+    logFileAdapter.submitList(items)
+  }
+
+  private fun String.replaceLast(old: String, new: String): String {
+    val index = lastIndexOf(old)
+    return if (index < 0) this else this.replaceRange(index, index + 1, new)
   }
 
   private val onNavigationItemSelectedListener =
