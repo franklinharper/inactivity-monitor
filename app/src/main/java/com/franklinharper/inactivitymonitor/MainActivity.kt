@@ -24,7 +24,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import fr.bipi.tressence.file.FileLoggerTree
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
-import java.io.File
+import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
 
@@ -70,7 +70,8 @@ class MainActivity : AppCompatActivity() {
     initializeBottomNavView()
     initializeHomeView()
     initializeLogView()
-    startMovementRecognition()
+    startMovementRecognitionIfPermissionGranted()
+    requestCallDetectionPermission()
     showHome()
 
     alarmScheduler.update()
@@ -81,7 +82,21 @@ class MainActivity : AppCompatActivity() {
     }
   }
 
-  private fun startMovementRecognition() {
+  private fun requestCallDetectionPermission() {
+    permissionManager.request(Permission.PHONE_STATE, object : PermissionListener {
+
+      override fun onGranted(permission: Permission) {
+//        ui.showPhoneStatePermission(granted = true)
+//        Timber.d("PHONE_STATE permission granted")
+      }
+
+      override fun onDenied(permission: Permission) {
+//        ui.showPhoneStatePermission(granted = false)
+      }
+    })
+  }
+
+  private fun startMovementRecognitionIfPermissionGranted() {
     permissionManager.request(Permission.ACTIVITY_RECOGNITION, object : PermissionListener {
 
       override fun onGranted(permission: Permission) {

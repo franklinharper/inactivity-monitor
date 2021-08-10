@@ -1,6 +1,7 @@
 package com.franklinharper.inactivitymonitor.permission
 
 import android.Manifest
+import android.os.Build
 import androidx.annotation.StringRes
 import com.franklinharper.inactivitymonitor.R
 
@@ -28,7 +29,19 @@ enum class Permission constructor(
 ) {
   ACTIVITY_RECOGNITION(
     778,
-    Manifest.permission.ACTIVITY_RECOGNITION,
-    R.string.permission_rationale_activity
+    activityRecognitionPermissionForCurrentApiLevel(),
+    R.string.permission_rationale_activity,
+  ),
+  PHONE_STATE(
+    779,
+    activityRecognitionPermissionForCurrentApiLevel(),
+    R.string.permission_rationale_phone_state,
   )
+}
+
+private fun activityRecognitionPermissionForCurrentApiLevel(): String {
+  return when {
+    Build.VERSION.SDK_INT >= 29 -> Manifest.permission.ACTIVITY_RECOGNITION
+    else -> "com.google.android.gms.permission.ACTIVITY_RECOGNITION"
+  }
 }

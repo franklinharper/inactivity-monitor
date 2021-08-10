@@ -73,4 +73,5 @@
 
   <!-- Run-time permissions -->
   <string name="permission_rationale_activity">This permission is required to remind you to move throughout the day</string>
+  <string name="permission_rationale_phone_state">This permission is required to prevent alerts while you are on a call</string>
 </resources>
