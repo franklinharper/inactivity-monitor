@@ -18,7 +18,7 @@ class AppVibrator @Inject constructor(
   // AudioAttributes are required for Vibrations from background processes that work
   // on API >= 29
   //
-  // Found on SO:
+  // Solution found on SO:
   // https://stackoverflow.com/questions/57893054/vibration-on-widget-click-not-working-since-api-29
   //
   private val audioAttributes: AudioAttributes = AudioAttributes.Builder()

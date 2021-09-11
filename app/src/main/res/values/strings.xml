@@ -69,6 +69,11 @@
   <string name="snooze_45_minutes">45 mins</string>
   <string name="snooze_1_hour">1 hour</string>
   <string name="snooze_2_hours">2 hours</string>
+  <string name="snooze_4_hours">4 hours</string>
+  <string name="snooze_6_hours">6 hours</string>
+  <string name="snooze_8_hours">8 hours</string>
+  <string name="snooze_10_hours">10 hours</string>
+  <string name="snooze_12_hours">12 hours</string>
   <string name="action_test_reminder">Test reminder</string>
 
   <!-- Run-time permissions -->

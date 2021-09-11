@@ -6,12 +6,19 @@ import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
 
+private const val hourInSeconds = 3600L
+
 enum class SnoozeDuration(val second: Long, @StringRes val stringId: Int) {
   FIFTEEN_MINUTES(900, R.string.snooze_15_minutes),
   THIRTY_MINUTES(1800, R.string.snooze_30_minutes),
   FORTY_FIVE_MINUTES(2700, R.string.snooze_45_minutes),
-  ONE_HOUR(3600, R.string.snooze_1_hour),
-  TWO_HOURS(7200, R.string.snooze_2_hours)
+  ONE_HOUR(hourInSeconds, R.string.snooze_1_hour),
+  TWO_HOURS(2 * hourInSeconds, R.string.snooze_2_hours),
+  FOUR_HOURS(4 * hourInSeconds, R.string.snooze_4_hours),
+  SIX_HOURS(6 * hourInSeconds, R.string.snooze_6_hours),
+  EIGHT_HOURS(8 * hourInSeconds, R.string.snooze_8_hours),
+  TEN_HOURS(10 * hourInSeconds, R.string.snooze_10_hours),
+  TWELVE_HOURS(12 * hourInSeconds, R.string.snooze_12_hours),
 }
 
 class Snooze @Inject constructor(
