@@ -24,7 +24,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import fr.bipi.tressence.file.FileLoggerTree
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
-import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
 
@@ -52,7 +51,7 @@ class MainActivity : AppCompatActivity() {
   @Inject lateinit var movementRepository: EventRepository
   @Inject lateinit var notificationSender: NotificationSender
   @Inject lateinit var alarmScheduler: AlarmScheduler
-  @Inject lateinit var appVibrator: AppVibrator
+  @Inject lateinit var appVibrations: AppVibrations
   @Inject lateinit var snooze: Snooze
   @Inject lateinit var reminder: Reminder
   @Inject lateinit var movementRecognitionSubscriber: MovementRecognitionSubscriber
@@ -219,7 +218,7 @@ class MainActivity : AppCompatActivity() {
         true
       }
       R.id.action_vibrate -> {
-        appVibrator.moveReminder()
+        appVibrations.moveReminder()
         true
       }
       R.id.action_notify -> {

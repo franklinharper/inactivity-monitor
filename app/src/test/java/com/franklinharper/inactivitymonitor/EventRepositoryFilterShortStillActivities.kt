@@ -42,7 +42,7 @@ class EventRepositoryFilterShortStillActivities {
   }
 
   @Test
-  fun `STILL Activities that last longer than or equal to "shortLimit" are NOT filtered`() {
+  fun `STILL Activities that last longer than or equal to shortLimit are NOT filtered`() {
 
     // Arrange
 

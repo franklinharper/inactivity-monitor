@@ -9,7 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 
-class AppVibrator @Inject constructor(
+class AppVibrations @Inject constructor(
   @ApplicationContext private val context: Context
 ) {
 

@@ -7,26 +7,27 @@ import javax.inject.Inject
 
 class Reminder @Inject constructor(
   private val eventRepository: EventRepository,
-  private val appVibrator: AppVibrator,
+  private val appVibrations: AppVibrations,
   private val notificationSender: NotificationSender,
   private val snooze: Snooze,
   private val appSettings: AppSettings,
   private val phoneCall: PhoneCall,
+  private val movementLogic: MovementLogic,
 ) {
 
   fun update() {
-    val mostRecentActivity = eventRepository.mostRecentMovement()
+    val mostRecentMovement = eventRepository.mostRecentMovement()
     val reminderStart = appSettings.reminderStart()
     val todaysFirstMovementAfterStart = eventRepository.firstMovementAfter(
-      ZonedDateTime.now().startOfDay.plusHours(reminderStart)
+      start = ZonedDateTime.now().startOfDay.plusHours(reminderStart)
     )
     val shouldRemind = shouldRemind(
-      ZonedDateTime.now(),
-      mostRecentActivity,
-      todaysFirstMovementAfterStart
+      now = ZonedDateTime.now(),
+      latestMovement = mostRecentMovement,
+      firstMovementAfterStart = todaysFirstMovementAfterStart
     )
     if (shouldRemind) {
-      remindToMove(mostRecentActivity)
+      remindToMove(movement = mostRecentMovement)
     } else {
       notificationSender.cancelNotification()
     }
@@ -46,17 +47,16 @@ class Reminder @Inject constructor(
     val reminderEnd = appSettings.reminderEnd()
     val tooEarly = hour < reminderStart
     val tooLate = hour >= reminderEnd
-    val userIsStill = latestMovement.type == MovementType.STILL_START
-    val userStillForTooLong = userIsStill
-        && latestMovement.durationSecs > appSettings.maxStillMinutes() * 60
+    val userStillForTooLong = movementLogic.userStillForTooLong(latestMovement)
+
     // FIXME phoneCallIsActive is NOT true when a phone call is active :(
     val phoneCallIsActive = phoneCall.isActive()
     Timber.d("phoneCallIsActive $phoneCallIsActive")
     val snoozeEnd = snooze.end
-    Timber.d(
-      "reminderStart $reminderStart, reminderEnd $reminderEnd, snoozeEnd $snoozeEnd," +
-          "still $userIsStill, tooLong $userStillForTooLong"
-    )
+    val message = "reminderStart $reminderStart, reminderEnd $reminderEnd, snoozeEnd $snoozeEnd," +
+          "userStillForTooLong: $userStillForTooLong"
+    Timber.d(message)
+
     return userStillForTooLong
         && !tooEarly
         && !tooLate
@@ -71,7 +71,7 @@ class Reminder @Inject constructor(
       Timber.d("notifications off")
     }
     if (appSettings.vibrate()) {
-      appVibrator.moveReminder()
+      appVibrations.moveReminder()
     } else {
       Timber.d("vibrations off")
     }

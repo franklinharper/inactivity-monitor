@@ -8,7 +8,7 @@ internal class ReminderTest {
   data class Dependencies(
     val reminder: Reminder,
     val alarmScheduler: AlarmScheduler,
-    val appVibrator: AppVibrator,
+    val appVibrations: AppVibrations,
     val notificationSender: NotificationSender
   )
 
@@ -17,18 +17,14 @@ internal class ReminderTest {
 
     // Arrange
     val emptyRepository = createEventRepository()
-    val (
-      transitionProcessor,
-      myVibrator,
-      myNotificationManager
-    ) = createDependencies(emptyRepository)
+    val dependencies = createDependencies(emptyRepository)
 
     // Act
-    transitionProcessor.update()
+    dependencies.reminder.update()
 
     // Assert
     verify {
-      listOf(myVibrator, myNotificationManager) wasNot Called
+      listOf(dependencies.appVibrations, dependencies.notificationSender) wasNot Called
     }
     verify(exactly = 0) {
       emptyRepository.insert(any(), any())
@@ -103,13 +99,21 @@ internal class ReminderTest {
 
   private fun createDependencies(
     eventRepository: EventRepository,
-    alarmScheduler: AlarmScheduler = myAlarmManager(),
-    appVibrator: AppVibrator = myVibrator(),
-    notificationSender: NotificationSender = myNotificationManager()
-  ): Dependencies {
-    val tp =
-      Reminder(eventRepository, appVibrator, notificationSender)
-    return Dependencies(tp, alarmScheduler, appVibrator, notificationSender)
+    alarmScheduler: AlarmScheduler = mockAlarmManager(),
+    appVibrations: AppVibrations = myVibrator(),
+    notificationSender: NotificationSender = mockNotificationSender(),
+
+    ): Dependencies {
+    val reminder = Reminder(
+      eventRepository = eventRepository,
+      appVibrator = appVibrations,
+      notificationSender = notificationSender,
+      snooze = mockk(),
+      appSettings = mockk(),
+      phoneCall = mockk(),
+      movementLogic = mockk()
+    )
+    return Dependencies(reminder, alarmScheduler, appVibrations, notificationSender)
   }
 
   private fun createEventRepository(
@@ -125,21 +129,17 @@ internal class ReminderTest {
     }
   }
 
-  private fun myAlarmManager(): AlarmScheduler {
+  private fun mockAlarmManager(): AlarmScheduler {
     return mockk<AlarmScheduler>().apply {
       every { update() } just Runs
     }
   }
 
-  private fun myVibrator(): AppVibrator {
-    return mockk<AppVibrator>().apply {
-      every { vibrate(any()) } just Runs
-    }
-  }
+  private fun myVibrator() = mockk<AppVibrations>()
+//    return mockk<AppVibrator>().apply {
+//      every { vibrate(any()) } just Runs
+//    }
+//  }
 
-  private fun myNotificationManager(): NotificationSender {
-    return mockk<NotificationSender>().apply {
-      every { doNotDisturbOff } returns true
-    }
-  }
+  private fun mockNotificationSender() = mockk<NotificationSender>()
 }

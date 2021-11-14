@@ -16,6 +16,91 @@ import java.util.stream.Stream
 
 class EventRepositoryTest {
 
+  @ParameterizedTest
+  @MethodSource("argumentsForfilterShortStillActivitiesTest")
+  fun filterShortStillActivitiesTest(
+    // caseNumber is used to set a conditional breakpoint when debugging a particular case
+    caseNumber: Int,
+    shortLimit: Long,
+    now: Timestamp,
+    events: List<Event>,
+    movements: List<UserMovement>
+  ) {
+
+    // Arrange
+
+    // Act
+    val result = DbEventRepository.filterShortStillMovements(
+      shortLimit = shortLimit,
+      now = now,
+      events = events
+    )
+
+    println("caseNumber = $caseNumber")
+    // Assert
+    assertEquals(movements, result)
+  }
+
+
+  // ====== Utility functions ======
+
+  // Not used for the time being
+
+  private val zoneId = ZoneId.of("America/Los_Angeles")
+
+  private val nowStartOfDay = ZonedDateTime.of(
+    2019,
+    7,
+    20,
+    0,
+    0,
+    0,
+    0,
+    zoneId
+  )
+
+  private val nowStartOfNextDay = ZonedDateTime.of(
+    2019,
+    7,
+    21,
+    0,
+    0,
+    0,
+    0,
+    zoneId
+  )
+
+//  private fun List<Event>.createRepositoryFromList(): DbEventRepository {
+//
+//    return createRepository {
+//      val query = mockk<Query<Event>>().also { every { it.executeAsList() } returns this }
+//      every {
+//        it.queries.selectRange(
+//          startInclusive = nowStartOfDay.timestamp,
+//          endExclusive = nowStartOfNextDay.timestamp,
+//          limit =
+//        )
+//      } returns query
+//    }
+//  }
+
+//  private fun createRepository(init: ((activityDb: LocalDb) -> Unit)?): DbEventRepository {
+//    val remoteDb = mockk<RemoteDb>()
+//    val db = mockk<LocalDb>().also {
+//      val queries = mockk<LocaldbQueries>()
+//
+//      // Configure standard mock behaviors
+//      every { it.queries } returns queries
+//      every { queries.insert(any(), any()) } just Runs
+//
+//      // Configure test specific behavior
+//      if (init != null) {
+//        init(it)
+//      }
+//    }
+//    return DbEventRepository(db, remoteDb)
+//  }
+
   companion object {
 
     // Ignore "unused" inspection for this function because it is used by the
@@ -340,89 +425,6 @@ class EventRepositoryTest {
       )
     }
 
-  }
-
-  @ParameterizedTest
-  @MethodSource("argumentsForfilterShortStillActivitiesTest")
-  fun `test filterShortStillActivities function`(
-    // caseNumber is used to set a conditional breakpoint when debugging a particular case
-    caseNumber: Int,
-    shortLimit: Long,
-    now: Timestamp,
-    events: List<Event>,
-    movements: List<UserMovement>
-  ) {
-
-    // Arrange
-
-    // Act
-    val result = DbEventRepository.filterShortStillMovements(
-      shortLimit = shortLimit,
-      now = now,
-      events = events
-    )
-
-    // Assert
-    assertEquals(movements, result)
-  }
-
-
-  // ====== Utility functions ======
-
-  // Not used for the time being
-
-  private val zoneId = ZoneId.of("America/Los_Angeles")
-
-  private val nowStartOfDay = ZonedDateTime.of(
-    2019,
-    7,
-    20,
-    0,
-    0,
-    0,
-    0,
-    zoneId
-  )
-
-  private val nowStartOfNextDay = ZonedDateTime.of(
-    2019,
-    7,
-    21,
-    0,
-    0,
-    0,
-    0,
-    zoneId
-  )
-
-  private fun List<Event>.createRepositoryFromList(): DbEventRepository {
-
-    return createRepository {
-      val query = mockk<Query<Event>>().also { every { it.executeAsList() } returns this }
-      every {
-        it.queries.selectRange(
-          startInclusive = nowStartOfDay.timestamp,
-          endExclusive = nowStartOfNextDay.timestamp
-        )
-      } returns query
-    }
-  }
-
-  private fun createRepository(init: ((activityDb: LocalDb) -> Unit)?): DbEventRepository {
-    val remoteDb = mockk<RemoteDb>()
-    val db = mockk<LocalDb>().also {
-      val queries = mockk<LocaldbQueries>()
-
-      // Configure standard mock behaviors
-      every { it.queries } returns queries
-      every { queries.insert(any(), any()) } just Runs
-
-      // Configure test specific behavior
-      if (init != null) {
-        init(it)
-      }
-    }
-    return DbEventRepository(db, remoteDb)
   }
 
 }

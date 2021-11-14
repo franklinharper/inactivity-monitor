@@ -6,6 +6,8 @@ import android.content.SharedPreferences
 import android.util.Log
 import androidx.preference.PreferenceManager
 import com.franklinharper.inactivitymonitor.*
+import com.franklinharper.inactivitymonitor.settings.AppSettings
+import com.franklinharper.inactivitymonitor.settings.AppSettingsProduction
 import com.franklinharper.inactivitymonitor.settings.SystemSettings
 import dagger.Module
 import dagger.Provides
@@ -65,5 +67,14 @@ object ApplicationModule {
   @Provides
   fun provideEventRepository(localDb: LocalDb, remoteDb: RemoteDb): EventRepository {
     return DbEventRepository(localDb, remoteDb)
+  }
+
+  @Singleton
+  @Provides
+  fun provideAppSettings(
+    @ApplicationContext appContext: Context,
+    sharedPreferences: SharedPreferences
+  ): AppSettings {
+    return AppSettingsProduction(appContext, sharedPreferences)
   }
 }

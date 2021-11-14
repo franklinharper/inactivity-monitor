@@ -1,6 +1,5 @@
 package com.franklinharper.inactivitymonitor
 
-import io.reactivex.disposables.CompositeDisposable
 import java.text.DecimalFormat
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
