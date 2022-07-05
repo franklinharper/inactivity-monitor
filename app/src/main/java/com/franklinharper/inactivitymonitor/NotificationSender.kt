@@ -16,21 +16,21 @@ class NotificationSender @Inject constructor(
   @ApplicationContext private val context: Context
 ) {
 
-  companion object {
-    const val MOVE_CHANNEL_ID = "MOVE"
-    const val ACTIVITY_STATUS_UPDATE_CHANNEL_ID = "STATUS"
-    private const val NOTIFICATION_ID = 1
-  }
-
   private val notificationManager = NotificationManagerCompat.from(context)
 
   init {
-    if (Build.VERSION.SDK_INT >= 26) {
-      createNotificationChannels()
-    }
+    createNotificationChannels()
+  }
+
+  fun sendMoveNotification(type: MovementType, minutes: Double) {
+    val formattedMinutes = TimeFormatters.minutes.format(minutes)
+    Timber.d("Move notification $type, $formattedMinutes minutes")
+    val notification = buildMoveNotification()
+    notificationManager.notify(NOTIFICATION_ID, notification)
   }
 
   private fun createNotificationChannels() {
+    Timber.i("franktag createNotificationChannels() called")
     createChannel(
       id = MOVE_CHANNEL_ID,
       name = context.getString(R.string.notification_move_channel_name),
@@ -53,13 +53,6 @@ class NotificationSender @Inject constructor(
 
   fun cancelNotification() {
     notificationManager.cancel(NOTIFICATION_ID)
-  }
-
-  fun sendMoveNotification(type: MovementType, minutes: Double) {
-    val formattedMinutes = TimeFormatters.minutes.format(minutes)
-    Timber.d("Move notification $type, $formattedMinutes minutes")
-    val notification = buildMoveNotification()
-    notificationManager.notify(NOTIFICATION_ID, notification)
   }
 
   private fun buildMoveNotification(): Notification {
@@ -107,6 +100,12 @@ class NotificationSender @Inject constructor(
     return NotificationCompat.Builder(context, channelId)
       .setContentIntent(pendingIntent)
       .setAutoCancel(true)
+  }
+
+  companion object {
+    const val MOVE_CHANNEL_ID = "MOVE"
+    const val ACTIVITY_STATUS_UPDATE_CHANNEL_ID = "STATUS"
+    private const val NOTIFICATION_ID = 1
   }
 
 }

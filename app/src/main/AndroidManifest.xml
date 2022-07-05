@@ -11,9 +11,18 @@
   <!--  Old permission for API <= 28 -->
   <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
 
+<!--
+      Without the FOREGROUND_SERVICE permission the OS eventually stops the app from receiving
+      Activity Recognition Broadcasts.
+-->
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+
   <uses-permission android:name="android.permission.VIBRATE" />
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-  <!--  Used to prevent alerting the user while a call is active -->
+<!--
+  Used to prevent alerting the user while a call is active.
+  Unfortunately this feature doesn't work.
+-->
   <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
   <application

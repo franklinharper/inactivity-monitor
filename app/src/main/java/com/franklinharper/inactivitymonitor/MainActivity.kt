@@ -1,5 +1,6 @@
 package com.franklinharper.inactivitymonitor
 
+import android.app.PendingIntent
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
@@ -7,6 +8,7 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import androidx.core.view.isVisible
@@ -24,6 +26,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import fr.bipi.tressence.file.FileLoggerTree
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
+import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
 
@@ -64,6 +67,7 @@ class MainActivity : AppCompatActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    Timber.i("franktag onCreate")
     setContentView(R.layout.activity_main)
     setSupportActionBar(findViewById(R.id.main_toolbar))
     initializeBottomNavView()
@@ -72,6 +76,17 @@ class MainActivity : AppCompatActivity() {
     startMovementRecognitionIfPermissionGranted()
     requestCallDetectionPermission()
     showHome()
+    Timber.i("franktag onCreate Starting foreground service")
+//    startService(Intent(this.applicationContext, ForegroundService::class.java))
+//    val intent = Intent(applicationContext, ForegroundService::class.java)
+    val pendingIntent: PendingIntent =
+      Intent(this, MainActivity::class.java).let { notificationIntent ->
+        PendingIntent.getActivity(this, 0, notificationIntent,
+          PendingIntent.FLAG_IMMUTABLE)
+      }
+//    ContextCompat.startForegroundService(this, intent)
+    val componentName = applicationContext.startForegroundService(intent)
+    Timber.i("franktag onCreate componentName: $componentName")
 
     alarmScheduler.update()
 
@@ -86,7 +101,7 @@ class MainActivity : AppCompatActivity() {
 
       override fun onGranted(permission: Permission) {
 //        ui.showPhoneStatePermission(granted = true)
-//        Timber.d("PHONE_STATE permission granted")
+        Timber.d("PHONE_STATE permission granted")
       }
 
       override fun onDenied(permission: Permission) {
