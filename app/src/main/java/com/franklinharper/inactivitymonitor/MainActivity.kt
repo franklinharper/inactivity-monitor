@@ -8,13 +8,13 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.firebase.ui.auth.AuthUI
+import com.franklinharper.inactivitymonitor.movementlist.MovementAdapter
 import com.franklinharper.inactivitymonitor.permission.Permission
 import com.franklinharper.inactivitymonitor.permission.PermissionListener
 import com.franklinharper.inactivitymonitor.permission.PermissionManager
@@ -27,7 +27,6 @@ import fr.bipi.tressence.file.FileLoggerTree
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
-import java.time.Instant
 import javax.inject.Inject
 
 // TODO Color code the daily movement list
@@ -51,15 +50,24 @@ enum class RequestCode {
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-  @Inject lateinit var movementRepository: EventRepository
-  @Inject lateinit var notificationSender: NotificationSender
-  @Inject lateinit var alarmScheduler: AlarmScheduler
-  @Inject lateinit var appVibrations: AppVibrations
-  @Inject lateinit var snooze: Snooze
-  @Inject lateinit var reminder: Reminder
-  @Inject lateinit var movementRecognitionSubscriber: MovementRecognitionSubscriber
-  @Inject lateinit var fileLogger: FileLoggerTree
+  @Inject
+  lateinit var movementRepository: EventRepository
+  @Inject
+  lateinit var notificationSender: NotificationSender
+  @Inject
+  lateinit var alarmScheduler: AlarmScheduler
+  @Inject
+  lateinit var appVibrations: AppVibrations
+  @Inject
+  lateinit var snooze: Snooze
+  @Inject
+  lateinit var reminder: Reminder
+  @Inject
+  lateinit var movementRecognitionSubscriber: MovementRecognitionSubscriber
+  @Inject
+  lateinit var fileLogger: FileLoggerTree
   private val logFileAdapter = LogFileAdapter()
+  private val movementAdapter = MovementAdapter()
   private val permissionManager = PermissionManager(this)
 
   @Suppress("SpellCheckingInspection")
@@ -72,6 +80,7 @@ class MainActivity : AppCompatActivity() {
     setSupportActionBar(findViewById(R.id.main_toolbar))
     initializeBottomNavView()
     initializeHomeView()
+    initializeMovementView()
     initializeLogView()
     startMovementRecognitionIfPermissionGranted()
     requestCallDetectionPermission()
@@ -81,8 +90,10 @@ class MainActivity : AppCompatActivity() {
 //    val intent = Intent(applicationContext, ForegroundService::class.java)
     val pendingIntent: PendingIntent =
       Intent(this, MainActivity::class.java).let { notificationIntent ->
-        PendingIntent.getActivity(this, 0, notificationIntent,
-          PendingIntent.FLAG_IMMUTABLE)
+        PendingIntent.getActivity(
+          this, 0, notificationIntent,
+          PendingIntent.FLAG_IMMUTABLE
+        )
       }
 //    ContextCompat.startForegroundService(this, intent)
     val componentName = applicationContext.startForegroundService(intent)
@@ -162,6 +173,18 @@ class MainActivity : AppCompatActivity() {
     }
   }
 
+  private fun initializeMovementView() {
+    movementContainer.apply {
+      layoutManager = LinearLayoutManager(
+        applicationContext,
+        LinearLayoutManager.VERTICAL,
+        true
+      )
+      addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+      adapter = movementAdapter
+    }
+  }
+
   private fun startUserSignin() {
     val authProviders = arrayListOf(
       AuthUI.IdpConfig.GoogleBuilder().build()
@@ -180,6 +203,7 @@ class MainActivity : AppCompatActivity() {
     permissions: Array<String>,
     grantResults: IntArray
   ) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     permissionManager.onRequestPermissionsResult(requestCode, grantResults)
   }
 
@@ -281,7 +305,7 @@ class MainActivity : AppCompatActivity() {
 
   private fun showHome() {
     homeContainer.isVisible = true
-    todayContainer.isVisible = false
+    movementContainer.isVisible = false
     logContainer.isVisible = false
     val latestMovement = movementRepository.mostRecentMovement()
     val minutes = TimeFormatters.minutes.format(latestMovement.durationSecs / 60.0)
@@ -308,36 +332,34 @@ class MainActivity : AppCompatActivity() {
 
   private fun showTodaysMovements() {
     homeContainer.isVisible = false
-    todayContainer.isVisible = true
+    movementContainer.isVisible = true
     logContainer.isVisible = false
-    val todaysMovements = StringBuilder()
-    val nowSecs = System.currentTimeMillis() / 1000
-    todaysMovements.append(
-      "Updated ${TimeFormatters.time.format(
-        Instant.ofEpochSecond(
-          nowSecs
-        )
-      )}\n\n"
-    )
-
-    movementRepository
+//    val todaysMovements = StringBuilder()
+//    val nowSecs = System.currentTimeMillis() / 1000
+//    todaysMovements.append(
+//      "Updated ${TimeFormatters.time.format(
+//        Instant.ofEpochSecond(
+//          nowSecs
+//        )
+//      )}\n\n"
+//    )
+    val movementList = movementRepository
       .todaysMovements(stillnessThreshold = 60)
       .reversed()
-      .forEach { movement ->
+      .map { movement ->
         // Go backwards in time displaying the duration of each successive movement
         val timestamp = TimeFormatters.time.format(movement.start.toZonedDateTime())
         val minutes = "%.1f".format(movement.durationSecs / 60.0)
         val movementType = getString(movement.type.stringId)
-        todaysMovements.append(
-          getString(R.string.main_activity_event_log, timestamp, movementType, minutes)
-        )
+        getString(R.string.main_activity_movement_item, timestamp, movementType, minutes)
       }
-    movements.text = todaysMovements.toString()
+    Timber.d("movementList: $movementList")
+    movementAdapter.submitList(movementList)
   }
 
   private fun showDeveloperLog() {
     homeContainer.isVisible = false
-    todayContainer.isVisible = false
+    movementContainer.isVisible = false
     logContainer.isVisible = true
     val file = fileLogger.files.first()
     val items = file.readLines().reversed().map {

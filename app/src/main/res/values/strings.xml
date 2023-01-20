@@ -16,7 +16,7 @@
   <string name="main_activity_do_not_disturb_on">\n\n<b>Do Not Disturb is ON.</b>\n\nYou will NOT receive reminders to move.</string>
   <string name="main_activity_do_not_disturb_off">\n\nDo Not Disturb mode is <b>OFF</b>.</string>
   <string name="main_activity_version">Version</string>
-  <string name="main_activity_event_log">"%1$s %2$s for %3$s minutes\n"</string>
+  <string name="main_activity_movement_item">"%1$s %2$s for %3$s minutes\n"</string>
   <string name="main_activity_start_snooze">Snooze reminders</string>
   <string name="main_activity_cancel_snooze">Cancel snooze</string>
   <string name="main_activity_snooze_reminders_for">Snooze Reminders For</string>
