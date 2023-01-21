@@ -334,26 +334,7 @@ class MainActivity : AppCompatActivity() {
     homeContainer.isVisible = false
     movementContainer.isVisible = true
     logContainer.isVisible = false
-//    val todaysMovements = StringBuilder()
-//    val nowSecs = System.currentTimeMillis() / 1000
-//    todaysMovements.append(
-//      "Updated ${TimeFormatters.time.format(
-//        Instant.ofEpochSecond(
-//          nowSecs
-//        )
-//      )}\n\n"
-//    )
-    val movementList = movementRepository
-      .todaysMovements(stillnessThreshold = 60)
-      .reversed()
-      .map { movement ->
-        // Go backwards in time displaying the duration of each successive movement
-        val timestamp = TimeFormatters.time.format(movement.start.toZonedDateTime())
-        val minutes = "%.1f".format(movement.durationSecs / 60.0)
-        val movementType = getString(movement.type.stringId)
-        getString(R.string.main_activity_movement_item, timestamp, movementType, minutes)
-      }
-    Timber.d("movementList: $movementList")
+    val movementList = movementRepository.todaysMovements(stillnessThreshold = 60)
     movementAdapter.submitList(movementList)
   }
 
